@@ -114,3 +114,21 @@ export async function addTracksToPlaylist(
 
 	return data;
 }
+
+export async function getPlaylist(
+	playlistId: string,
+	accessToken: string
+): Promise<SpotifyApi.PlaylistObjectFull> {
+	const url = `https://api.spotify.com/v1/playlists/${playlistId}`;
+
+	const headers = new Headers({
+		"Content-Type": "application/json",
+		Authorization: `Bearer ${accessToken}`,
+	});
+
+	const data = await fetch(url, { headers }).then((res) => res.json());
+
+	console.log("Playlist >>>", data);
+
+	return data;
+}

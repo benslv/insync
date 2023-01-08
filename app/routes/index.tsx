@@ -1,17 +1,11 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import {
-	Form,
-	useActionData,
-	useFetcher,
-	useLoaderData,
-} from "@remix-run/react";
+import { Form, useLoaderData } from "@remix-run/react";
 
-import type { loader as generateLoader } from "./generate";
-
+import { z } from "zod";
+import { generatePlaylist } from "~/models/generate.server";
 import { getUserProfile } from "~/models/spotify.server";
 import { commitSession, destroySession, getSession } from "~/sessions";
-import { z } from "zod";
 
 export async function loader({ request }: LoaderArgs) {
 	const session = await getSession(request.headers.get("Cookie"));
@@ -77,23 +71,35 @@ export async function action({ request }: ActionArgs) {
 	const formData = await request.formData();
 	const intent = z.string().parse(formData.get("_intent"));
 
-	if (intent === "logout") {
-		const session = await getSession(request.headers.get("Cookie"));
+	const session = await getSession(request.headers.get("Cookie"));
 
-		throw redirect("/", {
-			headers: {
-				"Set-Cookie": await destroySession(session),
-			},
-		});
+	switch (intent) {
+		case "logout": {
+			throw redirect("/", {
+				headers: {
+					"Set-Cookie": await destroySession(session),
+				},
+			});
+		}
+		case "generate": {
+			const playlistId = await generatePlaylist(request);
+
+			session.set("playlist_id", playlistId);
+
+			throw redirect("/playlist", {
+				headers: {
+					"Set-Cookie": await commitSession(session),
+				},
+			});
+		}
+		default: {
+			return { error: true, message: "Unhandled form intent: ", intent };
+		}
 	}
-
-	return { error: true, message: "Unhandled form intent: ", intent };
 }
 
 export default function Index() {
 	const { userProfile, oAuthUrl } = useLoaderData<typeof loader>();
-	const artistFetcher = useFetcher<typeof generateLoader>();
-	const data = useActionData<typeof action>();
 
 	return (
 		<div className="flex h-full max-h-full">
@@ -110,11 +116,16 @@ export default function Index() {
 				</div>
 
 				{!oAuthUrl ? (
-					<artistFetcher.Form method="get" action="/generate">
-						<button className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max">
+					<Form method="post">
+						<button
+							type="submit"
+							name="_intent"
+							value="generate"
+							className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
+						>
 							Generate
 						</button>
-					</artistFetcher.Form>
+					</Form>
 				) : (
 					<a
 						href={oAuthUrl}
@@ -142,17 +153,6 @@ export default function Index() {
 							</button>
 						</Form>
 					</>
-				) : null}
-				{artistFetcher.data ? (
-					<p>
-						{JSON.stringify(
-							artistFetcher.data.topTracks.map((track) => ({
-								name: track[0].name,
-								id: track[0].id,
-								popularity: track[0].popularity,
-							}))
-						)}
-					</p>
 				) : null}
 			</div>
 			<div className="relative hidden w-full h-full overflow-hidden sm:block">
