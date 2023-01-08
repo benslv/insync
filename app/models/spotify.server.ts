@@ -110,7 +110,7 @@ export async function addTracksToPlaylist(
 		body,
 	}).then((res) => res.json());
 
-	console.log("SnapshotID >>>", id);
+	console.log("SnapshotID >>>", data);
 
 	return data;
 }
