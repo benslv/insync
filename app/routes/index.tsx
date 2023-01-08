@@ -7,7 +7,7 @@ import { z } from "zod";
 
 import { BackgroundCircles } from "~/components/BackgroundCircles";
 import { generatePlaylist } from "~/models/generate.server";
-import { getUserProfile } from "~/models/spotify.server";
+import { getUserProfile, requestAccessToken } from "~/models/spotify.server";
 import { commitSession, destroySession, getSession } from "~/sessions";
 
 export async function loader({ request }: LoaderArgs) {
@@ -42,25 +42,14 @@ export async function loader({ request }: LoaderArgs) {
 
 	const auth = btoa(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`);
 
-	const data = await fetch("https://accounts.spotify.com/api/token", {
-		method: "post",
-		headers: new Headers({
-			Authorization: `Basic ${auth}`,
-			"Content-Type": "application/x-www-form-urlencoded",
-		}),
-		body: new URLSearchParams({
-			grant_type: "authorization_code",
-			code,
-			redirect_uri: redirectUri,
-		}),
-	}).then((res) => res.json());
-
-	const accessToken = data.access_token;
+	const { access_token: accessToken, refresh_token: refreshToken } =
+		await requestAccessToken(auth, code, redirectUri);
 
 	const userProfile = await getUserProfile(accessToken);
 	const userId = userProfile.id;
 
 	session.set("access_token", accessToken);
+	session.set("refresh_token", refreshToken);
 	session.set("user_id", userId);
 
 	throw redirect("/", {
@@ -122,12 +111,15 @@ export default function Index() {
 			<div className="flex flex-col items-center justify-center w-full h-full px-8 space-y-4 text-center border-r drop-shadow-xl border-white/20 sm:items-start sm:max-w-xl sm:text-left md:px-16">
 				<div className="w-full">
 					<h1 className="mb-2 text-3xl sm:text-5xl">
-						<Balancer>Stay in sync with the music you love</Balancer>
+						<Balancer>
+							Stay in sync with the music you love
+						</Balancer>
 					</h1>
 					<p>
 						<Balancer>
-							insync creates playlists from your followed artists on Spotify.
-							Connect your account for personalised music discovery.
+							insync creates playlists from your followed artists
+							on Spotify. Connect your account for personalised
+							music discovery.
 						</Balancer>
 					</p>
 				</div>
@@ -165,7 +157,9 @@ export default function Index() {
 					<>
 						<div className="flex items-center justify-center space-x-2 sm:justify-start">
 							<ProfileImage userProfile={userProfile} />
-							<p className="text-sm">Logged in as {userProfile.id}</p>
+							<p className="text-sm">
+								Logged in as {userProfile.id}
+							</p>
 						</div>
 						<Form method="post">
 							<button

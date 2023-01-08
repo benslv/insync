@@ -1,3 +1,34 @@
+export async function requestAccessToken(
+	auth: string,
+	code: string,
+	redirectUri: string
+): Promise<{
+	access_token: string;
+	token_type: "Bearer";
+	scope: string;
+	expires_in: number;
+	refresh_token: string;
+}> {
+	const url = "https://accounts.spotify.com/api/token";
+
+	const headers = new Headers({
+		Authorization: `Basic ${auth}`,
+		"Content-Type": "application/x-www-form-urlencoded",
+	});
+
+	const body = new URLSearchParams({
+		grant_type: "authorization_code",
+		code,
+		redirect_uri: redirectUri,
+	});
+
+	const data = await fetch(url, { method: "post", headers, body }).then(
+		(res) => res.json()
+	);
+
+	return data;
+}
+
 export async function getUserProfile(
 	accessToken: string
 ): Promise<SpotifyApi.UserProfileResponse> {
