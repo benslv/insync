@@ -7,6 +7,7 @@ import { z } from "zod";
 
 import { BackgroundCircles } from "~/components/BackgroundCircles";
 import { generatePlaylist } from "~/models/generate.server";
+import type { CustomError } from "~/models/spotify.server";
 import { getUserProfile, requestAccessToken } from "~/models/spotify.server";
 import { commitSession, destroySession, getSession } from "~/sessions";
 
@@ -17,7 +18,23 @@ export async function loader({ request }: LoaderArgs) {
 	if (session.has("access_token")) {
 		const accessToken = session.get("access_token");
 
-		const userProfile = await getUserProfile(accessToken);
+		const userProfile = await getUserProfile(accessToken).catch(
+			async (err: CustomError) => {
+				if (err.status === 401) {
+					const { access_token, refresh_token } =
+						await requestAccessToken(refreshToken, redirectUri);
+
+					session.set("access_token", access_token);
+					session.set("refresh_token", refresh_token);
+
+					throw redirect("/", {
+						headers: {
+							"Set-Cookie": await commitSession(session),
+						},
+					});
+				}
+			}
+		);
 
 		return json({ userProfile, oAuthUrl: null }, 200);
 	}

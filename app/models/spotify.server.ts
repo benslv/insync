@@ -30,8 +30,6 @@ export async function requestAccessToken(
 	return data;
 }
 
-export async function refreshAccessToken() {}
-
 export async function getUserProfile(
 	accessToken: string
 ): Promise<SpotifyApi.UserProfileResponse> {
@@ -45,7 +43,21 @@ export async function getUserProfile(
 
 	const data = await fetch(url, {
 		headers,
-	}).then((res) => res.json());
+	})
+		.then((res) => {
+			if (!res.ok) {
+				switch (res.status) {
+					case 401:
+						throw new CustomError({
+							status: 401,
+							message: "Access token has expired.",
+						});
+				}
+			}
+
+			return res;
+		})
+		.then((res) => res.json());
 
 	console.log("UserProfile >>>", data);
 
@@ -166,4 +178,13 @@ export async function getPlaylist(
 	console.log("Playlist >>>", data);
 
 	return data;
+}
+
+export class CustomError extends Error {
+	status: number;
+
+	constructor(data: { message: string; status: number }) {
+		super(data.message);
+		this.status = data.status;
+	}
 }
