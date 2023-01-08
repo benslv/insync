@@ -1,14 +1,14 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Form, useLoaderData, useTransition } from "@remix-run/react";
-import Balancer from "react-wrap-balancer";
 import { motion } from "framer-motion";
+import Balancer from "react-wrap-balancer";
 import { z } from "zod";
 
+import { BackgroundCircles } from "~/components/BackgroundCircles";
 import { generatePlaylist } from "~/models/generate.server";
 import { getUserProfile } from "~/models/spotify.server";
 import { commitSession, destroySession, getSession } from "~/sessions";
-import { BackgroundCircles } from "~/components/BackgroundCircles";
 
 export async function loader({ request }: LoaderArgs) {
 	const session = await getSession(request.headers.get("Cookie"));
