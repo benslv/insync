@@ -74,7 +74,7 @@ export default function Index() {
 	return (
 		<div className="flex flex-col justify-center h-full max-w-md mx-12 space-y-4">
 			<div>
-				<h1 className="text-5xl mb-4">
+				<h1 className="mb-2 text-5xl">
 					Stay in sync with the music you love
 				</h1>
 				<p>
@@ -86,20 +86,20 @@ export default function Index() {
 
 			{!oAuthUrl ? (
 				<artistFetcher.Form method="get" action="/generate">
-					<button className="bg-green-500 hover:bg-green-400 transition-colors px-4 py-2 rounded-full uppercase text-neutral-800 font-bold text-sm tracking-wide w-max">
+					<button className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max">
 						Generate
 					</button>
 				</artistFetcher.Form>
 			) : (
 				<a
 					href={oAuthUrl}
-					className="bg-green-500 hover:bg-green-400 transition-colors px-4 py-2 rounded-full uppercase text-neutral-800 font-bold text-sm tracking-wide w-max"
+					className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
 				>
 					Connect to Spotify
 				</a>
 			)}
 			{userProfile ? (
-				<div className="flex space-x-2 items-center">
+				<div className="flex items-center space-x-2">
 					<ProfileImage userProfile={userProfile} />
 					<p className="text-sm">Logged in as {userProfile.id}</p>
 				</div>
@@ -126,7 +126,7 @@ function ProfileImage({
 }) {
 	if (userProfile.images && userProfile.images.length === 0) {
 		return (
-			<div className="w-4 h-4 flex items-center justify-center rounded-full  border-white border">
+			<div className="flex items-center justify-center w-4 h-4 border border-white rounded-full">
 				?
 			</div>
 		);
@@ -136,7 +136,7 @@ function ProfileImage({
 		<img
 			src={userProfile.images![0].url}
 			alt=""
-			className="w-4 h-4  rounded-full  border-white border"
+			className="w-4 h-4 border border-white rounded-full"
 			height={16}
 			width={16}
 		/>
