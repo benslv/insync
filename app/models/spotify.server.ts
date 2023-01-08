@@ -9,9 +9,13 @@ export async function getUserProfile(
 		Authorization: `Bearer ${accessToken}`,
 	});
 
-	return fetch(url, {
+	const data = await fetch(url, {
 		headers,
 	}).then((res) => res.json());
+
+	console.log("UserProfile >>>", data);
+
+	return data;
 }
 
 export async function getFollowingArtistIds(accessToken: string) {
@@ -32,6 +36,8 @@ export async function getFollowingArtistIds(accessToken: string) {
 		}),
 	}).then((res) => res.json());
 
+	console.log("FollowedArtists >>>", data);
+
 	return data.artists.items.map((item) => item.id);
 }
 
@@ -49,6 +55,8 @@ export async function getTopTracks(id: string, accessToken: string) {
 	}).then((res) => res.json());
 
 	const tracks = data.tracks;
+
+	console.log("Tracks >>>", data.tracks);
 
 	return tracks;
 }
@@ -69,11 +77,15 @@ export async function createEmtpyPlaylist(
 		description: "Stay in sync with the music you love!",
 	});
 
-	return fetch(url, {
+	const data = await fetch(url, {
 		method: "post",
 		headers,
 		body,
 	}).then((res) => res.json());
+
+	console.log("Playlist >>>", data);
+
+	return data;
 }
 
 export async function addTracksToPlaylist(
@@ -97,6 +109,8 @@ export async function addTracksToPlaylist(
 		headers,
 		body,
 	}).then((res) => res.json());
+
+	console.log("SnapshotID >>>", data);
 
 	return data;
 }
