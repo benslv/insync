@@ -9,7 +9,7 @@ import { getUserProfile } from "~/models/spotify.server";
 
 export async function loader({ request }: LoaderArgs) {
 	const session = await getSession(request.headers.get("Cookie"));
-	const redirectUri = "http://localhost:3000";
+	const redirectUri = new URL(request.url).origin;
 
 	if (session.has("access_token")) {
 		const userId = session.get("user_id");
