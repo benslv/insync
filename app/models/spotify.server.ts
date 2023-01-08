@@ -54,9 +54,9 @@ export async function getTopTracks(id: string, accessToken: string) {
 		headers,
 	}).then((res) => res.json());
 
-	console.log("Tracks >>>", data);
-
 	const tracks = data.tracks;
+
+	console.log("Tracks >>>", data.tracks);
 
 	return tracks;
 }
