@@ -1,6 +1,7 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Form, useLoaderData } from "@remix-run/react";
+import Balancer from "react-wrap-balancer";
 
 import { z } from "zod";
 import { generatePlaylist } from "~/models/generate.server";
@@ -106,12 +107,16 @@ export default function Index() {
 			<div className="flex flex-col items-center justify-center w-full h-full mx-8 space-y-4 text-center sm:items-start sm:max-w-md sm:text-left md:mx-32">
 				<div>
 					<h1 className="mb-2 text-3xl sm:text-5xl">
-						Stay in sync with the music you love
+						<Balancer>
+							Stay in sync with the music you love
+						</Balancer>
 					</h1>
 					<p>
-						insync creates playlists from your followed artists on
-						Spotify. Connect your account for personalised music
-						discovery.
+						<Balancer>
+							insync creates playlists from your followed artists
+							on Spotify. Connect your account for personalised
+							music discovery.
+						</Balancer>
 					</p>
 				</div>
 

@@ -2,6 +2,8 @@ import type { LoaderArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import React from "react";
+import Balancer from "react-wrap-balancer";
+
 import { getPlaylist } from "~/models/spotify.server";
 
 import { getSession } from "~/sessions";
@@ -51,7 +53,7 @@ export default function GeneratePage() {
 		<div className="flex items-center justify-center w-full h-full px-4">
 			<div className="flex flex-col items-center justify-center max-w-xl gap-y-8">
 				<h1 className="mb-2 text-3xl text-center sm:text-5xl">
-					Your playlist with {artists} + others
+					<Balancer>Your playlist with {artists} + others</Balancer>
 				</h1>
 				<div className="flex flex-col items-center px-8 py-8 space-y-4 border rounded-lg bg-neutral-800 border-neutral-700">
 					<img
