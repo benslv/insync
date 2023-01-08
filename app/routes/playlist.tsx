@@ -50,7 +50,7 @@ export default function GeneratePage() {
 	return (
 		<div className="flex items-center justify-center w-full h-full px-4">
 			<div className="flex flex-col items-center justify-center max-w-xl gap-y-8">
-				<h1 className="mb-2 text-3xl text-center sm:text-4xl">
+				<h1 className="mb-2 text-3xl text-center sm:text-5xl">
 					Your playlist with {artists} + others
 				</h1>
 				<div className="flex flex-col items-center px-8 py-8 space-y-4 border rounded-lg bg-neutral-800 border-neutral-700">
