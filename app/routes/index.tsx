@@ -1,7 +1,8 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { Form, useLoaderData } from "@remix-run/react";
+import { Form, useLoaderData, useTransition } from "@remix-run/react";
 import Balancer from "react-wrap-balancer";
+import { motion } from "framer-motion";
 
 import { z } from "zod";
 import { generatePlaylist } from "~/models/generate.server";
@@ -83,7 +84,10 @@ export async function action({ request }: ActionArgs) {
 			});
 		}
 		case "generate": {
-			const playlistId = await generatePlaylist(request);
+			const [playlistId] = await Promise.all([
+				generatePlaylist(request),
+				delay(2000),
+			]);
 
 			session.set("playlist_id", playlistId);
 
@@ -101,6 +105,16 @@ export async function action({ request }: ActionArgs) {
 
 export default function Index() {
 	const { userProfile, oAuthUrl } = useLoaderData<typeof loader>();
+	const transition = useTransition();
+
+	const isGenerating = transition.state === "submitting";
+
+	const generateButtonText =
+		transition.state === "submitting"
+			? "Generating..."
+			: transition.state === "loading"
+			? "Loading..."
+			: "Generate";
 
 	return (
 		<div className="flex h-full max-h-full">
@@ -121,16 +135,26 @@ export default function Index() {
 				</div>
 
 				{!oAuthUrl ? (
-					<Form method="post">
-						<button
-							type="submit"
-							name="_intent"
-							value="generate"
-							className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
-						>
-							Generate
-						</button>
-					</Form>
+					<div className="flex items-center gap-x-2">
+						<Form method="post">
+							<button
+								type="submit"
+								name="_intent"
+								value="generate"
+								className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
+							>
+								{generateButtonText}
+							</button>
+						</Form>
+						{isGenerating ? (
+							<motion.div
+								initial={{ x: -50, opacity: 0 }}
+								animate={{ x: 0, opacity: 1 }}
+							>
+								<Spinner />
+							</motion.div>
+						) : null}
+					</div>
 				) : (
 					<a
 						href={oAuthUrl}
@@ -200,5 +224,36 @@ function BackgroundCircles() {
 				</div>
 			</div>
 		</div>
+	);
+}
+
+function Spinner() {
+	return (
+		<motion.svg
+			fill="#ffffff"
+			width="32px"
+			height="32px"
+			viewBox="0 0 32 32"
+			version="1.1"
+			xmlns="http://www.w3.org/2000/svg"
+			animate={{ rotate: 360 }}
+			transition={{
+				repeat: Infinity,
+				bounce: 0,
+				ease: "linear",
+				duration: 0.75,
+			}}
+		>
+			<title>spinner-one-third</title>
+			<path d="M16 0.75c-0.69 0-1.25 0.56-1.25 1.25s0.56 1.25 1.25 1.25v0c7.042 0.001 12.75 5.71 12.75 12.751 0 3.521-1.427 6.709-3.734 9.016v0c-0.226 0.226-0.365 0.538-0.365 0.883 0 0.69 0.56 1.25 1.25 1.25 0.346 0 0.659-0.14 0.885-0.367l0-0c2.759-2.76 4.465-6.572 4.465-10.782 0-8.423-6.828-15.251-15.25-15.251h-0z" />
+		</motion.svg>
+	);
+}
+
+async function delay(ms: number) {
+	return new Promise((resolve) =>
+		setTimeout(() => {
+			return resolve(0);
+		}, ms)
 	);
 }
