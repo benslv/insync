@@ -70,14 +70,28 @@ export default function Index() {
 
 	return (
 		<div>
-			<h1>Hello, world!</h1>
+			<h1 className="text-5xl mb-4">
+				Stay in sync with the music you love
+			</h1>
+			<p>
+				insync creates playlists from your followed artists on Spotify.
+				Connect your account for personalised music discovery.
+			</p>
+
 			<p>{userId ? `Logged in as ${userId}` : "Logged out"}</p>
 			{!oAuthUrl ? (
 				<artistFetcher.Form method="get" action="/generate">
-					<button>Generate</button>
+					<button className="bg-green-500 hover:bg-green-400 transition-colors px-4 py-2 rounded-full uppercase text-neutral-800 font-bold text-sm tracking-wide">
+						Generate
+					</button>
 				</artistFetcher.Form>
 			) : (
-				<a href={oAuthUrl}>Login</a>
+				<a
+					href={oAuthUrl}
+					className="bg-green-500 hover:bg-green-400 transition-colors px-4 py-2 rounded-full uppercase text-neutral-800 font-bold text-sm tracking-wide"
+				>
+					Connect to Spotify
+				</a>
 			)}
 			{artistFetcher.data ? (
 				<p>
