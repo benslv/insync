@@ -3,6 +3,7 @@ import { redirect } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
 import React from "react";
 import Balancer from "react-wrap-balancer";
+import { motion } from "framer-motion";
 
 import { getPlaylist } from "~/models/spotify.server";
 
@@ -52,10 +53,19 @@ export default function GeneratePage() {
 	return (
 		<div className="flex items-center justify-center w-full h-full px-4">
 			<div className="flex flex-col items-center justify-center max-w-xl gap-y-8">
-				<h1 className="mb-2 text-3xl text-center sm:text-5xl">
+				<motion.h1
+					initial={{ opacity: 0, y: -20 }}
+					animate={{ opacity: 1, y: 0 }}
+					className="mb-2 text-3xl text-center sm:text-5xl"
+				>
 					<Balancer>Your playlist with {artists} + others</Balancer>
-				</h1>
-				<div className="flex flex-col items-center px-8 py-8 space-y-4 border rounded-lg bg-neutral-800 border-neutral-700">
+				</motion.h1>
+				<motion.div
+					initial={{ opacity: 0, y: 20 }}
+					animate={{ opacity: 1, y: 0 }}
+					transition={{ delay: 0.2 }}
+					className="flex flex-col items-center px-8 py-8 space-y-4 border rounded-lg bg-neutral-800 border-neutral-700"
+				>
 					<img
 						src={playlistImageUrl}
 						alt={`Playlist for ${username}`}
@@ -79,7 +89,7 @@ export default function GeneratePage() {
 					>
 						Open
 					</a>
-				</div>
+				</motion.div>
 			</div>
 		</div>
 	);
