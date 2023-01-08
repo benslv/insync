@@ -108,7 +108,8 @@ export async function createEmtpyPlaylist(
 
 	const body = JSON.stringify({
 		name: "insync mixtape",
-		description: "Stay in sync with the music you love!",
+		description:
+			"Stay in sync with the music you love! Made with insync.vercel.app ✨",
 	});
 
 	const data = await fetch(url, {
