@@ -32,7 +32,10 @@ export async function requestAccessToken(
 
 export async function getUserProfile(
 	accessToken: string
-): Promise<SpotifyApi.UserProfileResponse> {
+): Promise<
+	| { ok: true; data: SpotifyApi.UserProfileResponse }
+	| { ok: false; error: unknown }
+> {
 	const url = "https://api.spotify.com/v1/me";
 
 	const headers = new Headers({
@@ -41,27 +44,15 @@ export async function getUserProfile(
 		Authorization: `Bearer ${accessToken}`,
 	});
 
-	const data = await fetch(url, {
-		headers,
-	})
-		.then((res) => {
-			if (!res.ok) {
-				switch (res.status) {
-					case 401:
-						throw new CustomError({
-							status: 401,
-							message: "Access token has expired.",
-						});
-				}
-			}
+	try {
+		const response = await fetch(url, { headers });
+		const data = await response.json();
 
-			return res;
-		})
-		.then((res) => res.json());
-
-	console.log("UserProfile >>>", data);
-
-	return data;
+		console.log("UserProfile >>>", data);
+		return { ok: true, data };
+	} catch (err) {
+		return { ok: false, error: err };
+	}
 }
 
 export async function getFollowingArtistIds(accessToken: string) {
@@ -178,13 +169,4 @@ export async function getPlaylist(
 	console.log("Playlist >>>", data);
 
 	return data;
-}
-
-export class CustomError extends Error {
-	status: number;
-
-	constructor(data: { message: string; status: number }) {
-		super(data.message);
-		this.status = data.status;
-	}
 }
