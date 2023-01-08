@@ -1,31 +1,38 @@
 {
-  "private": true,
-  "sideEffects": false,
-  "scripts": {
-    "build": "remix build",
-    "dev": "remix dev",
-    "typecheck": "tsc -b"
-  },
-  "dependencies": {
-    "@remix-run/node": "^1.9.0",
-    "@remix-run/react": "^1.9.0",
-    "@remix-run/vercel": "^1.9.0",
-    "@vercel/node": "^2.6.2",
-    "react": "^18.2.0",
-    "react-dom": "^18.2.0",
-    "zod": "^3.20.2"
-  },
-  "devDependencies": {
-    "@remix-run/dev": "^1.9.0",
-    "@remix-run/eslint-config": "^1.9.0",
-    "@remix-run/serve": "^1.9.0",
-    "@types/react": "^18.0.25",
-    "@types/react-dom": "^18.0.8",
-    "@types/spotify-api": "^0.0.19",
-    "eslint": "^8.27.0",
-    "typescript": "^4.8.4"
-  },
-  "engines": {
-    "node": ">=14"
-  }
+	"private": true,
+	"sideEffects": false,
+	"scripts": {
+		"typecheck": "tsc -b",
+		"build": "run-s \"build:*\"",
+		"build:css": "npm run generate:css -- --minify",
+		"build:remix": "remix build",
+		"dev": "run-p \"dev:*\"",
+		"dev:css": "npm run generate:css -- --watch",
+		"dev:remix": "remix dev",
+		"generate:css": "npx tailwindcss -o ./app/tailwind.css"
+	},
+	"dependencies": {
+		"@remix-run/node": "^1.9.0",
+		"@remix-run/react": "^1.9.0",
+		"@remix-run/vercel": "^1.9.0",
+		"@vercel/node": "^2.6.2",
+		"react": "^18.2.0",
+		"react-dom": "^18.2.0",
+		"zod": "^3.20.2"
+	},
+	"devDependencies": {
+		"@remix-run/dev": "^1.9.0",
+		"@remix-run/eslint-config": "^1.9.0",
+		"@remix-run/serve": "^1.9.0",
+		"@types/react": "^18.0.25",
+		"@types/react-dom": "^18.0.8",
+		"@types/spotify-api": "^0.0.19",
+		"eslint": "^8.27.0",
+		"npm-run-all": "^4.1.5",
+		"tailwindcss": "^3.2.4",
+		"typescript": "^4.8.4"
+	},
+	"engines": {
+		"node": ">=14"
+	}
 }
