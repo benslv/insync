@@ -1,3 +1,19 @@
+export async function getUserProfile(
+	accessToken: string
+): Promise<SpotifyApi.UserProfileResponse> {
+	const url = "https://api.spotify.com/v1/me";
+
+	const headers = new Headers({
+		Accept: "application/json",
+		"Content-Type": "application/json",
+		Authorization: `Bearer ${accessToken}`,
+	});
+
+	return fetch(url, {
+		headers,
+	}).then((res) => res.json());
+}
+
 export async function getFollowingArtistIds(accessToken: string) {
 	const endpoint = "https://api.spotify.com/v1/me/following";
 
@@ -37,44 +53,49 @@ export async function getTopTracks(id: string, accessToken: string) {
 	return tracks;
 }
 
-export async function createEmtpyPlaylist(userId: string, accessToken: string) {
+export async function createEmtpyPlaylist(
+	userId: string,
+	accessToken: string
+): Promise<SpotifyApi.CreatePlaylistResponse> {
 	const url = `https://api.spotify.com/v1/users/${userId}/playlists`;
 
 	const headers = new Headers({
-		Accept: "application/json",
 		"Content-Type": "application/json",
 		Authorization: `Bearer ${accessToken}`,
 	});
 
-	const body = new URLSearchParams({
+	const body = JSON.stringify({
 		name: "insync mixtape",
 		description: "Stay in sync with the music you love!",
 	});
 
-	const data: SpotifyApi.CreatePlaylistResponse = await fetch(url, {
+	return fetch(url, {
 		method: "post",
 		headers,
 		body,
 	}).then((res) => res.json());
-
-	console.log(data);
-
-	return data;
 }
 
-export async function addTracksToPlaylist() {}
-
-export async function getUserProfile(accessToken: string) {
-	const url = "https://api.spotify.com/v1/me";
+export async function addTracksToPlaylist(
+	playlistId: string,
+	trackUris: string[],
+	accessToken: string
+): Promise<SpotifyApi.AddTracksToPlaylistResponse> {
+	const url = `https://api.spotify.com/v1/playlists/${playlistId}/tracks`;
 
 	const headers = new Headers({
-		Accept: "application/json",
 		"Content-Type": "application/json",
 		Authorization: `Bearer ${accessToken}`,
 	});
 
-	const data: SpotifyApi.UserProfileResponse = await fetch(url, {
+	const body = JSON.stringify({
+		uris: trackUris,
+	});
+
+	const data = await fetch(url, {
+		method: "post",
 		headers,
+		body,
 	}).then((res) => res.json());
 
 	return data;

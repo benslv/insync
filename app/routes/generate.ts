@@ -1,6 +1,7 @@
 import type { LoaderArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 import {
+	addTracksToPlaylist,
 	createEmtpyPlaylist,
 	getFollowingArtistIds,
 	getTopTracks,
@@ -18,9 +19,6 @@ export async function loader({ request }: LoaderArgs) {
 	const accessToken = session.get("access_token");
 	const userId = session.get("user_id");
 
-	console.log("accessToken >>>", accessToken);
-	console.log("userId >>>", userId);
-
 	const artistIds = await getFollowingArtistIds(accessToken);
 
 	const artistTopTracks = await Promise.all(
@@ -31,9 +29,15 @@ export async function loader({ request }: LoaderArgs) {
 		artistTracks.sort((a, b) => b.popularity - a.popularity).slice(0, 1)
 	);
 
+	const topTrackUris = sortedTopTracks.map((track) => track[0].uri);
+
 	const playlist = await createEmtpyPlaylist(userId, accessToken);
 
-	console.log("playlist >>>", playlist);
+	const snapshotId = await addTracksToPlaylist(
+		playlist.id,
+		topTrackUris,
+		accessToken
+	);
 
 	return { topTracks: sortedTopTracks };
 }

@@ -26,12 +26,10 @@ export async function loader({ request }: LoaderArgs) {
 			client_id: process.env.CLIENT_ID || "",
 			response_type: "code",
 			redirect_uri: redirectUri,
-			scopes: "user-follow-read playlist-modify-public", // TODO: Find a way to make this add as a %20 space, rather than a symbol.
+			scope: "user-follow-read playlist-modify-public",
 		});
 
 		const oAuthUrl = oAuthEndpoint + "?" + params.toString();
-
-		console.log(oAuthUrl);
 
 		return json({ userId: null, oAuthUrl }, 200);
 	}
