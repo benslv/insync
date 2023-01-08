@@ -10,4 +10,4 @@ node_modules
 /api/index.js
 /api/index.js.map
 
-/app/tailwind.css
+app/tailwind.css

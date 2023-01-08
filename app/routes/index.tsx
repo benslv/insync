@@ -1,11 +1,17 @@
-import type { LoaderArgs } from "@remix-run/node";
+import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { useFetcher, useLoaderData } from "@remix-run/react";
+import {
+	Form,
+	useActionData,
+	useFetcher,
+	useLoaderData,
+} from "@remix-run/react";
 
 import type { loader as generateLoader } from "./generate";
 
-import { commitSession, getSession } from "~/sessions";
 import { getUserProfile } from "~/models/spotify.server";
+import { commitSession, destroySession, getSession } from "~/sessions";
+import { z } from "zod";
 
 export async function loader({ request }: LoaderArgs) {
 	const session = await getSession(request.headers.get("Cookie"));
@@ -67,9 +73,27 @@ export async function loader({ request }: LoaderArgs) {
 	});
 }
 
+export async function action({ request }: ActionArgs) {
+	const formData = await request.formData();
+	const intent = z.string().parse(formData.get("_intent"));
+
+	if (intent === "logout") {
+		const session = await getSession(request.headers.get("Cookie"));
+
+		throw redirect("/", {
+			headers: {
+				"Set-Cookie": await destroySession(session),
+			},
+		});
+	}
+
+	return { error: true, message: "Unhandled form intent: ", intent };
+}
+
 export default function Index() {
 	const { userProfile, oAuthUrl } = useLoaderData<typeof loader>();
 	const artistFetcher = useFetcher<typeof generateLoader>();
+	const data = useActionData<typeof action>();
 
 	return (
 		<div className="flex flex-col justify-center h-full max-w-md mx-12 space-y-4">
@@ -99,10 +123,22 @@ export default function Index() {
 				</a>
 			)}
 			{userProfile ? (
-				<div className="flex items-center space-x-2">
-					<ProfileImage userProfile={userProfile} />
-					<p className="text-sm">Logged in as {userProfile.id}</p>
-				</div>
+				<>
+					<div className="flex items-center space-x-2">
+						<ProfileImage userProfile={userProfile} />
+						<p className="text-sm">Logged in as {userProfile.id}</p>
+					</div>
+					<Form method="post">
+						<button
+							type="submit"
+							name="_intent"
+							value="logout"
+							className="text-sm underline"
+						>
+							Logout
+						</button>
+					</Form>
+				</>
 			) : null}
 			{artistFetcher.data ? (
 				<p>
