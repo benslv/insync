@@ -96,61 +96,68 @@ export default function Index() {
 	const data = useActionData<typeof action>();
 
 	return (
-		<div className="flex flex-col justify-center h-full max-w-md mx-12 space-y-4">
-			<div>
-				<h1 className="mb-2 text-5xl">
-					Stay in sync with the music you love
-				</h1>
-				<p>
-					insync creates playlists from your followed artists on
-					Spotify. Connect your account for personalised music
-					discovery.
-				</p>
-			</div>
+		<div className="flex h-full max-h-full">
+			<div className="flex flex-col justify-center w-full h-full mx-8 space-y-4 text-center sm:max-w-md sm:text-left md:mx-32">
+				<div>
+					<h1 className="mb-2 text-3xl sm:text-5xl">
+						Stay in sync with the music you love
+					</h1>
+					<p>
+						insync creates playlists from your followed artists on
+						Spotify. Connect your account for personalised music
+						discovery.
+					</p>
+				</div>
 
-			{!oAuthUrl ? (
-				<artistFetcher.Form method="get" action="/generate">
-					<button className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max">
-						Generate
-					</button>
-				</artistFetcher.Form>
-			) : (
-				<a
-					href={oAuthUrl}
-					className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
-				>
-					Connect to Spotify
-				</a>
-			)}
-			{userProfile ? (
-				<>
-					<div className="flex items-center space-x-2">
-						<ProfileImage userProfile={userProfile} />
-						<p className="text-sm">Logged in as {userProfile.id}</p>
-					</div>
-					<Form method="post">
-						<button
-							type="submit"
-							name="_intent"
-							value="logout"
-							className="text-sm underline"
-						>
-							Logout
+				{!oAuthUrl ? (
+					<artistFetcher.Form method="get" action="/generate">
+						<button className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max">
+							Generate
 						</button>
-					</Form>
-				</>
-			) : null}
-			{artistFetcher.data ? (
-				<p>
-					{JSON.stringify(
-						artistFetcher.data.topTracks.map((track) => ({
-							name: track[0].name,
-							id: track[0].id,
-							popularity: track[0].popularity,
-						}))
-					)}
-				</p>
-			) : null}
+					</artistFetcher.Form>
+				) : (
+					<a
+						href={oAuthUrl}
+						className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
+					>
+						Connect to Spotify
+					</a>
+				)}
+				{userProfile ? (
+					<>
+						<div className="flex items-center justify-center space-x-2 sm:justify-start">
+							<ProfileImage userProfile={userProfile} />
+							<p className="text-sm">
+								Logged in as {userProfile.id}
+							</p>
+						</div>
+						<Form method="post">
+							<button
+								type="submit"
+								name="_intent"
+								value="logout"
+								className="text-sm underline"
+							>
+								Logout
+							</button>
+						</Form>
+					</>
+				) : null}
+				{artistFetcher.data ? (
+					<p>
+						{JSON.stringify(
+							artistFetcher.data.topTracks.map((track) => ({
+								name: track[0].name,
+								id: track[0].id,
+								popularity: track[0].popularity,
+							}))
+						)}
+					</p>
+				) : null}
+			</div>
+			<div className="relative hidden w-full h-full overflow-hidden sm:block">
+				<BackgroundCircles />
+			</div>
 		</div>
 	);
 }
@@ -176,5 +183,17 @@ function ProfileImage({
 			height={16}
 			width={16}
 		/>
+	);
+}
+
+function BackgroundCircles() {
+	return (
+		<div className="absolute top-1/2 -translate-y-1/2 left-1/4 flex items-center justify-center w-[1527px] border-2 border-green-500 rounded-full h-[1527px]">
+			<div className="relative flex items-center justify-center w-[1221px] border-2 border-green-500 rounded-full h-[1221px]">
+				<div className="relative flex items-center justify-center w-[917px] border-2 border-green-500 rounded-full h-[917px]">
+					<div className="w-[611px] border-2 border-green-500 rounded-full h-[611px]"></div>
+				</div>
+			</div>
+		</div>
 	);
 }
