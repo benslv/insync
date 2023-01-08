@@ -119,18 +119,15 @@ export default function Index() {
 
 	return (
 		<div className="flex h-full max-h-full">
-			<div className="flex flex-col items-center justify-center w-full h-full mx-8 space-y-4 text-center sm:items-start sm:max-w-md sm:text-left md:mx-32">
-				<div>
+			<div className="flex flex-col items-center justify-center w-full h-full px-8 space-y-4 text-center border-r drop-shadow-xl border-white/20 sm:items-start sm:max-w-xl sm:text-left md:px-16">
+				<div className="w-full">
 					<h1 className="mb-2 text-3xl sm:text-5xl">
-						<Balancer>
-							Stay in sync with the music you love
-						</Balancer>
+						<Balancer>Stay in sync with the music you love</Balancer>
 					</h1>
 					<p>
 						<Balancer>
-							insync creates playlists from your followed artists
-							on Spotify. Connect your account for personalised
-							music discovery.
+							insync creates playlists from your followed artists on Spotify.
+							Connect your account for personalised music discovery.
 						</Balancer>
 					</p>
 				</div>
@@ -168,9 +165,7 @@ export default function Index() {
 					<>
 						<div className="flex items-center justify-center space-x-2 sm:justify-start">
 							<ProfileImage userProfile={userProfile} />
-							<p className="text-sm">
-								Logged in as {userProfile.id}
-							</p>
+							<p className="text-sm">Logged in as {userProfile.id}</p>
 						</div>
 						<Form method="post">
 							<button
