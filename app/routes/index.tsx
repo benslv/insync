@@ -97,7 +97,7 @@ export default function Index() {
 
 	return (
 		<div className="flex h-full max-h-full">
-			<div className="flex flex-col justify-center w-full h-full mx-8 space-y-4 text-center sm:max-w-md sm:text-left md:mx-32">
+			<div className="flex flex-col items-center justify-center w-full h-full mx-8 space-y-4 text-center sm:items-start sm:max-w-md sm:text-left md:mx-32">
 				<div>
 					<h1 className="mb-2 text-3xl sm:text-5xl">
 						Stay in sync with the music you love
