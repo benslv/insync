@@ -14,13 +14,23 @@ import styles from "./tailwind.css";
 
 export const meta: MetaFunction = () => ({
 	charset: "utf-8",
-	title: "insync",
+	title: "insync - Stay in sync with the music you love",
+	description:
+		"insync automatically generates playlists with music from your favourite artists to help you rediscover the music you love!",
 	viewport: "width=device-width,initial-scale=1",
-	"og:image": "/images/og_image.png",
-	"twitter:image": "/images/og_image.png",
-	"og:title": "insync - stay in sync with the music you love",
+	"og:type": "website",
+	"og:url": "https://insync.vercel.app",
+	"og:title": "insync - Stay in sync with the music you love",
 	"og:description":
-		"insync automatically generates playlists with music from your favourite artists to help you rediscovery the music you love!",
+		"insync automatically generates playlists with music from your favourite artists to help you rediscover the music you love!",
+	"og:image": "https://i.imgur.com/69dTjNg.png",
+
+	"twitter:card": "summary_large_image",
+	"twitter:url": "https://insync.vercel.app",
+	"twitter:title": "insync - Stay in sync with the music you love",
+	"twitter:description":
+		"insync automatically generates playlists with music from your favourite artists to help you rediscover the music you love!",
+	"twitter:image": "https://i.imgur.com/69dTjNg.png",
 });
 
 export const links: LinksFunction = () => {
