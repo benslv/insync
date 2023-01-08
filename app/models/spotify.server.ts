@@ -1,5 +1,4 @@
 export async function requestAccessToken(
-	auth: string,
 	code: string,
 	redirectUri: string
 ): Promise<{
@@ -10,6 +9,8 @@ export async function requestAccessToken(
 	refresh_token: string;
 }> {
 	const url = "https://accounts.spotify.com/api/token";
+
+	const auth = btoa(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`);
 
 	const headers = new Headers({
 		Authorization: `Basic ${auth}`,
@@ -28,6 +29,8 @@ export async function requestAccessToken(
 
 	return data;
 }
+
+export async function refreshAccessToken() {}
 
 export async function getUserProfile(
 	accessToken: string

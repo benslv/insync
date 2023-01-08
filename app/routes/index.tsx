@@ -40,10 +40,8 @@ export async function loader({ request }: LoaderArgs) {
 		return json({ userProfile: null, oAuthUrl }, 200);
 	}
 
-	const auth = btoa(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`);
-
 	const { access_token: accessToken, refresh_token: refreshToken } =
-		await requestAccessToken(auth, code, redirectUri);
+		await requestAccessToken(code, redirectUri);
 
 	const userProfile = await getUserProfile(accessToken);
 	const userId = userProfile.id;
