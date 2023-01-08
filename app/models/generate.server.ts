@@ -1,15 +1,13 @@
-import type { LoaderArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
+import { getSession } from "~/sessions";
 import {
-	addTracksToPlaylist,
-	createEmtpyPlaylist,
 	getFollowingArtistIds,
 	getTopTracks,
-} from "~/models/spotify.server";
+	createEmtpyPlaylist,
+	addTracksToPlaylist,
+} from "./spotify.server";
 
-import { getSession } from "~/sessions";
-
-export async function loader({ request }: LoaderArgs) {
+export async function generatePlaylist(request: Request) {
 	const session = await getSession(request.headers.get("Cookie"));
 
 	if (!session.has("access_token")) {
@@ -31,13 +29,13 @@ export async function loader({ request }: LoaderArgs) {
 
 	const topTrackUris = sortedTopTracks.map((track) => track[0].uri);
 
-	const playlist = await createEmtpyPlaylist(userId, accessToken);
+	const emtpyPlaylist = await createEmtpyPlaylist(userId, accessToken);
 
 	const snapshotId = await addTracksToPlaylist(
-		playlist.id,
+		emtpyPlaylist.id,
 		topTrackUris,
 		accessToken
 	);
 
-	return { topTracks: sortedTopTracks };
+	return emtpyPlaylist.id;
 }

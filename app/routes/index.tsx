@@ -1,19 +1,23 @@
-import type { LoaderArgs } from "@remix-run/node";
+import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { useFetcher, useLoaderData } from "@remix-run/react";
+import { Form, useLoaderData } from "@remix-run/react";
+import Balancer from "react-wrap-balancer";
 
-import type { loader as generateLoader } from "./generate";
-
-import { commitSession, getSession } from "~/sessions";
+import { z } from "zod";
+import { generatePlaylist } from "~/models/generate.server";
 import { getUserProfile } from "~/models/spotify.server";
+import { commitSession, destroySession, getSession } from "~/sessions";
 
 export async function loader({ request }: LoaderArgs) {
 	const session = await getSession(request.headers.get("Cookie"));
 	const redirectUri = new URL(request.url).origin;
 
 	if (session.has("access_token")) {
-		const userId = session.get("user_id");
-		return json({ userId, oAuthUrl: null }, 200);
+		const accessToken = session.get("access_token");
+
+		const userProfile = await getUserProfile(accessToken);
+
+		return json({ userProfile, oAuthUrl: null }, 200);
 	}
 
 	const url = new URL(request.url);
@@ -31,7 +35,7 @@ export async function loader({ request }: LoaderArgs) {
 
 		const oAuthUrl = oAuthEndpoint + "?" + params.toString();
 
-		return json({ userId: null, oAuthUrl }, 200);
+		return json({ userProfile: null, oAuthUrl }, 200);
 	}
 
 	const auth = btoa(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`);
@@ -64,32 +68,137 @@ export async function loader({ request }: LoaderArgs) {
 	});
 }
 
+export async function action({ request }: ActionArgs) {
+	const formData = await request.formData();
+	const intent = z.string().parse(formData.get("_intent"));
+
+	const session = await getSession(request.headers.get("Cookie"));
+
+	switch (intent) {
+		case "logout": {
+			throw redirect("/", {
+				headers: {
+					"Set-Cookie": await destroySession(session),
+				},
+			});
+		}
+		case "generate": {
+			const playlistId = await generatePlaylist(request);
+
+			session.set("playlist_id", playlistId);
+
+			throw redirect("/playlist", {
+				headers: {
+					"Set-Cookie": await commitSession(session),
+				},
+			});
+		}
+		default: {
+			return { error: true, message: "Unhandled form intent: ", intent };
+		}
+	}
+}
+
 export default function Index() {
-	const { userId, oAuthUrl } = useLoaderData<typeof loader>();
-	const artistFetcher = useFetcher<typeof generateLoader>();
+	const { userProfile, oAuthUrl } = useLoaderData<typeof loader>();
 
 	return (
-		<div>
-			<h1>Hello, world!</h1>
-			<p>{userId ? `Logged in as ${userId}` : "Logged out"}</p>
-			{!oAuthUrl ? (
-				<artistFetcher.Form method="get" action="/generate">
-					<button>Generate</button>
-				</artistFetcher.Form>
-			) : (
-				<a href={oAuthUrl}>Login</a>
-			)}
-			{artistFetcher.data ? (
-				<p>
-					{JSON.stringify(
-						artistFetcher.data.topTracks.map((track) => ({
-							name: track[0].name,
-							id: track[0].id,
-							popularity: track[0].popularity,
-						}))
-					)}
-				</p>
-			) : null}
+		<div className="flex h-full max-h-full">
+			<div className="flex flex-col items-center justify-center w-full h-full mx-8 space-y-4 text-center sm:items-start sm:max-w-md sm:text-left md:mx-32">
+				<div>
+					<h1 className="mb-2 text-3xl sm:text-5xl">
+						<Balancer>
+							Stay in sync with the music you love
+						</Balancer>
+					</h1>
+					<p>
+						<Balancer>
+							insync creates playlists from your followed artists
+							on Spotify. Connect your account for personalised
+							music discovery.
+						</Balancer>
+					</p>
+				</div>
+
+				{!oAuthUrl ? (
+					<Form method="post">
+						<button
+							type="submit"
+							name="_intent"
+							value="generate"
+							className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
+						>
+							Generate
+						</button>
+					</Form>
+				) : (
+					<a
+						href={oAuthUrl}
+						className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
+					>
+						Connect to Spotify
+					</a>
+				)}
+				{userProfile ? (
+					<>
+						<div className="flex items-center justify-center space-x-2 sm:justify-start">
+							<ProfileImage userProfile={userProfile} />
+							<p className="text-sm">
+								Logged in as {userProfile.id}
+							</p>
+						</div>
+						<Form method="post">
+							<button
+								type="submit"
+								name="_intent"
+								value="logout"
+								className="text-sm underline"
+							>
+								Logout
+							</button>
+						</Form>
+					</>
+				) : null}
+			</div>
+			<div className="relative hidden w-full h-full overflow-hidden sm:block">
+				<BackgroundCircles />
+			</div>
+		</div>
+	);
+}
+
+function ProfileImage({
+	userProfile,
+}: {
+	userProfile: SpotifyApi.UserProfileResponse;
+}) {
+	if (userProfile.images && userProfile.images.length === 0) {
+		return (
+			<div className="flex items-center justify-center w-4 h-4 border border-white rounded-full">
+				?
+			</div>
+		);
+	}
+
+	return (
+		<img
+			src={userProfile.images![0].url}
+			alt=""
+			className="w-4 h-4 border border-white rounded-full"
+			height={16}
+			width={16}
+		/>
+	);
+}
+
+function BackgroundCircles() {
+	return (
+		<div className="absolute top-1/2 -translate-y-1/2 left-1/4 flex items-center justify-center w-[1527px] border-2 border-green-500 rounded-full h-[1527px]">
+			<div className="relative flex items-center justify-center w-[1221px] border-2 border-green-500 rounded-full h-[1221px]">
+				<div className="relative flex items-center justify-center w-[917px] border-2 border-green-500 rounded-full h-[917px]">
+					<div className="w-[611px] border-2 border-green-500 rounded-full h-[611px]"></div>
+				</div>
+			</div>
 		</div>
 	);
 }
