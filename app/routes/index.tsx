@@ -15,29 +15,9 @@ export async function loader({ request }: LoaderArgs) {
 	const redirectUri = new URL(request.url).origin;
 
 	if (session.has("access_token")) {
-		const accessToken = session.get("access_token");
+		const userProfile = await getUserProfile(session);
 
-		const userProfile = await getUserProfile(accessToken);
-
-		if (!userProfile.ok) {
-			const refreshToken = session.get("refresh_token");
-
-			const { access_token, refresh_token } = await requestAccessToken(
-				refreshToken,
-				redirectUri
-			);
-
-			session.set("access_token", access_token);
-			session.set("refresh_token", refresh_token);
-
-			throw redirect("/", {
-				headers: {
-					"Set-Cookie": await commitSession(session),
-				},
-			});
-		}
-
-		return json({ userProfile: userProfile.data, oAuthUrl: null }, 200);
+		return json({ userProfile, oAuthUrl: null }, 200);
 	}
 
 	const url = new URL(request.url);
@@ -61,11 +41,12 @@ export async function loader({ request }: LoaderArgs) {
 	const { access_token: accessToken, refresh_token: refreshToken } =
 		await requestAccessToken(code, redirectUri);
 
-	const userProfile = await getUserProfile(accessToken);
-	const userId = userProfile.id;
-
 	session.set("access_token", accessToken);
 	session.set("refresh_token", refreshToken);
+
+	const userProfile = await getUserProfile(session);
+	const userId = userProfile.id;
+
 	session.set("user_id", userId);
 
 	throw redirect("/", {

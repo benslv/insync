@@ -1,3 +1,11 @@
+import type { Session } from "@remix-run/node";
+import { redirect } from "@remix-run/node";
+import wretch from "wretch";
+import { commitSession, destroySession, getSession } from "~/sessions";
+
+const api = wretch("https://api.spotify.com/v1").errorType("json");
+// .resolve((res) => res.json());
+
 export async function requestAccessToken(
 	code: string,
 	redirectUri: string
@@ -27,36 +35,28 @@ export async function requestAccessToken(
 		(res) => res.json()
 	);
 
+	console.log("data >>> ", data);
+
 	return data;
 }
 
-export async function getUserProfile(
-	accessToken: string
-): Promise<
-	| { ok: true; data: SpotifyApi.UserProfileResponse }
-	| { ok: false; error: unknown }
-> {
-	const url = "https://api.spotify.com/v1/me";
+export async function getUserProfile(session: Session) {
+	const url = "/me";
 
-	const headers = new Headers({
-		Accept: "application/json",
-		"Content-Type": "application/json",
-		Authorization: `Bearer ${accessToken}`,
-	});
+	const accessToken = session.get("access_token");
 
-	try {
-		const response = await fetch(url, { headers });
-		const data = await response.json();
-
-		console.log("UserProfile >>>", data);
-		return { ok: true, data };
-	} catch (err) {
-		return { ok: false, error: err };
-	}
+	return api
+		.auth(`Bearer ${accessToken}`)
+		.get(url)
+		.unauthorized(() => console.log("Unauthorized request"))
+		.json<SpotifyApi.UserProfileResponse>();
 }
 
-export async function getFollowingArtistIds(accessToken: string) {
-	const endpoint = "https://api.spotify.com/v1/me/following";
+export async function getFollowingArtistIds(session: Session) {
+	const endpoint = "/me/following";
+	const accessToken = session.get("access_token");
+
+	console.log("accessToken >>> ", accessToken);
 
 	const params = new URLSearchParams({
 		type: "artist",
@@ -65,13 +65,17 @@ export async function getFollowingArtistIds(accessToken: string) {
 
 	const url = endpoint + "?" + params.toString();
 
-	const data: SpotifyApi.UsersFollowedArtistsResponse = await fetch(url, {
-		headers: new Headers({
-			Accept: "application/json",
-			"Content-Type": "application/json",
-			Authorization: `Bearer ${accessToken}`,
-		}),
-	}).then((res) => res.json());
+	const data = await api
+		.auth(`Bearer ${accessToken}`)
+		.get(url)
+		.unauthorized(async () => {
+			return redirect("/", {
+				headers: {
+					"Set-Cookie": await destroySession(session),
+				},
+			});
+		})
+		.json<SpotifyApi.UsersFollowedArtistsResponse>();
 
 	console.log("FollowedArtists >>>", data);
 
@@ -79,7 +83,7 @@ export async function getFollowingArtistIds(accessToken: string) {
 }
 
 export async function getTopTracks(id: string, accessToken: string) {
-	const url = `https://api.spotify.com/v1/artists/${id}/top-tracks?market=GB`;
+	const url = `/artists/${id}/top-tracks?market=GB`;
 
 	const headers = new Headers({
 		Accept: "application/json",
@@ -96,6 +100,8 @@ export async function getTopTracks(id: string, accessToken: string) {
 	console.log("Tracks >>>", data.tracks);
 
 	return tracks;
+
+	return api.auth();
 }
 
 export async function createEmtpyPlaylist(
