@@ -90,8 +90,6 @@ export async function getUserProfile(
 			console.error("There was an error!", error);
 		});
 
-	console.log("UserProfile >>>", data);
-
 	return data;
 }
 
@@ -113,8 +111,6 @@ export async function getFollowingArtistIds(accessToken: string) {
 		}),
 	}).then((res) => res.json());
 
-	console.log("FollowedArtists >>>", data);
-
 	return data.artists.items.map((item) => item.id);
 }
 
@@ -132,8 +128,6 @@ export async function getTopTracks(id: string, accessToken: string) {
 	}).then((res) => res.json());
 
 	const tracks = data.tracks;
-
-	console.log("Tracks >>>", data.tracks);
 
 	return tracks;
 }
@@ -160,8 +154,6 @@ export async function createEmtpyPlaylist(
 		body,
 	}).then((res) => res.json());
 
-	console.log("Playlist >>>", data);
-
 	return data;
 }
 
@@ -187,8 +179,6 @@ export async function addTracksToPlaylist(
 		body,
 	}).then((res) => res.json());
 
-	console.log("SnapshotID >>>", data);
-
 	return data;
 }
 
@@ -205,18 +195,5 @@ export async function getPlaylist(
 
 	const data = await fetch(url, { headers }).then((res) => res.json());
 
-	console.log("Playlist >>>", data);
-
 	return data;
-}
-
-function handleErrors(response: Response) {
-	if (response.status >= 200 && response.status <= 299) {
-		return response.json();
-	} else {
-		return Promise.reject({
-			status: response.status,
-			message: response.statusText,
-		});
-	}
 }
