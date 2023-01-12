@@ -80,7 +80,7 @@ export async function getUserProfile(
 	const data = await fetch(url, {
 		headers,
 	})
-		.then(async (res) => {
+		.then((res) => {
 			if (!res.ok) {
 				return Promise.reject(res);
 			}
@@ -109,7 +109,16 @@ export async function getFollowingArtistIds(accessToken: string) {
 			"Content-Type": "application/json",
 			Authorization: `Bearer ${accessToken}`,
 		}),
-	}).then((res) => res.json());
+	})
+		.then((res) => {
+			if (!res.ok) {
+				return Promise.reject(res);
+			}
+			return res.json();
+		})
+		.catch((error) => {
+			console.error("There was an error!", error);
+		});
 
 	return data.artists.items.map((item) => item.id);
 }
