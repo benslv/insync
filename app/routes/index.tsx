@@ -1,14 +1,20 @@
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Form, useLoaderData, useTransition } from "@remix-run/react";
+import { addSeconds } from "date-fns";
 import { motion } from "framer-motion";
 import Balancer from "react-wrap-balancer";
 import { z } from "zod";
 
 import { BackgroundCircles } from "~/components/BackgroundCircles";
 import { generatePlaylist } from "~/models/generate.server";
-import { getUserProfile } from "~/models/spotify.server";
+import {
+	getUserProfile,
+	refreshAccessToken,
+	requestAccessToken,
+} from "~/models/spotify.server";
 import { commitSession, destroySession, getSession } from "~/sessions";
+import { SpotifyError } from "~/utils/SpotifyError";
 
 export async function loader({ request }: LoaderArgs) {
 	const session = await getSession(request.headers.get("Cookie"));
@@ -17,9 +23,50 @@ export async function loader({ request }: LoaderArgs) {
 	if (session.has("access_token")) {
 		const accessToken = session.get("access_token");
 
-		const userProfile = await getUserProfile(accessToken);
+		try {
+			const userProfile = await getUserProfile(accessToken);
 
-		return json({ userProfile, oAuthUrl: null }, 200);
+			session.set("user_id", userProfile.id);
+
+			return json({ userProfile, oAuthUrl: null });
+		} catch (error: unknown) {
+			const spotifyError = SpotifyError.parse(error);
+
+			switch (spotifyError.status) {
+				case 401: {
+					const refreshToken = session.get("refresh_token");
+
+					const { access_token, refresh_token, expires_in } =
+						await refreshAccessToken(refreshToken, redirectUri);
+
+					const expiryDate = addSeconds(new Date(), expires_in);
+
+					session.set("access_token", access_token);
+					session.set("refresh_token", refresh_token);
+					session.set("expiry_date", expiryDate.toISOString());
+
+					const userProfile = await getUserProfile(accessToken);
+
+					session.set("user_id", userProfile.id);
+
+					return json(
+						{ userProfile, oAuthUrl: null },
+						{
+							headers: {
+								"Set-Cookie": await commitSession(session),
+							},
+						}
+					);
+				}
+				default: {
+					throw redirect("/", {
+						headers: {
+							"Set-Cookie": await destroySession(session),
+						},
+					});
+				}
+			}
+		}
 	}
 
 	const url = new URL(request.url);
@@ -40,28 +87,16 @@ export async function loader({ request }: LoaderArgs) {
 		return json({ userProfile: null, oAuthUrl }, 200);
 	}
 
-	const auth = btoa(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`);
+	const { access_token, refresh_token, expires_in } =
+		await requestAccessToken(code, redirectUri);
 
-	const data = await fetch("https://accounts.spotify.com/api/token", {
-		method: "post",
-		headers: new Headers({
-			Authorization: `Basic ${auth}`,
-			"Content-Type": "application/x-www-form-urlencoded",
-		}),
-		body: new URLSearchParams({
-			grant_type: "authorization_code",
-			code,
-			redirect_uri: redirectUri,
-		}),
-	}).then((res) => res.json());
+	const expiryDate = addSeconds(new Date(), expires_in);
+	const userProfile = await getUserProfile(access_token);
 
-	const accessToken = data.access_token;
-
-	const userProfile = await getUserProfile(accessToken);
-	const userId = userProfile.id;
-
-	session.set("access_token", accessToken);
-	session.set("user_id", userId);
+	session.set("access_token", access_token);
+	session.set("refresh_token", refresh_token);
+	session.set("expiry_date", expiryDate.toISOString());
+	session.set("user_id", userProfile.id);
 
 	throw redirect("/", {
 		headers: {
@@ -87,7 +122,7 @@ export async function action({ request }: ActionArgs) {
 		case "generate": {
 			const [playlistId] = await Promise.all([
 				generatePlaylist(request),
-				delay(2000),
+				delay(1500),
 			]);
 
 			session.set("playlist_id", playlistId);
@@ -122,12 +157,15 @@ export default function Index() {
 			<div className="flex flex-col items-center justify-center w-full h-full px-8 space-y-4 text-center border-r drop-shadow-xl border-white/20 sm:items-start sm:max-w-xl sm:text-left md:px-16">
 				<div className="w-full">
 					<h1 className="mb-2 text-3xl sm:text-5xl">
-						<Balancer>Stay in sync with the music you love</Balancer>
+						<Balancer>
+							Stay in sync with the music you love
+						</Balancer>
 					</h1>
 					<p>
 						<Balancer>
-							insync creates playlists from your followed artists on Spotify.
-							Connect your account for personalised music discovery.
+							insync creates playlists from your followed artists
+							on Spotify. Connect your account for personalised
+							music discovery.
 						</Balancer>
 					</p>
 				</div>
@@ -165,7 +203,9 @@ export default function Index() {
 					<>
 						<div className="flex items-center justify-center space-x-2 sm:justify-start">
 							<ProfileImage userProfile={userProfile} />
-							<p className="text-sm">Logged in as {userProfile.id}</p>
+							<p className="text-sm">
+								Logged in as {userProfile.id}
+							</p>
 						</div>
 						<Form method="post">
 							<button

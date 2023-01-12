@@ -1,3 +1,71 @@
+export async function requestAccessToken(
+	code: string,
+	redirectUri: string
+): Promise<{
+	access_token: string;
+	token_type: "Bearer";
+	scope: string;
+	expires_in: number;
+	refresh_token: string;
+}> {
+	const url = "https://accounts.spotify.com/api/token";
+
+	const auth = btoa(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`);
+
+	const headers = new Headers({
+		Authorization: `Basic ${auth}`,
+		"Content-Type": "application/x-www-form-urlencoded",
+	});
+
+	const body = new URLSearchParams({
+		grant_type: "authorization_code",
+		code,
+		redirect_uri: redirectUri,
+	});
+
+	const data = await fetch(url, { method: "post", headers, body }).then(
+		(res) => res.json()
+	);
+
+	console.log("data >>> ", data);
+
+	return data;
+}
+
+export async function refreshAccessToken(
+	code: string,
+	redirectUri: string
+): Promise<{
+	access_token: string;
+	token_type: "Bearer";
+	scope: string;
+	expires_in: number;
+	refresh_token: string;
+}> {
+	const url = "https://accounts.spotify.com/api/token";
+
+	const auth = btoa(`${process.env.CLIENT_ID}:${process.env.CLIENT_SECRET}`);
+
+	const headers = new Headers({
+		Authorization: `Basic ${auth}`,
+		"Content-Type": "application/x-www-form-urlencoded",
+	});
+
+	const body = new URLSearchParams({
+		grant_type: "refresh_code",
+		code,
+		redirect_uri: redirectUri,
+	});
+
+	const data = await fetch(url, { method: "post", headers, body }).then(
+		(res) => res.json()
+	);
+
+	console.log("data >>> ", data);
+
+	return data;
+}
+
 export async function getUserProfile(
 	accessToken: string
 ): Promise<SpotifyApi.UserProfileResponse> {
@@ -11,7 +79,16 @@ export async function getUserProfile(
 
 	const data = await fetch(url, {
 		headers,
-	}).then((res) => res.json());
+	})
+		.then(async (res) => {
+			if (!res.ok) {
+				return Promise.reject(res);
+			}
+			return res.json();
+		})
+		.catch((error) => {
+			console.error("There was an error!", error);
+		});
 
 	console.log("UserProfile >>>", data);
 
@@ -131,4 +208,15 @@ export async function getPlaylist(
 	console.log("Playlist >>>", data);
 
 	return data;
+}
+
+function handleErrors(response: Response) {
+	if (response.status >= 200 && response.status <= 299) {
+		return response.json();
+	} else {
+		return Promise.reject({
+			status: response.status,
+			message: response.statusText,
+		});
+	}
 }
