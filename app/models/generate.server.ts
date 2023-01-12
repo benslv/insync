@@ -7,7 +7,10 @@ import {
 	addTracksToPlaylist,
 } from "./spotify.server";
 
-export async function generatePlaylist(request: Request) {
+export async function generatePlaylist(
+	request: Request,
+	selection: "popular" | "latest" | "random"
+) {
 	const session = await getSession(request.headers.get("Cookie"));
 
 	if (!session.has("access_token")) {

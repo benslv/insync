@@ -109,6 +109,10 @@ export async function loader({ request }: LoaderArgs) {
 export async function action({ request }: ActionArgs) {
 	const formData = await request.formData();
 	const intent = z.string().parse(formData.get("_intent"));
+	const selection = z
+		.union([z.literal("popular"), z.literal("latest"), z.literal("random")])
+		.catch("popular")
+		.parse(formData.get("selection"));
 
 	const session = await getSession(request.headers.get("Cookie"));
 
@@ -122,7 +126,7 @@ export async function action({ request }: ActionArgs) {
 		}
 		case "generate": {
 			const [playlistId] = await Promise.all([
-				generatePlaylist(request),
+				generatePlaylist(request, selection),
 				delay(1500),
 			]);
 
@@ -289,27 +293,47 @@ function PlaylistTypeGroup() {
 		"relative px-4 py-1 rounded-full hover:bg-neutral-800 data-[state=checked]:bg-neutral-700 border border-neutral-900 transition-colors data-[state=checked]:border-neutral-500";
 
 	return (
-		<RadioGroup.Root
-			defaultValue="Popular"
-			aria-label="Playlist type"
-			orientation="horizontal"
-			className="flex p-1 border rounded-full border-neutral-700 gap-x-2 "
-		>
-			<RadioGroup.Item value="Popular" id="r1" className={itemClassName}>
-				<label htmlFor="r1" className="cursor-pointer">
-					Popular
-				</label>
-			</RadioGroup.Item>
-			<RadioGroup.Item value="Latest" id="r2" className={itemClassName}>
-				<label htmlFor="r2" className="cursor-pointer">
-					Latest
-				</label>
-			</RadioGroup.Item>
-			<RadioGroup.Item value="Random" id="r3" className={itemClassName}>
-				<label htmlFor="r3" className="cursor-pointer">
-					Random
-				</label>
-			</RadioGroup.Item>
-		</RadioGroup.Root>
+		<div className="flex flex-col gap-y-2">
+			<label htmlFor="selection" className="text-sm text-neutral-400">
+				Selection method:
+			</label>
+			<RadioGroup.Root
+				defaultValue="popular"
+				loop={false}
+				aria-label="Playlist type"
+				orientation="horizontal"
+				id="selection"
+				name="selection"
+				className="flex p-1 border rounded-full border-neutral-700 gap-x-2 "
+			>
+				<RadioGroup.Item
+					value="popular"
+					id="r1"
+					className={itemClassName}
+				>
+					<label htmlFor="r1" className="cursor-pointer">
+						Popular
+					</label>
+				</RadioGroup.Item>
+				<RadioGroup.Item
+					value="latest"
+					id="r2"
+					className={itemClassName}
+				>
+					<label htmlFor="r2" className="cursor-pointer">
+						Latest
+					</label>
+				</RadioGroup.Item>
+				<RadioGroup.Item
+					value="random"
+					id="r3"
+					className={itemClassName}
+				>
+					<label htmlFor="r3" className="cursor-pointer">
+						Random
+					</label>
+				</RadioGroup.Item>
+			</RadioGroup.Root>
+		</div>
 	);
 }
