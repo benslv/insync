@@ -1,3 +1,4 @@
+import * as RadioGroup from "@radix-ui/react-radio-group";
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Form, useLoaderData, useTransition } from "@remix-run/react";
@@ -172,7 +173,8 @@ export default function Index() {
 
 				{!oAuthUrl ? (
 					<div className="flex items-center gap-x-2">
-						<Form method="post">
+						<Form method="post" className="flex flex-col gap-y-4">
+							<PlaylistTypeGroup />
 							<button
 								type="submit"
 								name="_intent"
@@ -279,5 +281,56 @@ async function delay(ms: number) {
 		setTimeout(() => {
 			return resolve(0);
 		}, ms)
+	);
+}
+
+function PlaylistTypeGroup() {
+	const indicatorClassName =
+		"absolute top-0 left-0 w-full h-full  rounded-full after:top-0 after:rounded-full after:bg-white/10 after:left-0 after:w-full after:h-full after:border after:border-neutral-600 after:absolute";
+
+	return (
+		<RadioGroup.Root
+			defaultValue="Popular"
+			aria-label="Playlist type"
+			orientation="horizontal"
+			className="flex p-1 border rounded-full border-neutral-700"
+		>
+			<RadioGroup.Item
+				value="Popular"
+				id="r1"
+				className="relative px-4 py-1 rounded-tl-full rounded-bl-full "
+			>
+				<RadioGroup.RadioGroupIndicator
+					className={indicatorClassName}
+				/>
+				<label htmlFor="r1" className="cursor-pointer">
+					Popular
+				</label>
+			</RadioGroup.Item>
+			<RadioGroup.Item
+				value="Latest"
+				id="r2"
+				className="relative px-4 py-1 "
+			>
+				<RadioGroup.RadioGroupIndicator
+					className={indicatorClassName}
+				/>
+				<label htmlFor="r2" className="cursor-pointer">
+					Latest
+				</label>
+			</RadioGroup.Item>
+			<RadioGroup.Item
+				value="Random"
+				id="r3"
+				className="relative px-4 py-1 rounded-tr-full rounded-br-full "
+			>
+				<RadioGroup.RadioGroupIndicator
+					className={indicatorClassName}
+				/>
+				<label htmlFor="r3" className="cursor-pointer">
+					Random
+				</label>
+			</RadioGroup.Item>
+		</RadioGroup.Root>
 	);
 }
