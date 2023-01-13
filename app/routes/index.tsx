@@ -1,18 +1,21 @@
+import * as RadioGroup from "@radix-ui/react-radio-group";
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import { Form, useLoaderData, useTransition } from "@remix-run/react";
+import {
+	Form,
+	useActionData,
+	useLoaderData,
+	useTransition,
+} from "@remix-run/react";
 import { addSeconds } from "date-fns";
 import { motion } from "framer-motion";
 import Balancer from "react-wrap-balancer";
+import { SpotifyWebApi } from "spotify-web-api-ts";
+import type { PrivateUser } from "spotify-web-api-ts/types/types/SpotifyObjects";
 import { z } from "zod";
 
 import { BackgroundCircles } from "~/components/BackgroundCircles";
 import { generatePlaylist } from "~/models/generate.server";
-import {
-	getUserProfile,
-	refreshAccessToken,
-	requestAccessToken,
-} from "~/models/spotify.server";
 import { commitSession, destroySession, getSession } from "~/sessions";
 import { SpotifyError } from "~/utils/SpotifyError";
 
@@ -20,33 +23,41 @@ export async function loader({ request }: LoaderArgs) {
 	const session = await getSession(request.headers.get("Cookie"));
 	const redirectUri = new URL(request.url).origin;
 
+	const spotify = new SpotifyWebApi({
+		redirectUri,
+		clientId: process.env.CLIENT_ID,
+		clientSecret: process.env.CLIENT_SECRET,
+	});
+
 	if (session.has("access_token")) {
 		const accessToken = session.get("access_token");
 
+		spotify.setAccessToken(accessToken);
+
 		try {
-			const userProfile = await getUserProfile(accessToken);
+			const userProfile = await spotify.users.getMe();
 
 			session.set("user_id", userProfile.id);
 
 			return json({ userProfile, oAuthUrl: null });
-		} catch (error: unknown) {
-			const spotifyError = SpotifyError.parse(error);
+		} catch (err: unknown) {
+			const error = SpotifyError.parse(err);
 
-			switch (spotifyError.status) {
+			switch (error.status) {
 				case 401: {
 					const refreshToken = session.get("refresh_token");
 
-					const { access_token, refresh_token, expires_in } =
-						await refreshAccessToken(refreshToken, redirectUri);
+					const { access_token, expires_in } =
+						await spotify.getRefreshedAccessToken(refreshToken);
 
 					const expiryDate = addSeconds(new Date(), expires_in);
 
 					session.set("access_token", access_token);
-					session.set("refresh_token", refresh_token);
 					session.set("expiry_date", expiryDate.toISOString());
 
-					const userProfile = await getUserProfile(accessToken);
+					spotify.setAccessToken(access_token);
 
+					const userProfile = await spotify.users.getMe();
 					session.set("user_id", userProfile.id);
 
 					return json(
@@ -73,25 +84,20 @@ export async function loader({ request }: LoaderArgs) {
 	const code = url.searchParams.get("code");
 
 	if (!code) {
-		const oAuthEndpoint = "https://accounts.spotify.com/authorize";
-
-		const params = new URLSearchParams({
-			client_id: process.env.CLIENT_ID || "",
-			response_type: "code",
-			redirect_uri: redirectUri,
-			scope: "user-follow-read playlist-modify-public",
+		const oAuthUrl = spotify.getRefreshableAuthorizationUrl({
+			scope: ["user-follow-read", "playlist-modify-public"],
 		});
 
-		const oAuthUrl = oAuthEndpoint + "?" + params.toString();
-
-		return json({ userProfile: null, oAuthUrl }, 200);
+		return json({ userProfile: null, oAuthUrl });
 	}
 
-	const { access_token, refresh_token, expires_in } =
-		await requestAccessToken(code, redirectUri);
+	const { access_token, expires_in, refresh_token } =
+		await spotify.getRefreshableUserTokens(code);
+
+	spotify.setAccessToken(access_token);
 
 	const expiryDate = addSeconds(new Date(), expires_in);
-	const userProfile = await getUserProfile(access_token);
+	const userProfile = await spotify.users.getMe();
 
 	session.set("access_token", access_token);
 	session.set("refresh_token", refresh_token);
@@ -108,6 +114,10 @@ export async function loader({ request }: LoaderArgs) {
 export async function action({ request }: ActionArgs) {
 	const formData = await request.formData();
 	const intent = z.string().parse(formData.get("_intent"));
+	const selection = z
+		.union([z.literal("popular"), z.literal("latest"), z.literal("random")])
+		.catch("popular")
+		.parse(formData.get("selection"));
 
 	const session = await getSession(request.headers.get("Cookie"));
 
@@ -120,10 +130,15 @@ export async function action({ request }: ActionArgs) {
 			});
 		}
 		case "generate": {
-			const [playlistId] = await Promise.all([
-				generatePlaylist(request),
-				delay(1500),
-			]);
+			const generateResult = await generatePlaylist(request, selection);
+
+			if (!generateResult.ok) {
+				const message = generateResult.message;
+
+				return json({ error: true, message });
+			}
+
+			const playlistId = generateResult.playlistId;
 
 			session.set("playlist_id", playlistId);
 
@@ -134,13 +149,17 @@ export async function action({ request }: ActionArgs) {
 			});
 		}
 		default: {
-			return { error: true, message: "Unhandled form intent: ", intent };
+			return json({
+				error: true,
+				message: `Unhandled form intent: ${intent}`,
+			});
 		}
 	}
 }
 
 export default function Index() {
 	const { userProfile, oAuthUrl } = useLoaderData<typeof loader>();
+	const errors = useActionData<typeof action>();
 	const transition = useTransition();
 
 	const isGenerating = transition.state === "submitting";
@@ -171,26 +190,38 @@ export default function Index() {
 				</div>
 
 				{!oAuthUrl ? (
-					<div className="flex items-center gap-x-2">
-						<Form method="post">
-							<button
-								type="submit"
-								name="_intent"
-								value="generate"
-								className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
-							>
-								{generateButtonText}
-							</button>
+					<>
+						<Form method="post" className="flex flex-col gap-y-4">
+							<PlaylistTypeGroup />
+							<div className="flex items-center gap-x-2">
+								<button
+									type="submit"
+									name="_intent"
+									value="generate"
+									className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
+								>
+									{generateButtonText}
+								</button>
+								{isGenerating ? (
+									<motion.div
+										initial={{ x: -50, opacity: 0 }}
+										animate={{ x: 0, opacity: 1 }}
+									>
+										<Spinner />
+									</motion.div>
+								) : null}
+							</div>
 						</Form>
-						{isGenerating ? (
-							<motion.div
-								initial={{ x: -50, opacity: 0 }}
-								animate={{ x: 0, opacity: 1 }}
+						{errors ? (
+							<motion.p
+								initial={{ opacity: 0, y: -50 }}
+								animate={{ opacity: 1, y: 0 }}
+								className="px-3 py-1 border border-red-300 rounded-xl bg-red-300/25"
 							>
-								<Spinner />
-							</motion.div>
+								{errors.message}
+							</motion.p>
 						) : null}
-					</div>
+					</>
 				) : (
 					<a
 						href={oAuthUrl}
@@ -227,11 +258,7 @@ export default function Index() {
 	);
 }
 
-function ProfileImage({
-	userProfile,
-}: {
-	userProfile: SpotifyApi.UserProfileResponse;
-}) {
+function ProfileImage({ userProfile }: { userProfile: PrivateUser }) {
 	if (userProfile.images && userProfile.images.length === 0) {
 		return (
 			<div className="flex items-center justify-center w-4 h-4 border border-white rounded-full">
@@ -279,5 +306,55 @@ async function delay(ms: number) {
 		setTimeout(() => {
 			return resolve(0);
 		}, ms)
+	);
+}
+
+function PlaylistTypeGroup() {
+	const itemClassName =
+		"relative px-4 py-1 rounded-full hover:bg-neutral-800 data-[state=checked]:bg-neutral-700 border border-neutral-900 transition-colors data-[state=checked]:border-neutral-500";
+
+	return (
+		<div className="flex flex-col gap-y-2">
+			<label htmlFor="selection" className="text-sm text-neutral-400">
+				Selection method:
+			</label>
+			<RadioGroup.Root
+				defaultValue="popular"
+				loop={false}
+				aria-label="Playlist type"
+				orientation="horizontal"
+				id="selection"
+				name="selection"
+				className="flex p-1 border rounded-full border-neutral-700 gap-x-2 "
+			>
+				<RadioGroup.Item
+					value="popular"
+					id="r1"
+					className={itemClassName}
+				>
+					<label htmlFor="r1" className="cursor-pointer">
+						Popular
+					</label>
+				</RadioGroup.Item>
+				<RadioGroup.Item
+					value="latest"
+					id="r2"
+					className={itemClassName}
+				>
+					<label htmlFor="r2" className="cursor-pointer">
+						Latest
+					</label>
+				</RadioGroup.Item>
+				<RadioGroup.Item
+					value="random"
+					id="r3"
+					className={itemClassName}
+				>
+					<label htmlFor="r3" className="cursor-pointer">
+						Random
+					</label>
+				</RadioGroup.Item>
+			</RadioGroup.Root>
+		</div>
 	);
 }
