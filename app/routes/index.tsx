@@ -156,7 +156,7 @@ export default function Index() {
 		<div className="flex h-full max-h-full">
 			<div className="flex flex-col items-center justify-center w-full h-full px-8 space-y-4 text-center border-r drop-shadow-xl border-white/20 sm:items-start sm:max-w-xl sm:text-left md:px-16">
 				<div className="w-full">
-					<h1 className="mb-2 text-3xl sm:text-5xl">
+					<h1 className="mb-2 text-3xl tracking-tighter sm:text-5xl">
 						<Balancer>
 							Stay in sync with the music you love
 						</Balancer>
