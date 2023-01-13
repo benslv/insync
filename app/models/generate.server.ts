@@ -1,12 +1,11 @@
 import { redirect } from "@remix-run/node";
-import { json } from "react-router";
 import { getSession } from "~/sessions";
 import { SpotifyError } from "~/utils/SpotifyError";
 import {
+	addTracksToPlaylist,
+	createEmtpyPlaylist,
 	getFollowingArtistIds,
 	getTopTracks,
-	createEmtpyPlaylist,
-	addTracksToPlaylist,
 } from "./spotify.server";
 
 export async function generatePlaylist(

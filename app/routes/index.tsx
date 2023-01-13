@@ -11,6 +11,7 @@ import { addSeconds } from "date-fns";
 import { motion } from "framer-motion";
 import Balancer from "react-wrap-balancer";
 import { z } from "zod";
+import { SpotifyWebApi } from "spotify-web-api-ts";
 
 import { BackgroundCircles } from "~/components/BackgroundCircles";
 import { generatePlaylist } from "~/models/generate.server";
@@ -26,11 +27,19 @@ export async function loader({ request }: LoaderArgs) {
 	const session = await getSession(request.headers.get("Cookie"));
 	const redirectUri = new URL(request.url).origin;
 
+	const spotify = new SpotifyWebApi({
+		redirectUri,
+		clientId: process.env.CLIENT_ID,
+		clientSecret: process.env.CLIENT_SECRET,
+	});
+
 	if (session.has("access_token")) {
 		const accessToken = session.get("access_token");
 
+		spotify.setAccessToken(accessToken);
+
 		try {
-			const userProfile = await getUserProfile(accessToken);
+			const userProfile = await spotify.users.getMe();
 
 			session.set("user_id", userProfile.id);
 
@@ -79,18 +88,11 @@ export async function loader({ request }: LoaderArgs) {
 	const code = url.searchParams.get("code");
 
 	if (!code) {
-		const oAuthEndpoint = "https://accounts.spotify.com/authorize";
-
-		const params = new URLSearchParams({
-			client_id: process.env.CLIENT_ID || "",
-			response_type: "code",
-			redirect_uri: redirectUri,
-			scope: "user-follow-read playlist-modify-public",
+		const oAuthUrl = spotify.getRefreshableAuthorizationUrl({
+			scope: ["user-follow-read", "playlist-modify-public"],
 		});
 
-		const oAuthUrl = oAuthEndpoint + "?" + params.toString();
-
-		return json({ userProfile: null, oAuthUrl }, 200);
+		return json({ userProfile: null, oAuthUrl });
 	}
 
 	const { access_token, refresh_token, expires_in } =
