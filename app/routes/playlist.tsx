@@ -21,15 +21,15 @@ export async function loader({ request }: LoaderArgs) {
 	const session = await getSession(request.headers.get("Cookie"));
 	const redirectUri = new URL(request.url).origin;
 
+	if (!session.has("access_token") || !session.has("playlist_id")) {
+		throw redirect("/");
+	}
+
 	const spotify = new SpotifyWebApi({
 		redirectUri,
 		clientId: process.env.CLIENT_ID,
 		clientSecret: process.env.CLIENT_SECRET,
 	});
-
-	if (!session.has("access_token") || !session.has("playlist_id")) {
-		throw redirect("/");
-	}
 
 	const accessToken = session.get("access_token");
 

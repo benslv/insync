@@ -54,8 +54,9 @@ export async function loader({ request }: LoaderArgs) {
 					session.set("access_token", access_token);
 					session.set("expiry_date", expiryDate.toISOString());
 
-					const userProfile = await spotify.users.getMe();
+					spotify.setAccessToken(access_token);
 
+					const userProfile = await spotify.users.getMe();
 					session.set("user_id", userProfile.id);
 
 					return json(
@@ -91,6 +92,8 @@ export async function loader({ request }: LoaderArgs) {
 
 	const { access_token, expires_in, refresh_token } =
 		await spotify.getRefreshableUserTokens(code);
+
+	spotify.setAccessToken(access_token);
 
 	const expiryDate = addSeconds(new Date(), expires_in);
 	const userProfile = await spotify.users.getMe();
