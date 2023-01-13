@@ -1,35 +1,55 @@
 import type { LoaderArgs } from "@remix-run/node";
-import { redirect } from "@remix-run/node";
+import { json, redirect } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
+import { motion } from "framer-motion";
 import React from "react";
 import Balancer from "react-wrap-balancer";
-import { motion } from "framer-motion";
+import { SpotifyWebApi } from "spotify-web-api-ts";
+import type {
+	PlaylistItem,
+	Track,
+} from "spotify-web-api-ts/esm/types/SpotifyObjects";
 
-import { getPlaylist } from "~/models/spotify.server";
-
-import { getSession } from "~/sessions";
 import { BackgroundCircles } from "~/components/BackgroundCircles";
+import { getSession } from "~/sessions";
+
+interface PlaylistItemWithTrack extends PlaylistItem {
+	track: Track;
+}
 
 export async function loader({ request }: LoaderArgs) {
 	const session = await getSession(request.headers.get("Cookie"));
+	const redirectUri = new URL(request.url).origin;
+
+	const spotify = new SpotifyWebApi({
+		redirectUri,
+		clientId: process.env.CLIENT_ID,
+		clientSecret: process.env.CLIENT_SECRET,
+	});
 
 	if (!session.has("access_token") || !session.has("playlist_id")) {
 		throw redirect("/");
 	}
 
 	const accessToken = session.get("access_token");
+
+	spotify.setAccessToken(accessToken);
+
 	const playlistId = session.get("playlist_id");
 
-	const playlist = await getPlaylist(playlistId, accessToken);
+	const playlist = await spotify.playlists.getPlaylist(playlistId);
 
-	return { playlist };
+	return json({ playlist });
 }
 
 export default function GeneratePage() {
 	const { playlist } = useLoaderData<typeof loader>();
 
 	const artists = playlist.tracks.items
-		.map((item) => item.track?.artists[0].name)
+		.filter(
+			(item): item is PlaylistItemWithTrack => item.track.type === "track"
+		)
+		.map((item) => item.track.artists[0].name)
 		.filter((name): name is string => name !== undefined)
 		.slice(0, 3)
 		.map<React.ReactNode>((name) => (

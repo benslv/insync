@@ -10,16 +10,11 @@ import {
 import { addSeconds } from "date-fns";
 import { motion } from "framer-motion";
 import Balancer from "react-wrap-balancer";
-import { z } from "zod";
 import { SpotifyWebApi } from "spotify-web-api-ts";
+import { z } from "zod";
 
 import { BackgroundCircles } from "~/components/BackgroundCircles";
 import { generatePlaylist } from "~/models/generate.server";
-import {
-	getUserProfile,
-	refreshAccessToken,
-	requestAccessToken,
-} from "~/models/spotify.server";
 import { commitSession, destroySession, getSession } from "~/sessions";
 import { SpotifyError } from "~/utils/SpotifyError";
 
