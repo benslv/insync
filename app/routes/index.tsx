@@ -51,16 +51,15 @@ export async function loader({ request }: LoaderArgs) {
 				case 401: {
 					const refreshToken = session.get("refresh_token");
 
-					const { access_token, refresh_token, expires_in } =
-						await refreshAccessToken(refreshToken, redirectUri);
+					const { access_token, expires_in } =
+						await spotify.getRefreshedAccessToken(refreshToken);
 
 					const expiryDate = addSeconds(new Date(), expires_in);
 
 					session.set("access_token", access_token);
-					session.set("refresh_token", refresh_token);
 					session.set("expiry_date", expiryDate.toISOString());
 
-					const userProfile = await getUserProfile(accessToken);
+					const userProfile = await spotify.users.getMe();
 
 					session.set("user_id", userProfile.id);
 
@@ -95,11 +94,11 @@ export async function loader({ request }: LoaderArgs) {
 		return json({ userProfile: null, oAuthUrl });
 	}
 
-	const { access_token, refresh_token, expires_in } =
-		await requestAccessToken(code, redirectUri);
+	const { access_token, expires_in, refresh_token } =
+		await spotify.getRefreshableUserTokens(code);
 
 	const expiryDate = addSeconds(new Date(), expires_in);
-	const userProfile = await getUserProfile(access_token);
+	const userProfile = await spotify.users.getMe();
 
 	session.set("access_token", access_token);
 	session.set("refresh_token", refresh_token);
