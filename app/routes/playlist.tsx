@@ -1,6 +1,7 @@
 import type { LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { useLoaderData } from "@remix-run/react";
+import { addSeconds } from "date-fns";
 import { motion } from "framer-motion";
 import React from "react";
 import Balancer from "react-wrap-balancer";
@@ -12,6 +13,7 @@ import type {
 
 import { BackgroundCircles } from "~/components/BackgroundCircles";
 import { getSession } from "~/sessions";
+import { tokenHasExpired } from "~/utils/tokenHasExpired";
 
 interface PlaylistItemWithTrack extends PlaylistItem {
 	track: Track;
@@ -31,8 +33,18 @@ export async function loader({ request }: LoaderArgs) {
 		clientSecret: process.env.CLIENT_SECRET,
 	});
 
-	const accessToken = session.get("access_token");
+	if (tokenHasExpired(session)) {
+		const refreshToken = session.get("refresh_token");
+		const { access_token, expires_in } =
+			await spotify.getRefreshedAccessToken(refreshToken);
 
+		session.set("access_token", access_token);
+
+		const expiryDate = addSeconds(new Date(), expires_in);
+		session.set("expiry_date", expiryDate);
+	}
+
+	const accessToken = session.get("access_token");
 	spotify.setAccessToken(accessToken);
 
 	const playlistId = session.get("playlist_id");

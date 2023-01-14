@@ -1,4 +1,3 @@
-import * as RadioGroup from "@radix-ui/react-radio-group";
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import {
@@ -17,7 +16,7 @@ import { z } from "zod";
 import { BackgroundCircles } from "~/components/BackgroundCircles";
 import { generatePlaylist } from "~/models/generate.server";
 import { commitSession, destroySession, getSession } from "~/sessions";
-import { SpotifyError } from "~/utils/SpotifyError";
+import { tokenHasExpired } from "~/utils/tokenHasExpired";
 
 export async function loader({ request }: LoaderArgs) {
 	const session = await getSession(request.headers.get("Cookie"));
@@ -30,54 +29,33 @@ export async function loader({ request }: LoaderArgs) {
 	});
 
 	if (session.has("access_token")) {
+		if (tokenHasExpired(session)) {
+			const refreshToken = session.get("refresh_token");
+			const { access_token, expires_in } =
+				await spotify.getRefreshedAccessToken(refreshToken);
+
+			session.set("access_token", access_token);
+
+			const expiryDate = addSeconds(new Date(), expires_in);
+			session.set("expiry_date", expiryDate);
+		}
+
 		const accessToken = session.get("access_token");
 
 		spotify.setAccessToken(accessToken);
 
-		try {
-			const userProfile = await spotify.users.getMe();
+		const userProfile = await spotify.users.getMe();
 
-			session.set("user_id", userProfile.id);
+		session.set("user_id", userProfile.id);
 
-			return json({ userProfile, oAuthUrl: null });
-		} catch (err: unknown) {
-			const error = SpotifyError.parse(err);
-
-			switch (error.status) {
-				case 401: {
-					const refreshToken = session.get("refresh_token");
-
-					const { access_token, expires_in } =
-						await spotify.getRefreshedAccessToken(refreshToken);
-
-					const expiryDate = addSeconds(new Date(), expires_in);
-
-					session.set("access_token", access_token);
-					session.set("expiry_date", expiryDate.toISOString());
-
-					spotify.setAccessToken(access_token);
-
-					const userProfile = await spotify.users.getMe();
-					session.set("user_id", userProfile.id);
-
-					return json(
-						{ userProfile, oAuthUrl: null },
-						{
-							headers: {
-								"Set-Cookie": await commitSession(session),
-							},
-						}
-					);
-				}
-				default: {
-					throw redirect("/", {
-						headers: {
-							"Set-Cookie": await destroySession(session),
-						},
-					});
-				}
+		return json(
+			{ userProfile, oAuthUrl: null },
+			{
+				headers: {
+					"Set-Cookie": await commitSession(session),
+				},
 			}
-		}
+		);
 	}
 
 	const url = new URL(request.url);
@@ -162,14 +140,15 @@ export default function Index() {
 	const errors = useActionData<typeof action>();
 	const transition = useTransition();
 
-	const isGenerating = transition.state === "submitting";
+	const isGenerating =
+		transition.state === "submitting" &&
+		transition.submission.formData.get("_intent") === "generate";
 
-	const generateButtonText =
-		transition.state === "submitting"
-			? "Generating..."
-			: transition.state === "loading"
-			? "Loading..."
-			: "Generate";
+	const generateButtonText = isGenerating
+		? "Generating..."
+		: transition.state === "loading"
+		? "Loading..."
+		: "Generate";
 
 	return (
 		<div className="flex h-full max-h-full">
@@ -192,7 +171,6 @@ export default function Index() {
 				{!oAuthUrl ? (
 					<>
 						<Form method="post" className="flex flex-col gap-y-4">
-							<PlaylistTypeGroup />
 							<div className="flex items-center gap-x-2">
 								<button
 									type="submit"
@@ -238,7 +216,7 @@ export default function Index() {
 								Logged in as {userProfile.id}
 							</p>
 						</div>
-						<Form method="post">
+						<Form method="post" action="/logout">
 							<button
 								type="submit"
 								name="_intent"
@@ -250,6 +228,36 @@ export default function Index() {
 						</Form>
 					</>
 				) : null}
+			</div>
+			<div className="relative items-center hidden w-full h-full overflow-hidden sm:flex sm:justify-end">
+				<BackgroundCircles />
+			</div>
+		</div>
+	);
+}
+
+export function ErrorBoundary() {
+	return (
+		<div className="flex h-full max-h-full">
+			<div className="flex flex-col items-center justify-center w-full h-full px-8 space-y-4 text-center border-r drop-shadow-xl border-white/20 sm:items-start sm:max-w-xl sm:text-left md:px-16">
+				<div className="w-full">
+					<h1 className="mb-2 text-3xl tracking-tighter sm:text-5xl">
+						Whoops!
+					</h1>
+					<p className="mb-2">insync ran into an error.</p>
+					<p>
+						Click the button below to be taken back to the homepage,
+						and we'll try again.
+					</p>
+				</div>
+				<Form method="post" action="/logout">
+					<button
+						type="submit"
+						className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
+					>
+						Home
+					</button>
+				</Form>
 			</div>
 			<div className="relative items-center hidden w-full h-full overflow-hidden sm:flex sm:justify-end">
 				<BackgroundCircles />
@@ -298,63 +306,5 @@ function Spinner() {
 			<title>spinner-one-third</title>
 			<path d="M16 0.75c-0.69 0-1.25 0.56-1.25 1.25s0.56 1.25 1.25 1.25v0c7.042 0.001 12.75 5.71 12.75 12.751 0 3.521-1.427 6.709-3.734 9.016v0c-0.226 0.226-0.365 0.538-0.365 0.883 0 0.69 0.56 1.25 1.25 1.25 0.346 0 0.659-0.14 0.885-0.367l0-0c2.759-2.76 4.465-6.572 4.465-10.782 0-8.423-6.828-15.251-15.25-15.251h-0z" />
 		</motion.svg>
-	);
-}
-
-async function delay(ms: number) {
-	return new Promise((resolve) =>
-		setTimeout(() => {
-			return resolve(0);
-		}, ms)
-	);
-}
-
-function PlaylistTypeGroup() {
-	const itemClassName =
-		"relative px-4 py-1 rounded-full hover:bg-neutral-800 data-[state=checked]:bg-neutral-700 border border-neutral-900 transition-colors data-[state=checked]:border-neutral-500";
-
-	return (
-		<div className="flex flex-col gap-y-2">
-			<label htmlFor="selection" className="text-sm text-neutral-400">
-				Selection method:
-			</label>
-			<RadioGroup.Root
-				defaultValue="popular"
-				loop={false}
-				aria-label="Playlist type"
-				orientation="horizontal"
-				id="selection"
-				name="selection"
-				className="flex p-1 border rounded-full border-neutral-700 gap-x-2 "
-			>
-				<RadioGroup.Item
-					value="popular"
-					id="r1"
-					className={itemClassName}
-				>
-					<label htmlFor="r1" className="cursor-pointer">
-						Popular
-					</label>
-				</RadioGroup.Item>
-				<RadioGroup.Item
-					value="latest"
-					id="r2"
-					className={itemClassName}
-				>
-					<label htmlFor="r2" className="cursor-pointer">
-						Latest
-					</label>
-				</RadioGroup.Item>
-				<RadioGroup.Item
-					value="random"
-					id="r3"
-					className={itemClassName}
-				>
-					<label htmlFor="r3" className="cursor-pointer">
-						Random
-					</label>
-				</RadioGroup.Item>
-			</RadioGroup.Root>
-		</div>
 	);
 }
