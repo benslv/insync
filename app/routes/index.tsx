@@ -7,7 +7,7 @@ import {
 	useTransition,
 } from "@remix-run/react";
 import { addSeconds } from "date-fns";
-import { motion } from "framer-motion";
+import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
 import Balancer from "react-wrap-balancer";
 import { SpotifyWebApi } from "spotify-web-api-ts";
 import type { PrivateUser } from "spotify-web-api-ts/types/types/SpotifyObjects";
@@ -167,67 +167,95 @@ export default function Index() {
 						</Balancer>
 					</p>
 				</div>
-
-				{!oAuthUrl ? (
-					<>
-						<Form method="post" className="flex flex-col gap-y-4">
-							<div className="flex items-center gap-x-2">
+				<LayoutGroup>
+					{!oAuthUrl ? (
+						<>
+							<Form
+								method="post"
+								className="flex flex-col gap-y-4"
+							>
+								<div className="flex items-center gap-x-2">
+									<button
+										type="submit"
+										name="_intent"
+										value="generate"
+										className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
+									>
+										{generateButtonText}
+									</button>
+									{isGenerating ? (
+										<motion.div
+											initial={{ x: -50, opacity: 0 }}
+											animate={{ x: 0, opacity: 1 }}
+										>
+											<Spinner />
+										</motion.div>
+									) : null}
+								</div>
+							</Form>
+							{isGenerating ? (
+								<motion.p
+									initial={{
+										opacity: 0,
+										y: -30,
+										height: 0,
+										margin: 0,
+									}}
+									animate={{
+										opacity: 1,
+										y: 0,
+										height: "auto",
+										marginTop: 16,
+									}}
+									transition={{ delay: 5 }}
+									layout="position"
+									className="text-sm text-neutral-400"
+								>
+									Hold tight! We're fetching a lot of data...
+								</motion.p>
+							) : null}
+							{errors ? (
+								<motion.p
+									initial={{ opacity: 0, y: -50 }}
+									animate={{
+										opacity: 1,
+										y: 0,
+									}}
+									className="px-3 py-1 border border-red-300 rounded-xl bg-red-300/25"
+								>
+									{errors.message}
+								</motion.p>
+							) : null}
+						</>
+					) : (
+						<a
+							href={oAuthUrl}
+							className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
+						>
+							Connect to Spotify
+						</a>
+					)}
+					{userProfile ? (
+						<motion.div layout="position">
+							<div className="flex items-center justify-center space-x-2 sm:justify-start">
+								<ProfileImage userProfile={userProfile} />
+								<p className="text-sm">
+									Logged in as {userProfile.id}
+								</p>
+							</div>
+							<Form method="post" action="/logout">
 								<button
 									type="submit"
 									name="_intent"
-									value="generate"
-									className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
+									value="logout"
+									className="text-sm underline"
 								>
-									{generateButtonText}
+									Logout
 								</button>
-								{isGenerating ? (
-									<motion.div
-										initial={{ x: -50, opacity: 0 }}
-										animate={{ x: 0, opacity: 1 }}
-									>
-										<Spinner />
-									</motion.div>
-								) : null}
-							</div>
-						</Form>
-						{errors ? (
-							<motion.p
-								initial={{ opacity: 0, y: -50 }}
-								animate={{ opacity: 1, y: 0 }}
-								className="px-3 py-1 border border-red-300 rounded-xl bg-red-300/25"
-							>
-								{errors.message}
-							</motion.p>
-						) : null}
-					</>
-				) : (
-					<a
-						href={oAuthUrl}
-						className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
-					>
-						Connect to Spotify
-					</a>
-				)}
-				{userProfile ? (
-					<>
-						<div className="flex items-center justify-center space-x-2 sm:justify-start">
-							<ProfileImage userProfile={userProfile} />
-							<p className="text-sm">
-								Logged in as {userProfile.id}
-							</p>
-						</div>
-						<Form method="post" action="/logout">
-							<button
-								type="submit"
-								name="_intent"
-								value="logout"
-								className="text-sm underline"
-							>
-								Logout
-							</button>
-						</Form>
-					</>
-				) : null}
+							</Form>
+						</motion.div>
+					) : null}
+				</LayoutGroup>
 			</div>
 			<div className="relative items-center hidden w-full h-full overflow-hidden sm:flex sm:justify-end">
 				<BackgroundCircles />

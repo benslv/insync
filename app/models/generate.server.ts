@@ -2,7 +2,7 @@ import { redirect } from "@remix-run/node";
 import { SpotifyWebApi } from "spotify-web-api-ts";
 
 import { getSession } from "~/sessions";
-import { SpotifyError } from "~/utils/SpotifyError";
+import { chunk } from "~/utils/chunk";
 
 export async function generatePlaylist(
 	request: Request,
@@ -27,36 +27,79 @@ export async function generatePlaylist(
 	spotify.setAccessToken(accessToken);
 
 	try {
-		const artistIds = await spotify.follow.getFollowedArtists();
+		const artistIds = await spotify.follow.getFollowedArtists({
+			limit: 25,
+		});
 
-		const artistTopTracks = await Promise.all(
-			artistIds.items.map((artist) =>
+		const allArtistIds = artistIds.items;
+
+		const allArtistTopTracks = await Promise.all(
+			allArtistIds.map((artist) =>
 				spotify.artists.getArtistTopTracks(artist.id, "GB")
 			)
 		);
 
-		const sortedTopTracks = artistTopTracks.map((artistTracks) =>
+		let after = artistIds.cursors.after;
+		let nextArtistIds;
+		let nextArtistTopTracks;
+		let i = 0;
+
+		if (artistIds.total ?? 0 > artistIds.limit) {
+			while (after !== null) {
+				console.log(`Running paginated request ${++i}`);
+				console.log("Getting followed artists from", after);
+
+				nextArtistIds = await spotify.follow.getFollowedArtists({
+					limit: 25,
+					after: after,
+				});
+
+				console.log("Getting top tracks for artists from", after);
+				nextArtistTopTracks = await Promise.all(
+					nextArtistIds.items.map((artist) =>
+						spotify.artists.getArtistTopTracks(artist.id, "GB")
+					)
+				);
+
+				allArtistTopTracks.push(...nextArtistTopTracks);
+				console.log("allTopTracks length:", allArtistTopTracks.length);
+
+				after = nextArtistIds.cursors.after;
+				console.log("after", after);
+
+				await new Promise<void>((resolve) =>
+					setTimeout(() => resolve(), 2000)
+				);
+			}
+		}
+
+		console.log("Finished loading top tracks...");
+
+		const sortedTopTracks = allArtistTopTracks.map((artistTracks) =>
 			artistTracks.sort((a, b) => b.popularity - a.popularity).slice(0, 1)
 		);
 
 		const topTrackUris = sortedTopTracks.map((track) => track[0].uri);
+		console.log("topTrackUrls", topTrackUris.length);
 
 		const playlist = await spotify.playlists.createPlaylist(
 			userId,
 			"insync mixtape"
 		);
 
-		const snapshotId = await spotify.playlists.addItemsToPlaylist(
-			playlist.id,
-			topTrackUris
-		);
+		for (const part of chunk(topTrackUris, 50)) {
+			await spotify.playlists.addItemsToPlaylist(playlist.id, part);
+		}
 
 		return { ok: true, playlistId: playlist.id };
-	} catch (err: unknown) {
-		const error = SpotifyError.parse(err);
+	} catch (error: unknown) {
+		console.log("THERE WAS AN ERROR BUT WE CAUGHT IT");
+
+		console.error(error);
+		console.log(error.status);
 
 		switch (error.status) {
-			case 429: {
+			case "429": {
 				return {
 					ok: false,
 					message:
@@ -64,6 +107,8 @@ export async function generatePlaylist(
 				};
 			}
 			default: {
+				console.log("Returning the default error message");
+
 				return {
 					ok: false,
 					message: "An error occurred. Please try again.",
