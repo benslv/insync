@@ -172,88 +172,96 @@ export default function Index() {
 			: "Generate";
 
 	return (
-		<div className="flex h-full max-h-full">
-			<div className="flex flex-col items-center justify-center w-full h-full px-8 space-y-4 text-center border-r drop-shadow-xl border-white/20 sm:items-start sm:max-w-xl sm:text-left md:px-16">
-				<div className="w-full">
-					<h1 className="mb-2 text-3xl tracking-tighter sm:text-5xl">
-						<Balancer>
-							Stay in sync with the music you love
-						</Balancer>
-					</h1>
-					<p>
-						<Balancer>
-							insync creates playlists from your followed artists
-							on Spotify. Connect your account for personalised
-							music discovery.
-						</Balancer>
-					</p>
-				</div>
+		<div className="h-full overflow-hidden">
+			<div className="relative z-10 flex h-full max-h-full">
+				<div className="flex flex-col items-center justify-center w-full h-full px-8 space-y-4 text-center border-r drop-shadow-xl border-white/20 sm:items-start sm:max-w-xl sm:text-left md:px-16 ">
+					<div className="w-full ">
+						<h1 className="mb-2 text-5xl tracking-tighter ">
+							<Balancer>Stay in sync with the music you love</Balancer>
+						</h1>
+						<p>
+							<Balancer>
+								insync creates playlists from your followed artists on Spotify.
+								Connect your account for personalised music discovery.
+							</Balancer>
+						</p>
+					</div>
 
-				{!oAuthUrl ? (
-					<>
-						<Form method="post" className="flex flex-col gap-y-4">
-							<PlaylistTypeGroup />
-							<div className="flex items-center gap-x-2">
+					{!oAuthUrl ? (
+						<>
+							<Form
+								method="post"
+								className="flex flex-col items-center sm:items-start gap-y-4"
+							>
+								<PlaylistTypeGroup />
+								<div className="flex items-center gap-x-2">
+									<button
+										type="submit"
+										name="_intent"
+										value="generate"
+										className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
+									>
+										{generateButtonText}
+									</button>
+									{isGenerating ? (
+										<motion.div
+											initial={{ x: -50, opacity: 0 }}
+											animate={{ x: 0, opacity: 1 }}
+										>
+											<Spinner />
+										</motion.div>
+									) : null}
+								</div>
+							</Form>
+							{errors ? (
+								<motion.p
+									initial={{ opacity: 0, y: -50 }}
+									animate={{ opacity: 1, y: 0 }}
+									className="px-3 py-1 border border-red-300 rounded-xl bg-red-300/25"
+								>
+									{errors.message}
+								</motion.p>
+							) : null}
+						</>
+					) : (
+						<a
+							href={oAuthUrl}
+							className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
+						>
+							Connect to Spotify
+						</a>
+					)}
+					{userProfile ? (
+						<>
+							<div className="flex items-center justify-center space-x-2 sm:justify-start">
+								<ProfileImage userProfile={userProfile} />
+								<p className="text-sm">Logged in as {userProfile.id}</p>
+							</div>
+							<Form method="post">
 								<button
 									type="submit"
 									name="_intent"
-									value="generate"
-									className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
+									value="logout"
+									className="text-sm underline"
 								>
-									{generateButtonText}
+									Logout
 								</button>
-								{isGenerating ? (
-									<motion.div
-										initial={{ x: -50, opacity: 0 }}
-										animate={{ x: 0, opacity: 1 }}
-									>
-										<Spinner />
-									</motion.div>
-								) : null}
-							</div>
-						</Form>
-						{errors ? (
-							<motion.p
-								initial={{ opacity: 0, y: -50 }}
-								animate={{ opacity: 1, y: 0 }}
-								className="px-3 py-1 border border-red-300 rounded-xl bg-red-300/25"
-							>
-								{errors.message}
-							</motion.p>
-						) : null}
-					</>
-				) : (
-					<a
-						href={oAuthUrl}
-						className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
-					>
-						Connect to Spotify
-					</a>
-				)}
-				{userProfile ? (
-					<>
-						<div className="flex items-center justify-center space-x-2 sm:justify-start">
-							<ProfileImage userProfile={userProfile} />
-							<p className="text-sm">
-								Logged in as {userProfile.id}
-							</p>
-						</div>
-						<Form method="post">
-							<button
-								type="submit"
-								name="_intent"
-								value="logout"
-								className="text-sm underline"
-							>
-								Logout
-							</button>
-						</Form>
-					</>
-				) : null}
+							</Form>
+						</>
+					) : null}
+				</div>
+				<div className="relative items-center hidden w-full h-full overflow-hidden sm:flex sm:justify-end">
+					<BackgroundCircles />
+				</div>
 			</div>
-			<div className="relative items-center hidden w-full h-full overflow-hidden sm:flex sm:justify-end">
+			<motion.div
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				transition={{ delay: 0.5, duration: 2 }}
+				className="relative z-0 flex sm:hidden blur-md"
+			>
 				<BackgroundCircles />
-			</div>
+			</motion.div>
 		</div>
 	);
 }
@@ -327,29 +335,17 @@ function PlaylistTypeGroup() {
 				name="selection"
 				className="flex p-1 border rounded-full border-neutral-700 gap-x-2 "
 			>
-				<RadioGroup.Item
-					value="popular"
-					id="r1"
-					className={itemClassName}
-				>
+				<RadioGroup.Item value="popular" id="r1" className={itemClassName}>
 					<label htmlFor="r1" className="cursor-pointer">
 						Popular
 					</label>
 				</RadioGroup.Item>
-				<RadioGroup.Item
-					value="latest"
-					id="r2"
-					className={itemClassName}
-				>
+				<RadioGroup.Item value="latest" id="r2" className={itemClassName}>
 					<label htmlFor="r2" className="cursor-pointer">
 						Latest
 					</label>
 				</RadioGroup.Item>
-				<RadioGroup.Item
-					value="random"
-					id="r3"
-					className={itemClassName}
-				>
+				<RadioGroup.Item value="random" id="r3" className={itemClassName}>
 					<label htmlFor="r3" className="cursor-pointer">
 						Random
 					</label>
