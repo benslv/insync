@@ -7,7 +7,7 @@ import {
 	useTransition,
 } from "@remix-run/react";
 import { addSeconds } from "date-fns";
-import { AnimatePresence, LayoutGroup, motion } from "framer-motion";
+import { LayoutGroup, motion } from "framer-motion";
 import Balancer from "react-wrap-balancer";
 import { SpotifyWebApi } from "spotify-web-api-ts";
 import type { PrivateUser } from "spotify-web-api-ts/types/types/SpotifyObjects";
@@ -176,6 +176,7 @@ export default function Index() {
 							>
 								<div className="flex items-center gap-x-2">
 									<button
+										disabled={isGenerating}
 										type="submit"
 										name="_intent"
 										value="generate"
