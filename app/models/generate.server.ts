@@ -1,5 +1,6 @@
 import { redirect } from "@remix-run/node";
 import { SpotifyWebApi } from "spotify-web-api-ts";
+import type { Track } from "spotify-web-api-ts/types/types/SpotifyObjects";
 
 import { getSession } from "~/sessions";
 import { chunk } from "~/utils/chunk";
@@ -27,93 +28,90 @@ export async function generatePlaylist(
 	spotify.setAccessToken(accessToken);
 
 	try {
-		const artistIds = await spotify.follow.getFollowedArtists({
-			limit: 25,
-		});
+		console.log("Getting first chunk of artist IDs");
 
-		const allArtistIds = artistIds.items;
+		const artistIdChunks = [
+			await spotify.follow.getFollowedArtists({
+				limit: 50,
+			}),
+		];
 
-		const allArtistTopTracks = await Promise.all(
-			allArtistIds.map((artist) =>
-				spotify.artists.getArtistTopTracks(artist.id, "GB")
-			)
-		);
+		console.log("Starting pagination of artist fetching");
 
-		let after = artistIds.cursors.after;
-		let nextArtistIds;
-		let nextArtistTopTracks;
+		let after = artistIdChunks[0].cursors.after;
 		let i = 0;
-
-		if (artistIds.total ?? 0 > artistIds.limit) {
+		if (artistIdChunks[0].total ?? 0 > artistIdChunks[0].limit) {
 			while (after !== null) {
-				console.log(`Running paginated request ${++i}`);
-				console.log("Getting followed artists from", after);
-
-				nextArtistIds = await spotify.follow.getFollowedArtists({
-					limit: 25,
-					after: after,
+				console.log(`Fetching artist page ${++i}`);
+				const artistIdChunk = await spotify.follow.getFollowedArtists({
+					limit: 50,
+					after,
 				});
 
-				console.log("Getting top tracks for artists from", after);
-				nextArtistTopTracks = await Promise.all(
-					nextArtistIds.items.map((artist) =>
-						spotify.artists.getArtistTopTracks(artist.id, "GB")
-					)
-				);
+				artistIdChunks.push(artistIdChunk);
 
-				allArtistTopTracks.push(...nextArtistTopTracks);
-				console.log("allTopTracks length:", allArtistTopTracks.length);
-
-				after = nextArtistIds.cursors.after;
-				console.log("after", after);
-
-				await new Promise<void>((resolve) =>
-					setTimeout(() => resolve(), 2000)
-				);
+				after = artistIdChunk.cursors.after;
 			}
+		}
+
+		const allArtistIds = artistIdChunks.flatMap((chunk) => chunk.items);
+
+		const artistTopTracks: Track[][] = [];
+
+		console.log("Starting chunked top-track search");
+		i = 0;
+		for (const partition of chunk(allArtistIds, 10)) {
+			console.log(`Fetching track chunk ${++i}`);
+			const topTrackChunk = await Promise.all(
+				partition.map((artist) => {
+					console.log(`Fetching top tracks for ${artist.name}`);
+
+					return spotify.artists
+						.getArtistTopTracks(artist.id, "GB")
+						.catch(() => {
+							console.log(`Hit rate limit for ${artist.name}`);
+							return [];
+						});
+				})
+			);
+
+			console.log(topTrackChunk);
+
+			artistTopTracks.push(
+				...topTrackChunk.filter(
+					(arr): arr is Track[] => arr.length !== 0
+				)
+			);
 		}
 
 		console.log("Finished loading top tracks...");
 
-		const sortedTopTracks = allArtistTopTracks.map((artistTracks) =>
+		const sortedTopTracks = artistTopTracks.map((artistTracks) =>
 			artistTracks.sort((a, b) => b.popularity - a.popularity).slice(0, 1)
 		);
 
 		const topTrackUris = sortedTopTracks.map((track) => track[0].uri);
 		console.log("topTrackUrls", topTrackUris.length);
 
+		console.log("Creating playlist...");
+
 		const playlist = await spotify.playlists.createPlaylist(
 			userId,
 			"insync mixtape"
 		);
 
+		console.log("Adding tracks to playlist...");
 		for (const part of chunk(topTrackUris, 50)) {
 			await spotify.playlists.addItemsToPlaylist(playlist.id, part);
 		}
 
 		return { ok: true, playlistId: playlist.id };
 	} catch (error: unknown) {
-		console.log("THERE WAS AN ERROR BUT WE CAUGHT IT");
-
 		console.error(error);
-		console.log(error.status);
 
-		switch (error.status) {
-			case "429": {
-				return {
-					ok: false,
-					message:
-						"You're making requests too quickly! Try again in a few seconds.",
-				};
-			}
-			default: {
-				console.log("Returning the default error message");
-
-				return {
-					ok: false,
-					message: "An error occurred. Please try again.",
-				};
-			}
-		}
+		return {
+			ok: false,
+			message: "An error occurred. Please try again in a minute.",
+		};
 	}
 }
