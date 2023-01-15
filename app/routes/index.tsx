@@ -162,7 +162,7 @@ export default function Index() {
 	return (
 		<div className="h-full overflow-hidden">
 			<div className="relative z-10 flex h-full max-h-full">
-				<div className="flex flex-col items-center justify-center w-full h-full px-8 space-y-4 text-center border-r drop-shadow-xl border-white/20 sm:items-start sm:max-w-xl sm:text-left md:px-16">
+				<div className="flex flex-col items-center justify-center w-full h-full px-8 text-center border-r gap-y-4 drop-shadow-xl border-white/20 sm:items-start sm:max-w-xl sm:text-left md:px-16">
 					<div className="w-full">
 						<h1 className="mb-2 text-5xl tracking-tighter">
 							<Balancer>
@@ -182,7 +182,7 @@ export default function Index() {
 							<>
 								<Form
 									method="post"
-									className="flex flex-col items-center sm:items-start gap-y-4"
+									className="flex flex-col items-center sm:items-start gap-y-6"
 								>
 									<div className="flex flex-col gap-y-2">
 										<label
@@ -195,7 +195,7 @@ export default function Index() {
 											name="playlist_title"
 											type="text"
 											placeholder="insync mixtape"
-											className="px-4 py-2 transition-colors rounded-full bg-neutral-800 focus:bg-neutral-600"
+											className="px-4 py-2 transition-colors border rounded-full bg-neutral-800 border-neutral-500 focus:bg-neutral-600"
 										/>
 									</div>
 									<PlaylistTypeGroup />
@@ -225,13 +225,11 @@ export default function Index() {
 											opacity: 0,
 											y: -30,
 											height: 0,
-											margin: 0,
 										}}
 										animate={{
 											opacity: 1,
 											y: 0,
 											height: "auto",
-											marginTop: 16,
 										}}
 										transition={{ delay: 5 }}
 										layout="position"
@@ -243,7 +241,10 @@ export default function Index() {
 								) : null}
 								{errors ? (
 									<motion.p
-										initial={{ opacity: 0, y: -50 }}
+										initial={{
+											opacity: 0,
+											y: -50,
+										}}
 										animate={{
 											opacity: 1,
 											y: 0,
@@ -263,8 +264,11 @@ export default function Index() {
 							</a>
 						)}
 						{userProfile ? (
-							<motion.div layout="position">
-								<div className="flex items-center justify-center space-x-2 sm:justify-start">
+							<motion.div
+								layout="position"
+								className="flex flex-col mt-8 gap-y-2"
+							>
+								<div className="flex items-center justify-center gap-x-2 sm:justify-start">
 									<ProfileImage userProfile={userProfile} />
 									<p className="text-sm">
 										Logged in as {userProfile.id}
@@ -303,7 +307,7 @@ export default function Index() {
 export function ErrorBoundary() {
 	return (
 		<div className="flex h-full max-h-full">
-			<div className="flex flex-col items-center justify-center w-full h-full px-8 space-y-4 text-center border-r drop-shadow-xl border-white/20 sm:items-start sm:max-w-xl sm:text-left md:px-16">
+			<div className="z-10 flex flex-col items-center justify-center w-full h-full px-8 text-center border-r gap-y-4 drop-shadow-xl border-white/20 sm:items-start sm:max-w-xl sm:text-left md:px-16">
 				<div className="w-full">
 					<h1 className="mb-2 text-3xl tracking-tighter sm:text-5xl">
 						Whoops!
@@ -394,7 +398,7 @@ function PlaylistTypeGroup() {
 				orientation="horizontal"
 				id="selection"
 				name="selection"
-				className="flex p-1 border rounded-full border-neutral-700 gap-x-2 "
+				className="flex p-1 border rounded-full bg-neutral-900 border-neutral-700 gap-x-2 "
 			>
 				<RadioGroup.Item
 					value="popular"
