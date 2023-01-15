@@ -1,3 +1,4 @@
+import * as RadioGroup from "@radix-ui/react-radio-group";
 import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import {
@@ -97,6 +98,11 @@ export async function action({ request }: ActionArgs) {
 		.catch("popular")
 		.parse(formData.get("selection"));
 
+	const playlistTitle = z
+		.string()
+		.catch("insync mixtape")
+		.parse(formData.get("playlist_title"));
+
 	const session = await getSession(request.headers.get("Cookie"));
 
 	switch (intent) {
@@ -108,7 +114,10 @@ export async function action({ request }: ActionArgs) {
 			});
 		}
 		case "generate": {
-			const generateResult = await generatePlaylist(request, selection);
+			const generateResult = await generatePlaylist(request, {
+				selection,
+				title: playlistTitle,
+			});
 
 			if (!generateResult.ok) {
 				const message = generateResult.message;
@@ -174,13 +183,28 @@ export default function Index() {
 								method="post"
 								className="flex flex-col gap-y-4"
 							>
+								<div className="flex flex-col gap-y-2">
+									<label
+										htmlFor="playlist_title"
+										className="text-sm text-neutral-400"
+									>
+										Name:
+									</label>
+									<input
+										name="playlist_title"
+										type="text"
+										placeholder="insync mixtape"
+										className="px-4 py-2 transition-colors rounded-full bg-neutral-800 focus:bg-neutral-600"
+									/>
+								</div>
+								<PlaylistTypeGroup />
 								<div className="flex items-center gap-x-2">
 									<button
 										disabled={isGenerating}
 										type="submit"
 										name="_intent"
 										value="generate"
-										className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
+										className="w-full px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 sm:w-max"
 									>
 										{generateButtonText}
 									</button>
@@ -335,5 +359,55 @@ function Spinner() {
 			<title>spinner-one-third</title>
 			<path d="M16 0.75c-0.69 0-1.25 0.56-1.25 1.25s0.56 1.25 1.25 1.25v0c7.042 0.001 12.75 5.71 12.75 12.751 0 3.521-1.427 6.709-3.734 9.016v0c-0.226 0.226-0.365 0.538-0.365 0.883 0 0.69 0.56 1.25 1.25 1.25 0.346 0 0.659-0.14 0.885-0.367l0-0c2.759-2.76 4.465-6.572 4.465-10.782 0-8.423-6.828-15.251-15.25-15.251h-0z" />
 		</motion.svg>
+	);
+}
+
+function PlaylistTypeGroup() {
+	const itemClassName =
+		"relative px-4 py-1 rounded-full hover:bg-neutral-800 data-[state=checked]:bg-neutral-700 border border-neutral-900 transition-colors data-[state=checked]:border-neutral-500";
+
+	return (
+		<div className="flex flex-col gap-y-2">
+			<label htmlFor="selection" className="text-sm text-neutral-400">
+				Selection method:
+			</label>
+			<RadioGroup.Root
+				defaultValue="popular"
+				loop={false}
+				aria-label="Playlist type"
+				orientation="horizontal"
+				id="selection"
+				name="selection"
+				className="flex p-1 border rounded-full border-neutral-700 gap-x-2 "
+			>
+				<RadioGroup.Item
+					value="popular"
+					id="r1"
+					className={itemClassName}
+				>
+					<label htmlFor="r1" className="cursor-pointer">
+						Popular
+					</label>
+				</RadioGroup.Item>
+				<RadioGroup.Item
+					value="latest"
+					id="r2"
+					className={itemClassName}
+				>
+					<label htmlFor="r2" className="cursor-pointer">
+						Latest
+					</label>
+				</RadioGroup.Item>
+				<RadioGroup.Item
+					value="random"
+					id="r3"
+					className={itemClassName}
+				>
+					<label htmlFor="r3" className="cursor-pointer">
+						Random
+					</label>
+				</RadioGroup.Item>
+			</RadioGroup.Root>
+		</div>
 	);
 }

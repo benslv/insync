@@ -1,13 +1,19 @@
 import { redirect } from "@remix-run/node";
+import { differenceInDays, parse } from "date-fns";
 import { SpotifyWebApi } from "spotify-web-api-ts";
 import type { Track } from "spotify-web-api-ts/types/types/SpotifyObjects";
 
 import { getSession } from "~/sessions";
 import { chunk } from "~/utils/chunk";
 
+type GenerateOptions = {
+	selection: "popular" | "latest" | "random";
+	title: string;
+};
+
 export async function generatePlaylist(
 	request: Request,
-	selection: "popular" | "latest" | "random"
+	{ selection, title }: GenerateOptions
 ): Promise<{ ok: true; playlistId: string } | { ok: false; message: string }> {
 	const session = await getSession(request.headers.get("Cookie"));
 	const redirectUri = new URL(request.url).origin;
@@ -75,7 +81,7 @@ export async function generatePlaylist(
 				})
 			);
 
-			console.log(topTrackChunk);
+			console.log(topTrackChunk[0].length);
 
 			artistTopTracks.push(
 				...topTrackChunk.filter(
@@ -86,22 +92,39 @@ export async function generatePlaylist(
 
 		console.log("Finished loading top tracks...");
 
-		const sortedTopTracks = artistTopTracks.map((artistTracks) =>
-			artistTracks.sort((a, b) => b.popularity - a.popularity).slice(0, 1)
-		);
+		let selectedTopTracks;
 
-		const topTrackUris = sortedTopTracks.map((track) => track[0].uri);
-		console.log("topTrackUrls", topTrackUris.length);
+		switch (selection) {
+			case "popular": {
+				selectedTopTracks = artistTopTracks.map((artistTracks) =>
+					artistTracks.sort(sortByMostPopular)
+				);
+				break;
+			}
+			case "latest": {
+				selectedTopTracks = artistTopTracks.map((artistTracks) =>
+					artistTracks.sort(sortByLatest)
+				);
+				break;
+			}
+			default: {
+				selectedTopTracks = artistTopTracks;
+			}
+		}
+
+		const trackUris = selectedTopTracks.map((track) =>
+			selection === "random" ? pickRandomValue(track).uri : track[0].uri
+		);
+		console.log("trackUrls", trackUris.length);
 
 		console.log("Creating playlist...");
 
-		const playlist = await spotify.playlists.createPlaylist(
-			userId,
-			"insync mixtape"
-		);
+		const playlist = await spotify.playlists.createPlaylist(userId, title, {
+			description: `A mix of ${selection} tracks from my followed artists! Generated with insync.vercel.app`,
+		});
 
 		console.log("Adding tracks to playlist...");
-		for (const part of chunk(topTrackUris, 50)) {
+		for (const part of chunk(trackUris, 50)) {
 			await spotify.playlists.addItemsToPlaylist(playlist.id, part);
 		}
 
@@ -114,4 +137,39 @@ export async function generatePlaylist(
 			message: "An error occurred. Please try again in a minute.",
 		};
 	}
+}
+
+function sortByMostPopular(a: Track, b: Track) {
+	return b.popularity - a.popularity;
+}
+
+function sortByLatest(a: Track, b: Track) {
+	const aDate = parseDate(
+		a.album.release_date,
+		a.album.release_date_precision
+	);
+	const bDate = parseDate(
+		b.album.release_date,
+		b.album.release_date_precision
+	);
+
+	return differenceInDays(bDate, aDate);
+}
+
+function parseDate(dateString: string, precision: "year" | "month" | "day") {
+	switch (precision) {
+		case "year": {
+			return parse(dateString, "yyyy", new Date());
+		}
+		case "month": {
+			return parse(dateString, "yyyy-MM", new Date());
+		}
+		case "day": {
+			return parse(dateString, "yyyy-MM-dd", new Date());
+		}
+	}
+}
+
+function pickRandomValue<T>(arr: T[]): T {
+	return arr[Math.floor(Math.random() * arr.length)];
 }
