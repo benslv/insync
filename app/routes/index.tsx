@@ -8,7 +8,7 @@ import {
 	useTransition,
 } from "@remix-run/react";
 import { addSeconds } from "date-fns";
-import { motion } from "framer-motion";
+import { LayoutGroup, motion } from "framer-motion";
 import Balancer from "react-wrap-balancer";
 import { SpotifyWebApi } from "spotify-web-api-ts";
 import type { PrivateUser } from "spotify-web-api-ts/types/types/SpotifyObjects";
@@ -17,7 +17,7 @@ import { z } from "zod";
 import { BackgroundCircles } from "~/components/BackgroundCircles";
 import { generatePlaylist } from "~/models/generate.server";
 import { commitSession, destroySession, getSession } from "~/sessions";
-import { SpotifyError } from "~/utils/SpotifyError";
+import { tokenHasExpired } from "~/utils/tokenHasExpired";
 
 export async function loader({ request }: LoaderArgs) {
 	const session = await getSession(request.headers.get("Cookie"));
@@ -30,54 +30,33 @@ export async function loader({ request }: LoaderArgs) {
 	});
 
 	if (session.has("access_token")) {
+		if (tokenHasExpired(session)) {
+			const refreshToken = session.get("refresh_token");
+			const { access_token, expires_in } =
+				await spotify.getRefreshedAccessToken(refreshToken);
+
+			session.set("access_token", access_token);
+
+			const expiryDate = addSeconds(new Date(), expires_in);
+			session.set("expiry_date", expiryDate);
+		}
+
 		const accessToken = session.get("access_token");
 
 		spotify.setAccessToken(accessToken);
 
-		try {
-			const userProfile = await spotify.users.getMe();
+		const userProfile = await spotify.users.getMe();
 
-			session.set("user_id", userProfile.id);
+		session.set("user_id", userProfile.id);
 
-			return json({ userProfile, oAuthUrl: null });
-		} catch (err: unknown) {
-			const error = SpotifyError.parse(err);
-
-			switch (error.status) {
-				case 401: {
-					const refreshToken = session.get("refresh_token");
-
-					const { access_token, expires_in } =
-						await spotify.getRefreshedAccessToken(refreshToken);
-
-					const expiryDate = addSeconds(new Date(), expires_in);
-
-					session.set("access_token", access_token);
-					session.set("expiry_date", expiryDate.toISOString());
-
-					spotify.setAccessToken(access_token);
-
-					const userProfile = await spotify.users.getMe();
-					session.set("user_id", userProfile.id);
-
-					return json(
-						{ userProfile, oAuthUrl: null },
-						{
-							headers: {
-								"Set-Cookie": await commitSession(session),
-							},
-						}
-					);
-				}
-				default: {
-					throw redirect("/", {
-						headers: {
-							"Set-Cookie": await destroySession(session),
-						},
-					});
-				}
+		return json(
+			{ userProfile, oAuthUrl: null },
+			{
+				headers: {
+					"Set-Cookie": await commitSession(session),
+				},
 			}
-		}
+		);
 	}
 
 	const url = new URL(request.url);
@@ -119,6 +98,16 @@ export async function action({ request }: ActionArgs) {
 		.catch("popular")
 		.parse(formData.get("selection"));
 
+	const playlistTitle = z
+		.string()
+		.trim()
+		.min(1)
+		.catch("insync mixtape")
+		.parse(formData.get("playlist_title"));
+
+	console.log("selection >>>", selection);
+	console.log("playlistTitle >>> ", playlistTitle);
+
 	const session = await getSession(request.headers.get("Cookie"));
 
 	switch (intent) {
@@ -130,7 +119,10 @@ export async function action({ request }: ActionArgs) {
 			});
 		}
 		case "generate": {
-			const generateResult = await generatePlaylist(request, selection);
+			const generateResult = await generatePlaylist(request, {
+				selection,
+				title: playlistTitle,
+			});
 
 			if (!generateResult.ok) {
 				const message = generateResult.message;
@@ -162,97 +154,185 @@ export default function Index() {
 	const errors = useActionData<typeof action>();
 	const transition = useTransition();
 
-	const isGenerating = transition.state === "submitting";
+	const isGenerating =
+		transition.state === "submitting" &&
+		transition.submission.formData.get("_intent") === "generate";
 
-	const generateButtonText =
-		transition.state === "submitting"
-			? "Generating..."
-			: transition.state === "loading"
-			? "Loading..."
-			: "Generate";
+	const generateButtonText = isGenerating
+		? "Generating..."
+		: transition.state === "loading"
+		? "Loading..."
+		: "Generate";
 
 	return (
 		<div className="h-full overflow-hidden">
 			<div className="relative z-10 flex h-full max-h-full">
-				<div className="flex flex-col items-center justify-center w-full h-full px-8 space-y-4 text-center border-r drop-shadow-xl border-white/20 sm:items-start sm:max-w-xl sm:text-left md:px-16 ">
-					<div className="w-full ">
-						<h1 className="mb-2 text-5xl tracking-tighter ">
-							<Balancer>Stay in sync with the music you love</Balancer>
+				<div className="flex flex-col items-center justify-center w-full h-full px-8 text-center border-r gap-y-4 drop-shadow-xl border-white/20 sm:items-start sm:max-w-xl sm:text-left md:px-16">
+					<div className="w-full">
+						<h1 className="mb-2 text-5xl tracking-tighter">
+							<Balancer>
+								Stay in sync with the music you love
+							</Balancer>
 						</h1>
 						<p>
 							<Balancer>
-								insync creates playlists from your followed artists on Spotify.
-								Connect your account for personalised music discovery.
+								insync creates playlists from your followed
+								artists on Spotify. Connect your account for
+								personalised music discovery.
 							</Balancer>
 						</p>
 					</div>
-
-					{!oAuthUrl ? (
-						<>
-							<Form
-								method="post"
-								className="flex flex-col items-center sm:items-start gap-y-4"
+					<LayoutGroup>
+						{!oAuthUrl ? (
+							<>
+								<Form
+									method="post"
+									className="flex flex-col items-center sm:items-start gap-y-6"
+								>
+									<div className="flex flex-col gap-y-2">
+										<label
+											htmlFor="playlist_title"
+											className="text-sm text-neutral-400"
+										>
+											Name:
+										</label>
+										<input
+											id="playlist_title"
+											name="playlist_title"
+											autoComplete="off"
+											type="text"
+											placeholder="insync mixtape"
+											className="px-4 py-2 transition-colors border rounded-full bg-neutral-800 border-neutral-500 focus:bg-neutral-600"
+										/>
+									</div>
+									<PlaylistTypeGroup />
+									<div className="flex items-center gap-x-2">
+										<button
+											disabled={isGenerating}
+											type="submit"
+											name="_intent"
+											value="generate"
+											className="w-full px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 sm:w-max"
+										>
+											{generateButtonText}
+										</button>
+										{isGenerating ? (
+											<motion.div
+												initial={{ x: -50, opacity: 0 }}
+												animate={{ x: 0, opacity: 1 }}
+											>
+												<Spinner />
+											</motion.div>
+										) : null}
+									</div>
+								</Form>
+								{isGenerating ? (
+									<motion.p
+										initial={{
+											opacity: 0,
+											y: -30,
+											height: 0,
+										}}
+										animate={{
+											opacity: 1,
+											y: 0,
+											height: "auto",
+										}}
+										transition={{ delay: 5 }}
+										layout="position"
+										className="text-sm text-neutral-400"
+									>
+										Hold tight! We're fetching a lot of
+										data...
+									</motion.p>
+								) : null}
+								{errors ? (
+									<motion.p
+										initial={{
+											opacity: 0,
+											y: -50,
+										}}
+										animate={{
+											opacity: 1,
+											y: 0,
+										}}
+										className="px-3 py-1 border border-red-300 rounded-xl bg-red-300/25"
+									>
+										{errors.message}
+									</motion.p>
+								) : null}
+							</>
+						) : (
+							<a
+								href={oAuthUrl}
+								className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
 							>
-								<PlaylistTypeGroup />
-								<div className="flex items-center gap-x-2">
+								Connect to Spotify
+							</a>
+						)}
+						{userProfile ? (
+							<motion.div
+								layout="position"
+								className="flex flex-col mt-8 gap-y-2"
+							>
+								<div className="flex items-center justify-center gap-x-2 sm:justify-start">
+									<ProfileImage userProfile={userProfile} />
+									<p className="text-sm">
+										Logged in as {userProfile.id}
+									</p>
+								</div>
+								<Form method="post" action="/logout">
 									<button
 										type="submit"
 										name="_intent"
-										value="generate"
-										className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
+										value="logout"
+										className="text-sm underline"
 									>
-										{generateButtonText}
+										Logout
 									</button>
-									{isGenerating ? (
-										<motion.div
-											initial={{ x: -50, opacity: 0 }}
-											animate={{ x: 0, opacity: 1 }}
-										>
-											<Spinner />
-										</motion.div>
-									) : null}
-								</div>
-							</Form>
-							{errors ? (
-								<motion.p
-									initial={{ opacity: 0, y: -50 }}
-									animate={{ opacity: 1, y: 0 }}
-									className="px-3 py-1 border border-red-300 rounded-xl bg-red-300/25"
-								>
-									{errors.message}
-								</motion.p>
-							) : null}
-						</>
-					) : (
-						<a
-							href={oAuthUrl}
-							className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
-						>
-							Connect to Spotify
-						</a>
-					)}
-					{userProfile ? (
-						<>
-							<div className="flex items-center justify-center space-x-2 sm:justify-start">
-								<ProfileImage userProfile={userProfile} />
-								<p className="text-sm">Logged in as {userProfile.id}</p>
-							</div>
-							<Form method="post">
-								<button
-									type="submit"
-									name="_intent"
-									value="logout"
-									className="text-sm underline"
-								>
-									Logout
-								</button>
-							</Form>
-						</>
-					) : null}
+								</Form>
+							</motion.div>
+						) : null}
+					</LayoutGroup>
 				</div>
 				<div className="relative items-center hidden w-full h-full overflow-hidden sm:flex sm:justify-end">
 					<BackgroundCircles />
 				</div>
+			</div>
+			<motion.div
+				initial={{ opacity: 0 }}
+				animate={{ opacity: 1 }}
+				transition={{ delay: 0.5, duration: 2 }}
+				className="relative z-0 flex sm:hidden blur-md"
+			>
+				<BackgroundCircles />
+			</motion.div>
+		</div>
+	);
+}
+
+export function ErrorBoundary() {
+	return (
+		<div className="flex h-full max-h-full">
+			<div className="z-10 flex flex-col items-center justify-center w-full h-full px-8 text-center border-r gap-y-4 drop-shadow-xl border-white/20 sm:items-start sm:max-w-xl sm:text-left md:px-16">
+				<div className="w-full">
+					<h1 className="mb-2 text-3xl tracking-tighter sm:text-5xl">
+						Whoops!
+					</h1>
+					<p className="mb-2">insync ran into an error.</p>
+					<p>
+						Click the button below to be taken back to the homepage,
+						and we'll try again.
+					</p>
+				</div>
+				<Form method="post" action="/logout">
+					<button
+						type="submit"
+						className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
+					>
+						Home
+					</button>
+				</Form>
 			</div>
 			<motion.div
 				initial={{ opacity: 0 }}
@@ -309,14 +389,6 @@ function Spinner() {
 	);
 }
 
-async function delay(ms: number) {
-	return new Promise((resolve) =>
-		setTimeout(() => {
-			return resolve(0);
-		}, ms)
-	);
-}
-
 function PlaylistTypeGroup() {
 	const itemClassName =
 		"relative px-4 py-1 rounded-full hover:bg-neutral-800 data-[state=checked]:bg-neutral-700 border border-neutral-900 transition-colors data-[state=checked]:border-neutral-500";
@@ -333,19 +405,31 @@ function PlaylistTypeGroup() {
 				orientation="horizontal"
 				id="selection"
 				name="selection"
-				className="flex p-1 border rounded-full border-neutral-700 gap-x-2 "
+				className="flex p-1 border rounded-full bg-neutral-900 border-neutral-700 gap-x-2 "
 			>
-				<RadioGroup.Item value="popular" id="r1" className={itemClassName}>
+				<RadioGroup.Item
+					value="popular"
+					id="r1"
+					className={itemClassName}
+				>
 					<label htmlFor="r1" className="cursor-pointer">
 						Popular
 					</label>
 				</RadioGroup.Item>
-				<RadioGroup.Item value="latest" id="r2" className={itemClassName}>
+				<RadioGroup.Item
+					value="latest"
+					id="r2"
+					className={itemClassName}
+				>
 					<label htmlFor="r2" className="cursor-pointer">
 						Latest
 					</label>
 				</RadioGroup.Item>
-				<RadioGroup.Item value="random" id="r3" className={itemClassName}>
+				<RadioGroup.Item
+					value="random"
+					id="r3"
+					className={itemClassName}
+				>
 					<label htmlFor="r3" className="cursor-pointer">
 						Random
 					</label>
