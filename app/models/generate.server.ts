@@ -117,7 +117,7 @@ export async function generatePlaylist(
 		);
 		console.log("trackUrls", trackUris.length);
 
-		console.log("Creating playlist...");
+		console.log("Creating playlist with title", title);
 
 		const playlist = await spotify.playlists.createPlaylist(userId, title, {
 			description: `A mix of ${selection} tracks from my followed artists! Generated with insync.vercel.app`,

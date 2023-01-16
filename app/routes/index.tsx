@@ -100,8 +100,13 @@ export async function action({ request }: ActionArgs) {
 
 	const playlistTitle = z
 		.string()
+		.trim()
+		.min(1)
 		.catch("insync mixtape")
 		.parse(formData.get("playlist_title"));
+
+	console.log("selection >>>", selection);
+	console.log("playlistTitle >>> ", playlistTitle);
 
 	const session = await getSession(request.headers.get("Cookie"));
 
@@ -192,7 +197,9 @@ export default function Index() {
 											Name:
 										</label>
 										<input
+											id="playlist_title"
 											name="playlist_title"
+											autoComplete="off"
 											type="text"
 											placeholder="insync mixtape"
 											className="px-4 py-2 transition-colors border rounded-full bg-neutral-800 border-neutral-500 focus:bg-neutral-600"
