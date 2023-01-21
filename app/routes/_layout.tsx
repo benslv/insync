@@ -33,7 +33,7 @@ export default function GenerateIndex() {
 					</Link>
 				</div>
 			</div>
-			<div className="flex flex-col max-w-4xl p-6 border w-max rounded-xl border-neutral-600 gap-y-4">
+			<div className="flex flex-col items-center max-w-4xl p-6 mx-2 border w-fit rounded-xl border-neutral-600 gap-y-4">
 				<div className="flex flex-col gap-y-2">
 					<h1 className="text-5xl tracking-tighter">Generate</h1>
 

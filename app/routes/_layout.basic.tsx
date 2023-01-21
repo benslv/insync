@@ -2,6 +2,7 @@ import * as RadioGroup from "@radix-ui/react-radio-group";
 import type { ActionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Form, useActionData, useTransition } from "@remix-run/react";
+import { motion } from "framer-motion";
 import { z } from "zod";
 
 import { generatePlaylist } from "~/models/generate.server";
@@ -52,9 +53,7 @@ export default function BasicPage() {
 	const errors = useActionData<typeof action>();
 	const transition = useTransition();
 
-	const isGenerating =
-		transition.state === "submitting" &&
-		transition.submission.formData.get("_intent") === "generate";
+	const isGenerating = transition.state === "submitting";
 
 	const generateButtonText = isGenerating
 		? "Generating..."
@@ -63,9 +62,11 @@ export default function BasicPage() {
 		: "Generate";
 
 	return (
-		<Form method="post" className="flex flex-col w-max gap-y-4">
-			<label className="flex flex-col w-full gap-y-2">
-				<span className="text-sm text-neutral-400">Playlist Name:</span>
+		<div className="flex flex-col gap-y-4">
+			<Form method="post" className="flex flex-col items-center gap-y-4">
+				<label className="self-start text-sm text-neutral-400">
+					Playlist Name:
+				</label>
 				<input
 					type="text"
 					name="playlist_title"
@@ -74,28 +75,79 @@ export default function BasicPage() {
 					placeholder="insync mixtape"
 					className="px-4 py-2 transition-colors border rounded-full bg-neutral-800 border-neutral-500 focus:bg-neutral-600"
 				/>
-			</label>
-			<PlaylistTypeGroup />
-			<button
-				type="submit"
-				className="w-full px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 sm:w-max"
-			>
-				{generateButtonText}
-			</button>
-		</Form>
+				<PlaylistTypeGroup />
+				<div className="flex items-center gap-x-2">
+					<button
+						type="submit"
+						disabled={isGenerating}
+						className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900"
+					>
+						{generateButtonText}
+					</button>
+					{isGenerating ? (
+						<motion.div
+							initial={{ x: -50, opacity: 0 }}
+							animate={{ x: 0, opacity: 1 }}
+						>
+							<Spinner />
+						</motion.div>
+					) : null}
+				</div>
+			</Form>
+			{errors ? (
+				<motion.p
+					initial={{
+						opacity: 0,
+						y: -50,
+					}}
+					animate={{
+						opacity: 1,
+						y: 0,
+					}}
+					className="px-3 py-1 border border-red-300 rounded-lg bg-red-300/25"
+				>
+					{errors.message}
+				</motion.p>
+			) : null}
+		</div>
+	);
+}
+
+function Spinner() {
+	return (
+		<motion.svg
+			fill="#ffffff"
+			width="32px"
+			height="32px"
+			viewBox="0 0 32 32"
+			version="1.1"
+			xmlns="http://www.w3.org/2000/svg"
+			animate={{ rotate: 360 }}
+			transition={{
+				repeat: Infinity,
+				bounce: 0,
+				ease: "linear",
+				duration: 0.75,
+			}}
+		>
+			<title>spinner-one-third</title>
+			<path d="M16 0.75c-0.69 0-1.25 0.56-1.25 1.25s0.56 1.25 1.25 1.25v0c7.042 0.001 12.75 5.71 12.75 12.751 0 3.521-1.427 6.709-3.734 9.016v0c-0.226 0.226-0.365 0.538-0.365 0.883 0 0.69 0.56 1.25 1.25 1.25 0.346 0 0.659-0.14 0.885-0.367l0-0c2.759-2.76 4.465-6.572 4.465-10.782 0-8.423-6.828-15.251-15.25-15.251h-0z" />
+		</motion.svg>
 	);
 }
 
 function PlaylistTypeGroup() {
 	const itemClassName =
-		"relative px-4 py-1 rounded-full hover:bg-neutral-800 data-[state=checked]:bg-neutral-700 border border-neutral-900 transition-colors data-[state=checked]:border-neutral-500";
+		"relative px-4 py-1 rounded-xl sm:rounded-full hover:bg-neutral-800 data-[state=checked]:bg-neutral-700 border border-neutral-900 transition-colors data-[state=checked]:border-neutral-500";
 
 	return (
-		<label
-			htmlFor="selection"
-			className="flex flex-col w-full text-sm text-neutral-400 gap-y-2"
-		>
-			Selection method:
+		<>
+			<label
+				htmlFor="selection"
+				className="self-start text-sm text-neutral-400"
+			>
+				Selection method:
+			</label>
 			<RadioGroup.Root
 				defaultValue="popular"
 				loop={false}
@@ -103,7 +155,7 @@ function PlaylistTypeGroup() {
 				orientation="horizontal"
 				id="selection"
 				name="selection"
-				className="flex p-1 text-base text-white border rounded-full bg-neutral-900 border-neutral-700 gap-x-2 "
+				className="flex flex-col w-full p-1 text-base text-white border rounded-2xl sm:rounded-full sm:flex-row bg-neutral-900 border-neutral-700 gap-y-1 sm:gap-y-0 sm:gap-x-2 "
 			>
 				<RadioGroup.Item
 					value="popular"
@@ -133,6 +185,6 @@ function PlaylistTypeGroup() {
 					</label>
 				</RadioGroup.Item>
 			</RadioGroup.Root>
-		</label>
+		</>
 	);
 }
