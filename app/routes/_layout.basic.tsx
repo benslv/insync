@@ -1,3 +1,3 @@
 export default function () {
-	return <h1>Simple!!!</h1>;
+	return <h1>Basic</h1>;
 }
