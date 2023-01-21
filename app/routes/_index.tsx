@@ -6,6 +6,7 @@ import {
 	useActionData,
 	useLoaderData,
 	useTransition,
+	Outlet,
 } from "@remix-run/react";
 import { addSeconds } from "date-fns";
 import { LayoutGroup, motion } from "framer-motion";
@@ -168,8 +169,8 @@ export default function Index() {
 		<div className="h-full overflow-hidden">
 			<div className="relative z-10 flex h-full max-h-full">
 				<div className="flex flex-col items-center justify-center w-full h-full px-8 text-center border-r gap-y-4 drop-shadow-xl border-white/20 sm:items-start sm:max-w-xl sm:text-left md:px-16">
-					<div className="w-full">
-						<h1 className="mb-2 text-5xl tracking-tighter">
+					<div className="flex flex-col w-full gap-y-4">
+						<h1 className="text-5xl tracking-tighter">
 							<Balancer>
 								Stay in sync with the music you love
 							</Balancer>
@@ -181,7 +182,38 @@ export default function Index() {
 								personalised music discovery.
 							</Balancer>
 						</p>
+						{oAuthUrl ? (
+							<a
+								href={oAuthUrl}
+								className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
+							>
+								Connect to Spotify
+							</a>
+						) : null}
 					</div>
+					<Outlet />
+					{userProfile ? (
+						<div className="flex flex-col w-full gap-y-2">
+							<hr className="border-neutral-600" />
+							<div className="flex flex-col items-center sm:justify-between sm:flex-row gap-x-2">
+								<div className="flex items-center gap-x-2">
+									<ProfileImage userProfile={userProfile} />
+									<p className="text-sm">
+										Logged in as {userProfile.id}
+									</p>
+								</div>
+								<Form method="post" action="/logout">
+									<button
+										type="submit"
+										value="logout"
+										className="text-sm underline"
+									>
+										Logout
+									</button>
+								</Form>
+							</div>
+						</div>
+					) : null}
 					<LayoutGroup>
 						{!oAuthUrl ? (
 							<>
