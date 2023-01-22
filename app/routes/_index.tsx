@@ -169,7 +169,7 @@ export default function Index() {
 		<div className="h-full overflow-hidden">
 			<div className="relative z-10 flex h-full max-h-full">
 				<div className="flex flex-col items-center justify-center w-full h-full px-8 text-center border-r gap-y-4 drop-shadow-xl border-white/20 sm:items-start sm:max-w-xl sm:text-left md:px-16">
-					<div className="flex flex-col w-full gap-y-4">
+					<div className="flex flex-col items-center w-full sm:items-start gap-y-4">
 						<h1 className="text-5xl tracking-tighter">
 							<Balancer>
 								Stay in sync with the music you love
@@ -189,22 +189,24 @@ export default function Index() {
 							>
 								Connect to Spotify
 							</a>
-						) : null}
+						) : (
+							<div className="flex p-1 border rounded-lg w-max bg-neutral-900 border-neutral-600 gap-x-1">
+								<Link
+									to="./basic"
+									className="px-2 py-1 align-baseline transition-colors border rounded-md hover:bg-neutral-800 border-neutral-900"
+								>
+									Basic
+								</Link>
+								<Link
+									to="./studio"
+									className="px-2 py-1 align-baseline transition-colors border rounded-md hover:bg-neutral-800 border-neutral-900"
+								>
+									Studio
+								</Link>
+							</div>
+						)}
 					</div>
-					<div className="flex p-1 border rounded-lg w-max bg-neutral-900 border-neutral-600 gap-x-1">
-						<Link
-							to="./basic"
-							className="px-2 py-1 align-baseline transition-colors border rounded-md hover:bg-neutral-800 border-neutral-900"
-						>
-							Basic
-						</Link>
-						<Link
-							to="./studio"
-							className="px-2 py-1 align-baseline transition-colors border rounded-md hover:bg-neutral-800 border-neutral-900"
-						>
-							Studio
-						</Link>
-					</div>
+
 					{userProfile ? (
 						<div className="flex flex-col w-full gap-y-2">
 							<hr className="border-neutral-600" />
