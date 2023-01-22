@@ -62,8 +62,38 @@ export default function BasicPage() {
 		: "Generate";
 
 	return (
-		<div className="flex flex-col gap-y-4">
-			<Form method="post" className="flex flex-col items-center gap-y-4">
+		<div className="flex flex-col max-w-lg gap-y-4">
+			<p>
+				Create playlists based on the top songs from artists you follow
+				on Spotify!
+			</p>
+			<details className="p-2 text-sm border rounded-lg border-neutral-700 bg-neutral-800">
+				<summary className="cursor-pointer">
+					What are the selection methods?
+				</summary>
+				<p className="text-neutral-400">
+					Pick a selection method to change how your playlist is
+					generated.
+				</p>
+				<ul className="flex flex-col mt-2 gap-y-2">
+					<li>
+						🔥 <b>Popular</b> - Use the most popular song from each
+						artist.
+					</li>
+					<li>
+						🕒 <b>Latest</b> - Create a playlist of the latest
+						releases!
+					</li>
+					<li>
+						🎲 <b>Random</b> - Pot luck! Pick a random song from
+						each artist. Maybe you'll discover some old favourites?
+					</li>
+				</ul>
+			</details>
+			<Form
+				method="post"
+				className="flex flex-col items-center self-center gap-y-4 w-max"
+			>
 				<label className="self-start text-sm text-neutral-400">
 					Playlist Name:
 				</label>
@@ -73,7 +103,7 @@ export default function BasicPage() {
 					id="playlist_title"
 					autoComplete="off"
 					placeholder="insync mixtape"
-					className="px-4 py-2 transition-colors border rounded-full bg-neutral-800 border-neutral-500 focus:bg-neutral-600"
+					className="px-4 py-2 transition-colors border rounded-full placeholder:text-neutral-400 bg-neutral-800 border-neutral-500 focus:bg-neutral-600"
 				/>
 				<PlaylistTypeGroup />
 				<div className="flex items-center gap-x-2">
