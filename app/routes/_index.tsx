@@ -3,13 +3,13 @@ import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import {
 	Form,
+	Link,
 	useActionData,
 	useLoaderData,
 	useTransition,
-	Outlet,
 } from "@remix-run/react";
 import { addSeconds } from "date-fns";
-import { LayoutGroup, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import Balancer from "react-wrap-balancer";
 import { SpotifyWebApi } from "spotify-web-api-ts";
 import type { PrivateUser } from "spotify-web-api-ts/types/types/SpotifyObjects";
@@ -191,7 +191,20 @@ export default function Index() {
 							</a>
 						) : null}
 					</div>
-					<Outlet />
+					<div className="flex p-1 border rounded-lg w-max bg-neutral-900 border-neutral-600 gap-x-1">
+						<Link
+							to="./basic"
+							className="px-2 py-1 align-baseline transition-colors border rounded-md hover:bg-neutral-800 border-neutral-900"
+						>
+							Basic
+						</Link>
+						<Link
+							to="./studio"
+							className="px-2 py-1 align-baseline transition-colors border rounded-md hover:bg-neutral-800 border-neutral-900"
+						>
+							Studio
+						</Link>
+					</div>
 					{userProfile ? (
 						<div className="flex flex-col w-full gap-y-2">
 							<hr className="border-neutral-600" />
@@ -214,118 +227,6 @@ export default function Index() {
 							</div>
 						</div>
 					) : null}
-					<LayoutGroup>
-						{!oAuthUrl ? (
-							<>
-								<Form
-									method="post"
-									className="flex flex-col items-center sm:items-start gap-y-6"
-								>
-									<div className="flex flex-col gap-y-2">
-										<label
-											htmlFor="playlist_title"
-											className="text-sm text-neutral-400"
-										>
-											Name:
-										</label>
-										<input
-											id="playlist_title"
-											name="playlist_title"
-											autoComplete="off"
-											type="text"
-											placeholder="insync mixtape"
-											className="px-4 py-2 transition-colors border rounded-full bg-neutral-800 border-neutral-500 focus:bg-neutral-600"
-										/>
-									</div>
-									<PlaylistTypeGroup />
-									<div className="flex items-center gap-x-2">
-										<button
-											disabled={isGenerating}
-											type="submit"
-											name="_intent"
-											value="generate"
-											className="w-full px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 sm:w-max"
-										>
-											{generateButtonText}
-										</button>
-										{isGenerating ? (
-											<motion.div
-												initial={{ x: -50, opacity: 0 }}
-												animate={{ x: 0, opacity: 1 }}
-											>
-												<Spinner />
-											</motion.div>
-										) : null}
-									</div>
-								</Form>
-								{isGenerating ? (
-									<motion.p
-										initial={{
-											opacity: 0,
-											y: -30,
-											height: 0,
-										}}
-										animate={{
-											opacity: 1,
-											y: 0,
-											height: "auto",
-										}}
-										transition={{ delay: 5 }}
-										layout="position"
-										className="text-sm text-neutral-400"
-									>
-										Hold tight! We're fetching a lot of
-										data...
-									</motion.p>
-								) : null}
-								{errors ? (
-									<motion.p
-										initial={{
-											opacity: 0,
-											y: -50,
-										}}
-										animate={{
-											opacity: 1,
-											y: 0,
-										}}
-										className="px-3 py-1 border border-red-300 rounded-xl bg-red-300/25"
-									>
-										{errors.message}
-									</motion.p>
-								) : null}
-							</>
-						) : (
-							<a
-								href={oAuthUrl}
-								className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
-							>
-								Connect to Spotify
-							</a>
-						)}
-						{userProfile ? (
-							<motion.div
-								layout="position"
-								className="flex flex-col mt-8 gap-y-2"
-							>
-								<div className="flex items-center justify-center gap-x-2 sm:justify-start">
-									<ProfileImage userProfile={userProfile} />
-									<p className="text-sm">
-										Logged in as {userProfile.id}
-									</p>
-								</div>
-								<Form method="post" action="/logout">
-									<button
-										type="submit"
-										name="_intent"
-										value="logout"
-										className="text-sm underline"
-									>
-										Logout
-									</button>
-								</Form>
-							</motion.div>
-						) : null}
-					</LayoutGroup>
 				</div>
 				<div className="relative items-center hidden w-full h-full overflow-hidden sm:flex sm:justify-end">
 					<BackgroundCircles />
