@@ -19,6 +19,7 @@
 		"@vercel/node": "^2.8.15",
 		"date-fns": "^2.29.3",
 		"framer-motion": "^8.5.0",
+		"iconoir-react": "^6.0.0",
 		"react": "^18.2.0",
 		"react-dom": "^18.2.0",
 		"react-wrap-balancer": "^0.3.0",

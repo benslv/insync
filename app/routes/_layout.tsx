@@ -1,15 +1,14 @@
 import { Link, Outlet, useMatches } from "@remix-run/react";
+import { LongArrowUpLeft } from "iconoir-react";
 
 export default function GenerateIndex() {
 	const matches = useMatches();
 	const selectedRoute = matches[2].pathname;
 
 	return (
-		<div className="flex flex-col items-center justify-center w-full h-full gap-y-4">
+		<div className="flex flex-col items-center justify-between w-full h-full py-8">
 			<div className="flex flex-col items-center gap-y-2">
-				<p className="text-sm text-neutral-400">
-					Choose generation method:
-				</p>
+				<p className="text-sm text-neutral-400">Choose generation method:</p>
 				<div className="flex p-1 border rounded-lg w-max bg-neutral-900 border-neutral-600 gap-x-1">
 					<Link
 						to="./basic"
@@ -40,6 +39,13 @@ export default function GenerateIndex() {
 					<Outlet />
 				</div>
 			</div>
+			<Link
+				to="/"
+				className="flex transition-all duration-150 text-neutral-500 h-max w-max hover:text-neutral-200"
+			>
+				<LongArrowUpLeft />
+				Go back
+			</Link>
 		</div>
 	);
 }
