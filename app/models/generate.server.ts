@@ -1,7 +1,7 @@
 import { redirect } from "@remix-run/node";
 import { differenceInDays, parse } from "date-fns";
-import { SpotifyWebApi } from "spotify-web-api-ts";
-import type { Track } from "spotify-web-api-ts/types/types/SpotifyObjects";
+import { SpotifyWebApi } from "@thomasngrlt/spotify-web-api-ts";
+import type { Track } from "@thomasngrlt/spotify-web-api-ts/types/types/SpotifyObjects";
 
 import { getSession } from "~/sessions";
 import { chunk } from "~/utils/chunk";

@@ -10,8 +10,8 @@ import {
 import { addSeconds } from "date-fns";
 import { LayoutGroup, motion } from "framer-motion";
 import Balancer from "react-wrap-balancer";
-import { SpotifyWebApi } from "spotify-web-api-ts";
-import type { PrivateUser } from "spotify-web-api-ts/types/types/SpotifyObjects";
+import { SpotifyWebApi } from "@thomasngrlt/spotify-web-api-ts";
+import type { PrivateUser } from "@thomasngrlt/spotify-web-api-ts/types/types/SpotifyObjects";
 import { z } from "zod";
 
 import { BackgroundCircles } from "~/components/BackgroundCircles";
