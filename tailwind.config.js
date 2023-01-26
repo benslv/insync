@@ -5,7 +5,11 @@ module.exports = {
 		fontFamily: {
 			sans: ["Inter", "sans"],
 		},
-		extend: {},
+		extend: {
+			boxShadow: {
+				tile: "0px 5px 5px 0px rgba(255, 255, 255, 0.25) inset",
+			},
+		},
 	},
 	plugins: [],
 };

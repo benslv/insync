@@ -170,16 +170,13 @@ export default function Index() {
 			<div className="relative z-10 flex h-full max-h-full">
 				<div className="flex flex-col items-center justify-center w-full h-full px-8 text-center border-r gap-y-4 drop-shadow-xl border-white/20 sm:items-start sm:max-w-xl sm:text-left md:px-16">
 					<div className="flex flex-col items-center w-full sm:items-start gap-y-4">
-						<h1 className="text-5xl tracking-tighter">
-							<Balancer>
-								Stay in sync with the music you love
-							</Balancer>
+						<h1 className="w-full text-5xl tracking-tighter">
+							<Balancer>Stay in sync with the music you love</Balancer>
 						</h1>
-						<p>
+						<p className="w-full">
 							<Balancer>
-								insync creates playlists from your followed
-								artists on Spotify. Connect your account for
-								personalised music discovery.
+								insync creates playlists from your followed artists on Spotify.
+								Connect your account for personalised music discovery.
 							</Balancer>
 						</p>
 						{oAuthUrl ? (
@@ -190,18 +187,23 @@ export default function Index() {
 								Connect to Spotify
 							</a>
 						) : (
-							<div className="flex p-1 border rounded-lg w-max bg-neutral-900 border-neutral-600 gap-x-1">
+							<div className="flex w-full h-16 gap-x-2">
 								<Link
 									to="./basic"
-									className="px-2 py-1 align-baseline transition-colors border rounded-md hover:bg-neutral-800 border-neutral-900"
+									className="flex items-center justify-center w-full h-full transition duration-300 border rounded-2xl border-neutral-700 bg-neutral-900 hover:border-neutral-500"
 								>
-									Basic
+									<p className="text-xl">Basic</p>
 								</Link>
 								<Link
 									to="./studio"
-									className="px-2 py-1 align-baseline transition-colors border rounded-md hover:bg-neutral-800 border-neutral-900"
+									className="relative w-full h-full bg-gradient-to-br from-white/10 via-white/75 group to-white/10 rounded-2xl"
 								>
-									Studio
+									<div className="shadow-tile absolute flex inset-0.5  items-center justify-center rounded-[14px] bg-gradient-to-br from-black via-[#222] to-black hover:ring-[2px] ring-white/20 transition-all duration-300 overflow-hidden">
+										<p className="text-2xl font-semibold tracking-tighter">
+											Studio
+										</p>
+										<div className="absolute inset-0 w-full h-full transition-all duration-300 bg-gradient-to-t from-green-500 to-transparent opacity-10 group-hover:opacity-20"></div>
+									</div>
 								</Link>
 							</div>
 						)}
@@ -213,9 +215,7 @@ export default function Index() {
 							<div className="flex flex-col items-center sm:justify-between sm:flex-row gap-x-2">
 								<div className="flex items-center gap-x-2">
 									<ProfileImage userProfile={userProfile} />
-									<p className="text-sm">
-										Logged in as {userProfile.id}
-									</p>
+									<p className="text-sm">Logged in as {userProfile.id}</p>
 								</div>
 								<Form method="post" action="/logout">
 									<button
@@ -256,8 +256,8 @@ export function ErrorBoundary() {
 					</h1>
 					<p className="mb-2">insync ran into an error.</p>
 					<p>
-						Click the button below to be taken back to the homepage,
-						and we'll try again.
+						Click the button below to be taken back to the homepage, and we'll
+						try again.
 					</p>
 				</div>
 				<Form method="post" action="/logout">
@@ -342,29 +342,17 @@ function PlaylistTypeGroup() {
 				name="selection"
 				className="flex p-1 border rounded-full bg-neutral-900 border-neutral-700 gap-x-2 "
 			>
-				<RadioGroup.Item
-					value="popular"
-					id="r1"
-					className={itemClassName}
-				>
+				<RadioGroup.Item value="popular" id="r1" className={itemClassName}>
 					<label htmlFor="r1" className="cursor-pointer">
 						Popular
 					</label>
 				</RadioGroup.Item>
-				<RadioGroup.Item
-					value="latest"
-					id="r2"
-					className={itemClassName}
-				>
+				<RadioGroup.Item value="latest" id="r2" className={itemClassName}>
 					<label htmlFor="r2" className="cursor-pointer">
 						Latest
 					</label>
 				</RadioGroup.Item>
-				<RadioGroup.Item
-					value="random"
-					id="r3"
-					className={itemClassName}
-				>
+				<RadioGroup.Item value="random" id="r3" className={itemClassName}>
 					<label htmlFor="r3" className="cursor-pointer">
 						Random
 					</label>
