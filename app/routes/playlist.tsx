@@ -5,11 +5,11 @@ import { addSeconds } from "date-fns";
 import { motion } from "framer-motion";
 import React from "react";
 import Balancer from "react-wrap-balancer";
-import { SpotifyWebApi } from "spotify-web-api-ts";
+import { SpotifyWebApi } from "@thomasngrlt/spotify-web-api-ts";
 import type {
 	PlaylistItem,
 	Track,
-} from "spotify-web-api-ts/esm/types/SpotifyObjects";
+} from "@thomasngrlt/spotify-web-api-ts/types/types/SpotifyObjects";
 
 import { BackgroundCircles } from "~/components/BackgroundCircles";
 import { getSession } from "~/sessions";
