@@ -4,6 +4,8 @@ import { json, redirect } from "@remix-run/node";
 import { Form, useActionData, useTransition } from "@remix-run/react";
 import { motion } from "framer-motion";
 import { z } from "zod";
+import { Label } from "~/components/Label";
+import { TextInput } from "~/components/TextInput";
 
 import { generatePlaylist } from "~/models/generate.server";
 import { commitSession, getSession } from "~/sessions";
@@ -94,16 +96,14 @@ export default function BasicPage() {
 				method="post"
 				className="flex flex-col items-center self-center gap-y-4 w-max"
 			>
-				<label className="self-start text-sm text-neutral-400">
+				<Label htmlFor="playlist_title" className="self-start">
 					Playlist Name:
-				</label>
-				<input
-					type="text"
+				</Label>
+				<TextInput
 					name="playlist_title"
 					id="playlist_title"
 					autoComplete="off"
 					placeholder="insync mixtape"
-					className="px-4 py-2 transition-colors border rounded-full placeholder:text-neutral-400 bg-neutral-800 border-neutral-500 focus:bg-neutral-600"
 				/>
 				<PlaylistTypeGroup />
 				<div className="flex items-center gap-x-2">
@@ -172,12 +172,9 @@ function PlaylistTypeGroup() {
 
 	return (
 		<>
-			<label
-				htmlFor="selection"
-				className="self-start text-sm text-neutral-400"
-			>
+			<Label htmlFor="selection" className="self-start">
 				Selection method:
-			</label>
+			</Label>
 			<RadioGroup.Root
 				defaultValue="popular"
 				loop={false}
