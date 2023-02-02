@@ -10,19 +10,15 @@ export const RangeSlider = forwardRef(
 		ref: Ref<HTMLInputElement>
 	) => {
 		return (
-			<div className="flex items-center gap-x-2">
-				<span className="text-xs text-neutral-400">0</span>
-				<input
-					ref={ref}
-					type="range"
-					className="flex-1 accent-green-500"
-					defaultValue={50}
-					{...rest}
-					min={rest.min ?? 0}
-					max={rest.max ?? 100}
-				/>
-				<span className="text-xs text-neutral-400">100</span>
-			</div>
+			<input
+				ref={ref}
+				type="range"
+				className={`accent-green-500 ${className}`}
+				defaultValue={50}
+				min={0}
+				max={100}
+				{...rest}
+			/>
 		);
 	}
 );

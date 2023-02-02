@@ -8,7 +8,9 @@ export default function GenerateIndex() {
 	return (
 		<div className="flex flex-col items-center justify-between w-full h-full py-8">
 			<div className="flex flex-col items-center gap-y-2">
-				<p className="text-sm text-neutral-400">Choose generation method:</p>
+				<p className="text-sm text-neutral-400">
+					Choose generation method:
+				</p>
 				<div className="flex p-1 border rounded-lg w-max bg-neutral-900 border-neutral-600 gap-x-1">
 					<Link
 						to="./basic"
@@ -32,12 +34,10 @@ export default function GenerateIndex() {
 					</Link>
 				</div>
 			</div>
-			<div className="flex flex-col items-center max-w-4xl p-6 mx-2 border w-fit rounded-xl border-neutral-600 gap-y-4">
-				<div className="flex flex-col gap-y-2">
-					<h1 className="text-5xl tracking-tighter">Generate</h1>
+			<div className="flex flex-col items-center p-6 mx-2 border w-fit rounded-xl border-neutral-600 gap-y-4">
+				<h1 className="text-5xl tracking-tighter">Generate</h1>
 
-					<Outlet />
-				</div>
+				<Outlet />
 			</div>
 			<Link
 				to="/"

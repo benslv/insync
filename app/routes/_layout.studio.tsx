@@ -1,5 +1,6 @@
 import type { ActionArgs } from "@remix-run/node";
 import { Form } from "@remix-run/react";
+import { InputHTMLAttributes } from "react";
 
 import { Label } from "~/components/Label";
 import { NumberInput } from "~/components/NumberInput";
@@ -16,9 +17,12 @@ export async function action({ request }: ActionArgs) {
 
 export default function StudioPage() {
 	return (
-		<Form method="post" className="flex flex-col gap-y-4">
+		<Form
+			method="post"
+			className="flex flex-col items-center w-full gap-y-4"
+		>
 			<div>
-				<Label htmlFor="name">Name</Label>
+				<Label htmlFor="name">Playlist Name</Label>
 				<TextInput
 					id="name"
 					name="name"
@@ -26,30 +30,71 @@ export default function StudioPage() {
 					className="w-full mt-1"
 				/>
 			</div>
-			<div>
-				<NumberInput />
+			<div className="flex items-center gap-x-4">
+				<Label>How many tracks? (max. 100)</Label>
+				<NumberInput className="w-16 hide-spinner" min={1} max={100} />
 			</div>
-			<div>
-				<Label>BPM</Label>
-				<RangeSlider name="energy" id="energy" />
-				<p className="text-xs italic text-neutral-400">
-					How do you like your tempo?
-				</p>
-			</div>
-			<div>
-				<Label>Popularity</Label>
-				<RangeSlider name="energy" id="energy" />
-				<p className="text-xs italic text-neutral-400">
-					Chart toppers or obscure discoveries?
-				</p>
-			</div>
-			<div>
-				<Label>Energy</Label>
-				<RangeSlider name="energy" id="energy" />
-				<p className="text-xs italic text-neutral-400">
-					Chilling out or ramping up?
-				</p>
-			</div>
+			<RangeGroup label="Tempo (BPM)" leftText="30" rightText="300">
+				<RangeSlider
+					name="energy"
+					id="energy"
+					min={30}
+					max={300}
+					className="w-[350px]"
+				/>
+			</RangeGroup>
+			<RangeGroup
+				label="Popularity"
+				leftText="Obscure finds"
+				rightText="Chart toppers"
+			>
+				<RangeSlider
+					name="popularity"
+					id="popularity"
+					min={0}
+					max={1}
+					step={0.01}
+					className="w-[350px]"
+				/>
+			</RangeGroup>
+			<RangeGroup
+				label="Energy"
+				leftText="Chilling out"
+				rightText="Ramping up"
+			>
+				<RangeSlider
+					name="energy"
+					id="energy"
+					min={0}
+					max={1}
+					step={0.01}
+					className="w-[350px]"
+				/>
+			</RangeGroup>
 		</Form>
+	);
+}
+
+type RangeGroupProps = {
+	label: string;
+	leftText: string;
+	rightText: string;
+	children: React.ReactNode;
+};
+
+function RangeGroup({ label, leftText, rightText, children }: RangeGroupProps) {
+	return (
+		<div>
+			<Label>{label}</Label>
+			<div>
+				{children}
+				<div className="flex justify-between">
+					<span className="text-xs text-neutral-400">{leftText}</span>
+					<span className="text-xs text-neutral-400">
+						{rightText}
+					</span>
+				</div>
+			</div>
+		</div>
 	);
 }
