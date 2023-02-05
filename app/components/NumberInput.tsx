@@ -9,39 +9,38 @@ export const NumberInput = forwardRef(
 		}: Omit<InputHTMLAttributes<HTMLInputElement>, "type">,
 		ref: Ref<HTMLInputElement>
 	) => {
-		const [value, setValue] = useState<number>(
+		const [value, setValue] = useState<number | "">(
 			(rest.defaultValue as number) ?? 50
 		);
 
 		const max = (rest.max as number) ?? 100;
 		const min = (rest.min as number) ?? 0;
 
-		const increment = () => setValue((prev) => Math.min(max, prev + 1));
-		const decrement = () => setValue((prev) => Math.max(min, prev - 1));
+		const increment = () =>
+			setValue((prev) => Math.min(max, (prev || 0) + 1));
+		const decrement = () =>
+			setValue((prev) => Math.max(min, (prev || 0) - 1));
 
 		const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
 			const newValue = event.target.value;
 
 			if (newValue === "") {
-				return;
-			}
-			const parsedValue = parseInt(newValue, 10);
-
-			console.log({ parsedValue });
-
-			if (isNaN(parsedValue)) {
-				return;
+				setValue("");
 			}
 
-			setValue((prev) => {
-				if (parsedValue > max || parsedValue < min) return prev;
+			if (!/[0-9]+/.test(newValue)) return;
 
-				return parsedValue;
-			});
+			const parsedValue = parseInt(newValue);
+
+			return setValue(parsedValue);
 		};
 
-		const handleBlur = (event: ChangeEvent<HTMLInputElement>) => {
-			console.log("blurred!");
+		const handleBlur = () => {
+			console.log("blurred!", value);
+
+			if (value === "" || 0) {
+				return setValue(1);
+			}
 		};
 
 		return (
@@ -54,13 +53,13 @@ export const NumberInput = forwardRef(
 				</button>
 				<input
 					ref={ref}
-					type="number"
+					type="tel"
 					value={value}
 					min={0}
 					max={100}
 					onBlur={handleBlur}
 					onChange={handleChange}
-					className={`px-4 py-1 transition-colors min-w-0 bg-neutral-800 border-neutral-500 focus:bg-neutral-600 ${className}`}
+					className={`px-4 py-1 text-center transition-colors min-w-0 bg-neutral-800 border-neutral-500 focus:bg-neutral-600 ${className}`}
 					{...rest}
 				/>
 				<button
