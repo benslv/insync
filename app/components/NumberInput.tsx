@@ -16,10 +16,14 @@ export const NumberInput = forwardRef(
 		const max = (rest.max as number) ?? 100;
 		const min = (rest.min as number) ?? 0;
 
-		const increment = () =>
+		const increment = (e: Event) => {
+			e.preventDefault();
 			setValue((prev) => Math.min(max, (prev || 0) + 1));
-		const decrement = () =>
+		};
+		const decrement = (e: Event) => {
+			e.preventDefault();
 			setValue((prev) => Math.max(min, (prev || 0) - 1));
+		};
 
 		const handleChange = (event: ChangeEvent<HTMLInputElement>) => {
 			const newValue = event.target.value;
