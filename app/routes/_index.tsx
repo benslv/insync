@@ -3,15 +3,16 @@ import type { ActionArgs, LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import {
 	Form,
+	Link,
 	useActionData,
 	useLoaderData,
 	useTransition,
 } from "@remix-run/react";
 import { addSeconds } from "date-fns";
-import { LayoutGroup, motion } from "framer-motion";
+import { motion } from "framer-motion";
 import Balancer from "react-wrap-balancer";
-import { SpotifyWebApi } from "spotify-web-api-ts";
-import type { PrivateUser } from "spotify-web-api-ts/types/types/SpotifyObjects";
+import { SpotifyWebApi } from "@thomasngrlt/spotify-web-api-ts";
+import type { PrivateUser } from "@thomasngrlt/spotify-web-api-ts/types/types/SpotifyObjects";
 import { z } from "zod";
 
 import { BackgroundCircles } from "~/components/BackgroundCircles";
@@ -168,132 +169,66 @@ export default function Index() {
 		<div className="h-full overflow-hidden">
 			<div className="relative z-10 flex h-full max-h-full">
 				<div className="flex flex-col items-center justify-center w-full h-full px-8 text-center border-r gap-y-4 drop-shadow-xl border-white/20 sm:items-start sm:max-w-xl sm:text-left md:px-16">
-					<div className="w-full">
-						<h1 className="mb-2 text-5xl tracking-tighter">
-							<Balancer>
-								Stay in sync with the music you love
-							</Balancer>
+					<div className="flex flex-col items-center w-full sm:items-start gap-y-4">
+						<h1 className="w-full text-5xl tracking-tighter">
+							<Balancer>Stay in sync with the music you love</Balancer>
 						</h1>
-						<p>
+						<p className="w-full">
 							<Balancer>
-								insync creates playlists from your followed
-								artists on Spotify. Connect your account for
-								personalised music discovery.
+								insync creates playlists from your followed artists on Spotify.
+								Connect your account for personalised music discovery.
 							</Balancer>
 						</p>
-					</div>
-					<LayoutGroup>
-						{!oAuthUrl ? (
-							<>
-								<Form
-									method="post"
-									className="flex flex-col items-center sm:items-start gap-y-6"
-								>
-									<div className="flex flex-col gap-y-2">
-										<label
-											htmlFor="playlist_title"
-											className="text-sm text-neutral-400"
-										>
-											Name:
-										</label>
-										<input
-											id="playlist_title"
-											name="playlist_title"
-											autoComplete="off"
-											type="text"
-											placeholder="insync mixtape"
-											className="px-4 py-2 transition-colors border rounded-full bg-neutral-800 border-neutral-500 focus:bg-neutral-600"
-										/>
-									</div>
-									<PlaylistTypeGroup />
-									<div className="flex items-center gap-x-2">
-										<button
-											disabled={isGenerating}
-											type="submit"
-											name="_intent"
-											value="generate"
-											className="w-full px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 sm:w-max"
-										>
-											{generateButtonText}
-										</button>
-										{isGenerating ? (
-											<motion.div
-												initial={{ x: -50, opacity: 0 }}
-												animate={{ x: 0, opacity: 1 }}
-											>
-												<Spinner />
-											</motion.div>
-										) : null}
-									</div>
-								</Form>
-								{isGenerating ? (
-									<motion.p
-										initial={{
-											opacity: 0,
-											y: -30,
-											height: 0,
-										}}
-										animate={{
-											opacity: 1,
-											y: 0,
-											height: "auto",
-										}}
-										transition={{ delay: 5 }}
-										layout="position"
-										className="text-sm text-neutral-400"
-									>
-										Hold tight! We're fetching a lot of
-										data...
-									</motion.p>
-								) : null}
-								{errors ? (
-									<motion.p
-										initial={{
-											opacity: 0,
-											y: -50,
-										}}
-										animate={{
-											opacity: 1,
-											y: 0,
-										}}
-										className="px-3 py-1 border border-red-300 rounded-xl bg-red-300/25"
-									>
-										{errors.message}
-									</motion.p>
-								) : null}
-							</>
-						) : (
+						{oAuthUrl ? (
 							<a
 								href={oAuthUrl}
 								className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
 							>
 								Connect to Spotify
 							</a>
+						) : (
+							<div className="flex w-full h-16 gap-x-2">
+								<Link
+									to="./basic"
+									className="flex items-center justify-center w-full h-full transition duration-300 border rounded-2xl border-neutral-700 bg-neutral-900 hover:border-neutral-500"
+								>
+									<p className="text-xl">Basic</p>
+								</Link>
+								<Link
+									to="./studio"
+									className="relative w-full h-full bg-gradient-to-br from-white/10 via-white/75 group to-white/10 rounded-2xl"
+								>
+									<div className="shadow-tile absolute flex inset-0.5  items-center justify-center rounded-[14px] bg-gradient-to-br from-black via-[#222] to-black hover:ring-[2px] ring-white/20 transition-all duration-300 overflow-hidden">
+										<p className="text-2xl font-semibold tracking-tighter">
+											Studio
+										</p>
+										<div className="absolute inset-0 w-full h-full transition-all duration-300 bg-gradient-to-t from-green-500 to-transparent opacity-10 group-hover:opacity-20"></div>
+									</div>
+								</Link>
+							</div>
 						)}
-						{userProfile ? (
-							<motion.div
-								layout="position"
-								className="flex flex-col mt-8 gap-y-2"
-							>
-								<div className="flex items-center justify-center gap-x-2 sm:justify-start">
+					</div>
+
+					{userProfile ? (
+						<div className="flex flex-col w-full gap-y-2">
+							<hr className="border-neutral-600" />
+							<div className="flex flex-col items-center sm:justify-between sm:flex-row gap-x-2">
+								<div className="flex items-center gap-x-2">
 									<ProfileImage userProfile={userProfile} />
-									<p className="text-sm">
-										Logged in as {userProfile.id}
-									</p>
+									<p className="text-sm">Logged in as {userProfile.id}</p>
 								</div>
 								<Form method="post" action="/logout">
 									<button
 										type="submit"
-										name="_intent"
 										value="logout"
 										className="text-sm underline"
 									>
 										Logout
 									</button>
 								</Form>
-							</motion.div>
-						) : null}
-					</LayoutGroup>
+							</div>
+						</div>
+					) : null}
 				</div>
 				<div className="relative items-center hidden w-full h-full overflow-hidden sm:flex sm:justify-end">
 					<BackgroundCircles />
@@ -321,8 +256,8 @@ export function ErrorBoundary() {
 					</h1>
 					<p className="mb-2">insync ran into an error.</p>
 					<p>
-						Click the button below to be taken back to the homepage,
-						and we'll try again.
+						Click the button below to be taken back to the homepage, and we'll
+						try again.
 					</p>
 				</div>
 				<Form method="post" action="/logout">
@@ -407,29 +342,17 @@ function PlaylistTypeGroup() {
 				name="selection"
 				className="flex p-1 border rounded-full bg-neutral-900 border-neutral-700 gap-x-2 "
 			>
-				<RadioGroup.Item
-					value="popular"
-					id="r1"
-					className={itemClassName}
-				>
+				<RadioGroup.Item value="popular" id="r1" className={itemClassName}>
 					<label htmlFor="r1" className="cursor-pointer">
 						Popular
 					</label>
 				</RadioGroup.Item>
-				<RadioGroup.Item
-					value="latest"
-					id="r2"
-					className={itemClassName}
-				>
+				<RadioGroup.Item value="latest" id="r2" className={itemClassName}>
 					<label htmlFor="r2" className="cursor-pointer">
 						Latest
 					</label>
 				</RadioGroup.Item>
-				<RadioGroup.Item
-					value="random"
-					id="r3"
-					className={itemClassName}
-				>
+				<RadioGroup.Item value="random" id="r3" className={itemClassName}>
 					<label htmlFor="r3" className="cursor-pointer">
 						Random
 					</label>

@@ -20,4 +20,15 @@
 		font-style: normal;
 		font-display: swap;
 	}
+
+	input[type="number"]::-webkit-outer-spin-button.hide-spinner,
+	input[type="number"]::-webkit-inner-spin-button.hide-spinner {
+		-webkit-appearance: none;
+		margin: 0;
+	}
+
+	input[type="number"].hide-spinner {
+		-moz-appearance: textfield;
+		appearance: "textfield";
+	}
 }
