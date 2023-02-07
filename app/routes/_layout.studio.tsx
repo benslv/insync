@@ -1,5 +1,5 @@
 import type { ActionArgs } from "@remix-run/node";
-import { defer, redirect } from "@remix-run/node";
+import { defer, json, redirect } from "@remix-run/node";
 import { Await, Form, useLoaderData } from "@remix-run/react";
 import { SpotifyWebApi } from "@thomasngrlt/spotify-web-api-ts";
 import type { Artist } from "@thomasngrlt/spotify-web-api-ts/types/types/SpotifyObjects";
@@ -21,7 +21,7 @@ const generateOptions = z.object({
 	energy: z.number().min(0).max(1).catch(0.5),
 });
 
-const seedArtistSchema = z.array(z.string());
+const seedArtistSchema = z.array(z.string()).catch([]);
 
 type GenerateOptions = z.infer<typeof generateOptions>;
 
@@ -50,6 +50,7 @@ export async function loader({ request }: ActionArgs) {
 export async function action({ request }: ActionArgs) {
 	const formData = await request.formData();
 	const session = await getSession(request.headers.get("Cookie"));
+	const redirectUri = new URL(request.url).origin;
 
 	const options: GenerateOptions = generateOptions.parse({
 		trackCount: formData.get("track_count"),
@@ -59,11 +60,17 @@ export async function action({ request }: ActionArgs) {
 		energy: formData.get("energy"),
 	});
 
-	const seedArtists = seedArtistSchema.parse(
-		formData.getAll("selected_artist")
-	);
+	const seedArtists = seedArtistSchema
+		.parse(formData.getAll("selected_artist"))
+		.map((artist) => JSON.parse(artist) as MiniArtist);
 
-	const redirectUri = new URL(request.url).origin;
+	if (seedArtists.length === 0) {
+		return json({
+			ok: false,
+			message:
+				"You need to select at least one artist to generate a playlist!",
+		});
+	}
 
 	const spotify = new SpotifyWebApi({
 		redirectUri,
@@ -76,7 +83,7 @@ export async function action({ request }: ActionArgs) {
 
 	const recommendations = await spotify.browse.getRecommendations(
 		{
-			seed_artists: seedArtists,
+			seed_artists: seedArtists.map((artist) => artist.id),
 		},
 		{
 			limit: options.trackCount,
@@ -86,9 +93,20 @@ export async function action({ request }: ActionArgs) {
 		}
 	);
 
+	const formatter = new Intl.ListFormat("en-GB", {
+		style: "short",
+		type: "conjunction",
+	});
+	const artistDesc = formatter.format(
+		seedArtists.map((artist) => artist.name)
+	);
+
 	const playlist = await spotify.playlists.createPlaylist(
 		userId,
-		options.name
+		options.name,
+		{
+			description: `An tailor-made mixtape for ${userId}, based off ${artistDesc}. Create your own at insync.vercel.app!`,
+		}
 	);
 
 	const snapshotId = await spotify.playlists.addItemsToPlaylist(
@@ -96,23 +114,30 @@ export async function action({ request }: ActionArgs) {
 		recommendations.tracks.map((track) => track.uri)
 	);
 
-	return null;
+	return redirect(`/playlist?id=${playlist.id}`);
 }
+
+type MiniArtist = {
+	name: string;
+	id: string;
+};
 
 export default function StudioPage() {
 	const { followedArtistsPromise } = useLoaderData<typeof loader>();
-	const [selectedArtists, setSelectedArtists] = useState<string[]>([]);
+	const [selectedArtists, setSelectedArtists] = useState<MiniArtist[]>([]);
 
-	const handleChipClick = (id: string) => {
-		if (selectedArtists.includes(id)) {
+	const handleChipClick = ({ name, id }: MiniArtist) => {
+		const hasArtist = selectedArtists.find((artist) => artist.id === id);
+
+		if (hasArtist) {
 			return setSelectedArtists((prev) =>
-				prev.filter((selectedId) => selectedId !== id)
+				prev.filter((artist) => artist.id !== id)
 			);
 		}
 
 		if (selectedArtists.length === 5) return;
 
-		return setSelectedArtists((prev) => [...prev, id]);
+		return setSelectedArtists((prev) => [...prev, { name, id }]);
 	};
 
 	const ArtistList = ({ artists }: { artists: Artist[] }) => (
@@ -122,8 +147,10 @@ export default function StudioPage() {
 					key={id}
 					image={images![0].url ?? ""}
 					text={name!}
-					onClick={() => handleChipClick(id!)}
-					selected={selectedArtists.includes(id!)}
+					onClick={() => handleChipClick({ name, id })}
+					selected={Boolean(
+						selectedArtists.find((artist) => artist.id === id)
+					)}
 				/>
 			))}
 		</>
@@ -145,12 +172,12 @@ export default function StudioPage() {
 				method="post"
 				className="flex flex-col items-center w-full gap-y-4"
 			>
-				{selectedArtists.map((id) => (
+				{selectedArtists.map((artist) => (
 					<input
-						key={id}
+						key={artist.id}
 						type="hidden"
 						name="selected_artist"
-						value={id}
+						value={JSON.stringify(artist)}
 					/>
 				))}
 				<div>
