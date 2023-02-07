@@ -22,8 +22,10 @@ interface PlaylistItemWithTrack extends PlaylistItem {
 export async function loader({ request }: LoaderArgs) {
 	const session = await getSession(request.headers.get("Cookie"));
 	const redirectUri = new URL(request.url).origin;
+	const url = new URL(request.url);
+	const playlistId = url.searchParams.get("id");
 
-	if (!session.has("access_token") || !session.has("playlist_id")) {
+	if (!session.has("access_token") || !playlistId) {
 		throw redirect("/");
 	}
 
@@ -47,11 +49,12 @@ export async function loader({ request }: LoaderArgs) {
 	const accessToken = session.get("access_token");
 	spotify.setAccessToken(accessToken);
 
-	const playlistId = session.get("playlist_id");
-
-	const playlist = await spotify.playlists.getPlaylist(playlistId);
-
-	return json({ playlist });
+	try {
+		const playlist = await spotify.playlists.getPlaylist(playlistId);
+		return json({ ok: true, playlist });
+	} catch (err) {
+		return redirect("/");
+	}
 }
 
 export default function GeneratePage() {

@@ -42,9 +42,8 @@ export async function action({ request }: ActionArgs) {
 	const session = await getSession(request.headers.get("Cookie"));
 
 	const playlistId = generateResult.playlistId;
-	session.set("playlist_id", playlistId);
 
-	throw redirect("/playlist", {
+	throw redirect(`/playlist?id=${playlistId}`, {
 		headers: {
 			"Set-Cookie": await commitSession(session),
 		},
