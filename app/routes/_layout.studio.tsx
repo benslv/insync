@@ -5,6 +5,7 @@ import { SpotifyWebApi } from "@thomasngrlt/spotify-web-api-ts";
 import type { Artist } from "@thomasngrlt/spotify-web-api-ts/types/types/SpotifyObjects";
 import { Suspense, useState } from "react";
 import { z } from "zod";
+import { motion } from "framer-motion";
 
 import { Label } from "~/components/Label";
 import { NumberInput } from "~/components/NumberInput";
@@ -67,8 +68,7 @@ export async function action({ request }: ActionArgs) {
 	if (seedArtists.length === 0) {
 		return json({
 			ok: false,
-			message:
-				"You need to select at least one artist to generate a playlist!",
+			message: "You need to select at least one artist to generate a playlist!",
 		});
 	}
 
@@ -97,9 +97,7 @@ export async function action({ request }: ActionArgs) {
 		style: "short",
 		type: "conjunction",
 	});
-	const artistDesc = formatter.format(
-		seedArtists.map((artist) => artist.name)
-	);
+	const artistDesc = formatter.format(seedArtists.map((artist) => artist.name));
 
 	const playlist = await spotify.playlists.createPlaylist(
 		userId,
@@ -148,9 +146,7 @@ export default function StudioPage() {
 					image={images![0].url ?? ""}
 					text={name!}
 					onClick={() => handleChipClick({ name, id })}
-					selected={Boolean(
-						selectedArtists.find((artist) => artist.id === id)
-					)}
+					selected={Boolean(selectedArtists.find((artist) => artist.id === id))}
 				/>
 			))}
 		</>
@@ -158,8 +154,14 @@ export default function StudioPage() {
 
 	return (
 		<div className="flex space-x-4">
-			<div className="flex flex-wrap justify-center max-w-sm gap-2 overflow-y-scroll w-sm min-w-sm h-96">
-				<Suspense fallback={<p>Loading artists...</p>}>
+			<div className="flex flex-wrap justify-center max-w-sm gap-2 p-4 overflow-y-scroll transition duration-300 border w-sm min-w-sm h-96 rounded-xl border-neutral-700">
+				<Suspense
+					fallback={
+						<div className="flex">
+							<p>Loading artists...</p> <Spinner />
+						</div>
+					}
+				>
 					<Await
 						resolve={followedArtistsPromise}
 						errorElement={<p>Error loading artists...</p>}
@@ -168,10 +170,7 @@ export default function StudioPage() {
 					</Await>
 				</Suspense>
 			</div>
-			<Form
-				method="post"
-				className="flex flex-col items-center w-full gap-y-4"
-			>
+			<Form method="post" className="flex flex-col items-center w-full gap-y-4">
 				{selectedArtists.map((artist) => (
 					<input
 						key={artist.id}
@@ -256,9 +255,7 @@ function RangeGroup({ label, leftText, rightText, children }: RangeGroupProps) {
 				{children}
 				<div className="flex justify-between">
 					<span className="text-xs text-neutral-400">{leftText}</span>
-					<span className="text-xs text-neutral-400">
-						{rightText}
-					</span>
+					<span className="text-xs text-neutral-400">{rightText}</span>
 				</div>
 			</div>
 		</div>
@@ -299,5 +296,28 @@ function ArtistChip({ image, text, onClick, selected }: ArtistChipProps) {
 				{text}
 			</p>
 		</div>
+	);
+}
+
+function Spinner() {
+	return (
+		<motion.svg
+			fill="#ffffff"
+			width="32px"
+			height="32px"
+			viewBox="0 0 32 32"
+			version="1.1"
+			xmlns="http://www.w3.org/2000/svg"
+			animate={{ rotate: 360 }}
+			transition={{
+				repeat: Infinity,
+				bounce: 0,
+				ease: "linear",
+				duration: 0.75,
+			}}
+		>
+			<title>spinner-one-third</title>
+			<path d="M16 0.75c-0.69 0-1.25 0.56-1.25 1.25s0.56 1.25 1.25 1.25v0c7.042 0.001 12.75 5.71 12.75 12.751 0 3.521-1.427 6.709-3.734 9.016v0c-0.226 0.226-0.365 0.538-0.365 0.883 0 0.69 0.56 1.25 1.25 1.25 0.346 0 0.659-0.14 0.885-0.367l0-0c2.759-2.76 4.465-6.572 4.465-10.782 0-8.423-6.828-15.251-15.25-15.251h-0z" />
+		</motion.svg>
 	);
 }
