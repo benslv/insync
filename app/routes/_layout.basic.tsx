@@ -63,38 +63,34 @@ export default function BasicPage() {
 		: "Generate";
 
 	return (
-		<div className="flex flex-col max-w-lg gap-y-4">
+		<div className="flex max-w-lg flex-col gap-y-4">
 			<p>
-				Create playlists based on the top songs from artists you follow
-				on Spotify!
+				Create playlists based on the top songs from artists you follow on
+				Spotify!
 			</p>
-			<details className="p-2 text-sm border rounded-lg border-neutral-700 bg-neutral-800">
+			<details className="rounded-lg border border-neutral-700 bg-neutral-800 p-2 text-sm">
 				<summary className="cursor-pointer">
 					What are the selection methods?
 				</summary>
 				<p className="text-neutral-400">
-					Pick a selection method to change how your playlist is
-					generated.
+					Pick a selection method to change how your playlist is generated.
 				</p>
-				<ul className="flex flex-col mt-2 gap-y-2">
+				<ul className="mt-2 flex flex-col gap-y-2">
 					<li>
-						🔥 <b>Popular</b> - Use the most popular song from each
-						artist.
+						🔥 <b>Popular</b> - Use the most popular song from each artist.
 					</li>
 					<li>
-						🕒 <b>Latest</b> - Create a playlist of the latest
-						releases!
+						🕒 <b>Latest</b> - Create a playlist of the latest releases!
 					</li>
 					<li>
-						🎲 <b>Random</b> - Pot luck! Pick a random song from
-						each artist. Maybe you'll discover some old favourites?
+						🎲 <b>Random</b> - Pot luck! Pick a random song from each artist.
+						Maybe you'll discover some old favourites?
 					</li>
 				</ul>
 			</details>
 			<Form
 				method="post"
-				className="flex flex-col items-center self-center gap-y-4 w-max"
-			>
+				className="flex w-max flex-col items-center gap-y-4 self-center">
 				<Label htmlFor="playlist_title" className="self-start">
 					Playlist Name:
 				</Label>
@@ -109,15 +105,13 @@ export default function BasicPage() {
 					<button
 						type="submit"
 						disabled={isGenerating}
-						className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900"
-					>
+						className="rounded-full bg-green-500 px-4 py-2 text-sm font-bold uppercase text-neutral-900 transition-colors hover:bg-green-400">
 						{generateButtonText}
 					</button>
 					{isGenerating ? (
 						<motion.div
 							initial={{ x: -50, opacity: 0 }}
-							animate={{ x: 0, opacity: 1 }}
-						>
+							animate={{ x: 0, opacity: 1 }}>
 							<Spinner />
 						</motion.div>
 					) : null}
@@ -133,8 +127,7 @@ export default function BasicPage() {
 						opacity: 1,
 						y: 0,
 					}}
-					className="px-3 py-1 border border-red-300 rounded-lg bg-red-300/25"
-				>
+					className="rounded-lg border border-red-300 bg-red-300/25 px-3 py-1">
 					{errors.message}
 				</motion.p>
 			) : null}
@@ -157,8 +150,7 @@ function Spinner() {
 				bounce: 0,
 				ease: "linear",
 				duration: 0.75,
-			}}
-		>
+			}}>
 			<title>spinner-one-third</title>
 			<path d="M16 0.75c-0.69 0-1.25 0.56-1.25 1.25s0.56 1.25 1.25 1.25v0c7.042 0.001 12.75 5.71 12.75 12.751 0 3.521-1.427 6.709-3.734 9.016v0c-0.226 0.226-0.365 0.538-0.365 0.883 0 0.69 0.56 1.25 1.25 1.25 0.346 0 0.659-0.14 0.885-0.367l0-0c2.759-2.76 4.465-6.572 4.465-10.782 0-8.423-6.828-15.251-15.25-15.251h-0z" />
 		</motion.svg>
@@ -181,31 +173,18 @@ function PlaylistTypeGroup() {
 				orientation="horizontal"
 				id="selection"
 				name="selection"
-				className="flex flex-col w-full p-1 text-base text-white border rounded-2xl sm:rounded-full sm:flex-row bg-neutral-900 border-neutral-700 gap-y-1 sm:gap-y-0 sm:gap-x-2 "
-			>
-				<RadioGroup.Item
-					value="popular"
-					id="r1"
-					className={itemClassName}
-				>
+				className="flex w-full flex-col gap-y-1 rounded-2xl border border-neutral-700 bg-neutral-900 p-1 text-base text-white sm:flex-row sm:gap-y-0 sm:gap-x-2 sm:rounded-full ">
+				<RadioGroup.Item value="popular" id="r1" className={itemClassName}>
 					<label htmlFor="r1" className="cursor-pointer">
 						Popular
 					</label>
 				</RadioGroup.Item>
-				<RadioGroup.Item
-					value="latest"
-					id="r2"
-					className={itemClassName}
-				>
+				<RadioGroup.Item value="latest" id="r2" className={itemClassName}>
 					<label htmlFor="r2" className="cursor-pointer">
 						Latest
 					</label>
 				</RadioGroup.Item>
-				<RadioGroup.Item
-					value="random"
-					id="r3"
-					className={itemClassName}
-				>
+				<RadioGroup.Item value="random" id="r3" className={itemClassName}>
 					<label htmlFor="r3" className="cursor-pointer">
 						Random
 					</label>

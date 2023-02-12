@@ -3,10 +3,7 @@ import { forwardRef } from "react";
 
 export const RangeSlider = forwardRef(
 	(
-		{
-			className,
-			...rest
-		}: Omit<InputHTMLAttributes<HTMLInputElement>, "type">,
+		{ className, ...rest }: Omit<InputHTMLAttributes<HTMLInputElement>, "type">,
 		ref: Ref<HTMLInputElement>
 	) => {
 		return (
