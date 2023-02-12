@@ -19,7 +19,7 @@ import { commitSession, getSession } from "~/sessions";
 import { tokenHasExpired } from "~/utils/tokenHasExpired";
 
 const generateOptions = z.object({
-	trackCount: z.number().min(1).max(100).catch(20),
+	trackCount: z.coerce.number().min(1).max(100).catch(20),
 	name: z.string().min(1).catch("Insync Studio Mixtape"),
 	tempo: z.number().min(30).max(300).catch(100),
 	popularity: z.number().min(0).max(100).catch(80),
@@ -187,20 +187,21 @@ export default function StudioPage() {
 	};
 
 	return (
-		<>
-			<div className="max-w-2xl">
-				<p className="mb-2">
+		<div className="mx-4 flex flex-col items-center gap-y-8">
+			<div className="prose prose-invert w-full rounded-xl border border-neutral-700 bg-neutral-800 p-6 text-center">
+				<h2 className="prose-3xl">Studio Mode</h2>
+				<p>
 					Build playlists based on the people you follow! Select up to 5 artists
-					and insync will generate a custom playlist for you based on music that
-					sounds like them.
+					and insync will generate a custom playlist for you based on similar
+					music.
 				</p>
 				<p>
 					Use the sliders to tailor the playlist to your liking. Fancy a more
 					upbeat vibe? Crank that energy slider right up!
 				</p>
 			</div>
-			<div className="flex max-w-4xl flex-col gap-y-4 sm:flex-row sm:gap-x-4">
-				<div className="flex w-full flex-grow flex-col sm:w-1/2">
+			<div className="flex w-full max-w-4xl flex-col gap-y-8 gap-x-0 sm:flex-row sm:gap-y-0 sm:gap-x-8">
+				<div className="flex w-full flex-col sm:w-1/2">
 					<h2 className="mb-4 text-xl font-bold sm:hidden">
 						1. Select artists
 					</h2>
@@ -210,10 +211,10 @@ export default function StudioPage() {
 						onChange={(event) => setSearchTerm(event.target.value)}
 						className="z-10 min-w-0 rounded-xl rounded-bl-none rounded-br-none border-b-0 border-neutral-700"
 					/>
-					<div className="h-96 overflow-y-scroll rounded-xl rounded-tl-none rounded-tr-none border border-neutral-700 transition duration-300">
+					<div className="h-96 w-full overflow-y-scroll rounded-xl rounded-tl-none rounded-tr-none border border-neutral-700 transition duration-300">
 						<Suspense
 							fallback={
-								<div className="flex p-4">
+								<div className="flex h-full w-full items-center justify-center gap-x-4 p-4">
 									<p>Loading artists...</p> <Spinner />
 								</div>
 							}>
@@ -229,7 +230,7 @@ export default function StudioPage() {
 										<motion.div
 											initial={{ opacity: 0 }}
 											animate={{ opacity: 1 }}
-											className="flex h-max w-full flex-wrap items-start justify-center gap-2 p-4">
+											className="flex h-max flex-wrap items-start justify-center gap-2 p-4">
 											{filteredArtists.map(({ name, images, id }, i) => (
 												<ArtistChip
 													key={id}
@@ -248,79 +249,83 @@ export default function StudioPage() {
 						</Suspense>
 					</div>
 				</div>
-				<h2 className="text-xl font-bold sm:hidden">2. Generate playlist</h2>
-				<Form
-					method="post"
-					className="flex w-full flex-col items-center gap-y-4 sm:w-1/2">
-					{selectedArtists.map((artist) => (
-						<input
-							key={artist.id}
-							type="hidden"
-							name="selected_artist"
-							value={JSON.stringify(artist)}
-						/>
-					))}
-					<div className="w-full">
-						<Label htmlFor="name">Playlist Name</Label>
-						<TextInput
-							id="name"
-							name="name"
-							placeholder="insync mixtape"
-							className="mt-1 w-full"
-						/>
-					</div>
-					<div className="flex w-full items-center justify-between gap-x-4">
-						<Label>How many tracks? (max. 100)</Label>
-						<NumberInput
-							className="hide-spinner w-16"
-							name="track_count"
-							min={1}
-							max={100}
-						/>
-					</div>
-					<RangeGroup label="Tempo (BPM)" leftText="30" rightText="300">
-						<RangeSlider
-							name="tempo"
-							id="tempo"
-							min={30}
-							max={300}
-							className="w-full"
-						/>
-					</RangeGroup>
-					<RangeGroup
-						label="Popularity"
-						leftText="Obscure finds"
-						rightText="Chart toppers">
-						<RangeSlider
-							name="popularity"
-							id="popularity"
-							min={0}
-							max={100}
-							step={1}
-							className="w-full"
-						/>
-					</RangeGroup>
-					<RangeGroup
-						label="Energy"
-						leftText="Chilling out"
-						rightText="Ramping up">
-						<RangeSlider
-							name="energy"
-							id="energy"
-							min={0}
-							max={1}
-							step={0.01}
-							className="w-full"
-						/>
-					</RangeGroup>
-					<button
-						type="submit"
-						disabled={selectedArtists.length === 0 || isGenerating}
-						className="rounded-full bg-green-500 px-4 py-2 text-sm font-bold uppercase text-neutral-900 transition-all hover:bg-green-400 disabled:opacity-50">
-						{generateButtonText}
-					</button>
-				</Form>
+				<div className="w-full sm:w-1/2">
+					<h2 className="mb-4 text-xl font-bold sm:hidden">
+						2. Generate playlist
+					</h2>
+					<Form
+						method="post"
+						className="flex flex-col items-center gap-y-4 rounded-xl border border-neutral-700 p-6 shadow">
+						{selectedArtists.map((artist) => (
+							<input
+								key={artist.id}
+								type="hidden"
+								name="selected_artist"
+								value={JSON.stringify(artist)}
+							/>
+						))}
+						<div className="w-full">
+							<Label htmlFor="name">Playlist Name</Label>
+							<TextInput
+								id="name"
+								name="name"
+								placeholder="insync mixtape"
+								className="mt-1 w-full"
+							/>
+						</div>
+						<div className="flex w-full items-center justify-between gap-x-4">
+							<Label>How many tracks? (max. 100)</Label>
+							<NumberInput
+								className="hide-spinner w-12"
+								name="track_count"
+								min={1}
+								max={100}
+							/>
+						</div>
+						<RangeGroup label="Tempo (BPM)" leftText="30" rightText="300">
+							<RangeSlider
+								name="tempo"
+								id="tempo"
+								min={30}
+								max={300}
+								className="w-full"
+							/>
+						</RangeGroup>
+						<RangeGroup
+							label="Popularity"
+							leftText="Obscure finds"
+							rightText="Chart toppers">
+							<RangeSlider
+								name="popularity"
+								id="popularity"
+								min={0}
+								max={100}
+								step={1}
+								className="w-full"
+							/>
+						</RangeGroup>
+						<RangeGroup
+							label="Energy"
+							leftText="Chilling out"
+							rightText="Ramping up">
+							<RangeSlider
+								name="energy"
+								id="energy"
+								min={0}
+								max={1}
+								step={0.01}
+								className="w-full"
+							/>
+						</RangeGroup>
+						<button
+							type="submit"
+							disabled={selectedArtists.length === 0 || isGenerating}
+							className="rounded-full bg-green-500 px-4 py-2 text-sm font-bold uppercase text-neutral-900 transition-all hover:bg-green-400 disabled:opacity-50">
+							{generateButtonText}
+						</button>
+					</Form>
+				</div>
 			</div>
-		</>
+		</div>
 	);
 }

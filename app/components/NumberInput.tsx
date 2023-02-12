@@ -13,12 +13,10 @@ export const NumberInput = forwardRef(
 		const max = (rest.max as number) ?? 100;
 		const min = (rest.min as number) ?? 0;
 
-		const increment = (e: Event) => {
-			e.preventDefault();
+		const increment = () => {
 			setValue((prev) => Math.min(max, (prev || 0) + 1));
 		};
-		const decrement = (e: Event) => {
-			e.preventDefault();
+		const decrement = () => {
 			setValue((prev) => Math.max(min, (prev || 0) - 1));
 		};
 
@@ -37,8 +35,6 @@ export const NumberInput = forwardRef(
 		};
 
 		const handleBlur = () => {
-			console.log("blurred!", value);
-
 			if (value === "" || 0) {
 				return setValue(1);
 			}
@@ -48,7 +44,8 @@ export const NumberInput = forwardRef(
 			<div className="flex flex-nowrap">
 				<button
 					onClick={decrement}
-					className="rounded-tl-full rounded-bl-full bg-neutral-700 px-4 py-1 transition-colors hover:bg-neutral-600">
+					type="button"
+					className="rounded-tl-full rounded-bl-full bg-neutral-700 py-1 pl-4 pr-3 transition-colors hover:bg-neutral-600">
 					-
 				</button>
 				<input
@@ -59,12 +56,13 @@ export const NumberInput = forwardRef(
 					max={100}
 					onBlur={handleBlur}
 					onChange={handleChange}
-					className={`min-w-0 border-neutral-500 bg-neutral-800 px-4 py-1 text-center transition-colors focus:bg-neutral-600 ${className}`}
+					className={`w-8 min-w-0 border-neutral-500 bg-neutral-800 px-2 py-1 text-center transition-colors focus:bg-neutral-600 ${className}`}
 					{...rest}
 				/>
 				<button
 					onClick={increment}
-					className="rounded-tr-full rounded-br-full bg-neutral-700 px-4 py-1 transition-colors hover:bg-neutral-600">
+					type="button"
+					className="rounded-tr-full rounded-br-full bg-neutral-700 py-1 pl-3 pr-4 transition-colors hover:bg-neutral-600">
 					+
 				</button>
 			</div>

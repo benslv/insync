@@ -30,11 +30,8 @@ export default function GenerateIndex() {
 					</Link>
 				</div>
 			</div>
-			<div className="mx-2 flex w-full max-w-fit flex-col items-center gap-y-4 rounded-xl border border-neutral-600 p-6 px-4 sm:px-6">
-				<h1 className="text-5xl tracking-tighter">Generate</h1>
 
-				<Outlet />
-			</div>
+			<Outlet />
 			<Link
 				to="/"
 				className="flex h-max w-max text-neutral-500 transition-all duration-150 hover:text-neutral-200">
