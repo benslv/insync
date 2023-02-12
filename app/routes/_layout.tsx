@@ -6,8 +6,8 @@ export default function GenerateIndex() {
 	const selectedRoute = matches[2].pathname;
 
 	return (
-		<div className="flex h-full w-full flex-col items-center justify-between py-8">
-			<div className="flex flex-col items-center gap-y-2">
+		<div className="flex h-max min-h-full w-full flex-col items-center justify-between gap-y-8 py-8">
+			<div className="flex h-full flex-col items-center gap-y-2">
 				<p className="text-sm text-neutral-400">Choose generation method:</p>
 				<div className="flex w-max gap-x-1 rounded-lg border border-neutral-600 bg-neutral-900 p-1">
 					<Link
@@ -30,7 +30,7 @@ export default function GenerateIndex() {
 					</Link>
 				</div>
 			</div>
-			<div className="mx-2 flex w-fit flex-col items-center gap-y-4 rounded-xl border border-neutral-600 p-6">
+			<div className="mx-2 flex w-full max-w-fit flex-col items-center gap-y-4 rounded-xl border border-neutral-600 p-6 px-4 sm:px-6">
 				<h1 className="text-5xl tracking-tighter">Generate</h1>
 
 				<Outlet />

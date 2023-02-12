@@ -10,7 +10,7 @@ export const RangeSlider = forwardRef(
 			<input
 				ref={ref}
 				type="range"
-				className={`min-w-0 accent-green-500 ${className}`}
+				className={`min-w-0 touch-none accent-green-500 ${className}`}
 				defaultValue={50}
 				min={0}
 				max={100}
