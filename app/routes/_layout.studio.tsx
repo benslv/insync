@@ -132,6 +132,7 @@ type MiniArtist = {
 export default function StudioPage() {
 	const { followedArtistsPromise } = useLoaderData<typeof loader>();
 	const [selectedArtists, setSelectedArtists] = useState<MiniArtist[]>([]);
+	const [searchTerm, setSearchTerm] = useState("");
 
 	const handleChipClick = ({ name, id }: MiniArtist) => {
 		const hasArtist = selectedArtists.find((artist) => artist.id === id);
@@ -162,22 +163,37 @@ export default function StudioPage() {
 	);
 
 	return (
-		<div className="flex space-x-4">
-			<div className="w-sm min-w-sm flex h-96 max-w-sm flex-wrap justify-center gap-2 overflow-y-scroll rounded-xl border border-neutral-700 p-4 transition duration-300">
-				<Suspense
-					fallback={
-						<div className="flex">
-							<p>Loading artists...</p> <Spinner />
-						</div>
-					}>
-					<Await
-						resolve={followedArtistsPromise}
-						errorElement={<p>Error loading artists...</p>}>
-						{(artists) => <ArtistList artists={artists} />}
-					</Await>
-				</Suspense>
+		<div className="flex max-w-4xl space-x-4">
+			<div className="flex w-1/2 flex-col gap-y-2">
+				<input
+					type="text"
+					placeholder="Search"
+					value={searchTerm}
+					onChange={(event) => setSearchTerm(event.target.value)}
+					className="min-w-0"
+				/>
+				<div className="h-96 overflow-y-scroll rounded-xl border border-neutral-700 p-4 transition duration-300">
+					<Suspense
+						fallback={
+							<div className="flex">
+								<p>Loading artists...</p> <Spinner />
+							</div>
+						}>
+						<Await
+							resolve={followedArtistsPromise}
+							errorElement={<p>Error loading artists...</p>}>
+							{(artists) => {
+								const filteredArtists = artists.filter(({ name }) =>
+									name.toLowerCase().includes(searchTerm.toLowerCase())
+								);
+
+								return <ArtistList artists={filteredArtists} />;
+							}}
+						</Await>
+					</Suspense>
+				</div>
 			</div>
-			<Form method="post" className="flex w-full flex-col items-center gap-y-4">
+			<Form method="post" className="flex w-1/2 flex-col items-center gap-y-4">
 				{selectedArtists.map((artist) => (
 					<input
 						key={artist.id}
