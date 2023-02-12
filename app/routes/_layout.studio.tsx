@@ -45,7 +45,14 @@ export async function loader({ request }: ActionArgs) {
 
 	const followedArtistsPromise = getAllFollowedArtists(spotify);
 
-	return defer({ followedArtistsPromise });
+	return defer(
+		{ followedArtistsPromise },
+		{
+			headers: {
+				"Cache-Control": "max-age=600",
+			},
+		}
+	);
 }
 
 export async function action({ request }: ActionArgs) {
@@ -68,7 +75,8 @@ export async function action({ request }: ActionArgs) {
 	if (seedArtists.length === 0) {
 		return json({
 			ok: false,
-			message: "You need to select at least one artist to generate a playlist!",
+			message:
+				"You need to select at least one artist to generate a playlist!",
 		});
 	}
 
@@ -97,7 +105,9 @@ export async function action({ request }: ActionArgs) {
 		style: "short",
 		type: "conjunction",
 	});
-	const artistDesc = formatter.format(seedArtists.map((artist) => artist.name));
+	const artistDesc = formatter.format(
+		seedArtists.map((artist) => artist.name)
+	);
 
 	const playlist = await spotify.playlists.createPlaylist(
 		userId,
@@ -146,7 +156,9 @@ export default function StudioPage() {
 					image={images![0].url ?? ""}
 					text={name!}
 					onClick={() => handleChipClick({ name, id })}
-					selected={Boolean(selectedArtists.find((artist) => artist.id === id))}
+					selected={Boolean(
+						selectedArtists.find((artist) => artist.id === id)
+					)}
 				/>
 			))}
 		</>
@@ -170,7 +182,10 @@ export default function StudioPage() {
 					</Await>
 				</Suspense>
 			</div>
-			<Form method="post" className="flex flex-col items-center w-full gap-y-4">
+			<Form
+				method="post"
+				className="flex flex-col items-center w-full gap-y-4"
+			>
 				{selectedArtists.map((artist) => (
 					<input
 						key={artist.id}
@@ -255,7 +270,9 @@ function RangeGroup({ label, leftText, rightText, children }: RangeGroupProps) {
 				{children}
 				<div className="flex justify-between">
 					<span className="text-xs text-neutral-400">{leftText}</span>
-					<span className="text-xs text-neutral-400">{rightText}</span>
+					<span className="text-xs text-neutral-400">
+						{rightText}
+					</span>
 				</div>
 			</div>
 		</div>
