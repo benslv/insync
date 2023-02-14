@@ -189,7 +189,7 @@ export default function StudioPage() {
 	console.log(selectedArtists.length);
 
 	return (
-		<div className="flex flex-col items-center h-full mx-4 gap-y-8">
+		<div className="flex flex-col items-center w-full h-full mx-4 gap-y-8">
 			<div className="w-full p-6 prose text-center border prose-invert rounded-xl border-neutral-700 bg-neutral-800">
 				<h2 className="prose-3xl">Studio Mode</h2>
 				<p>
@@ -207,7 +207,7 @@ export default function StudioPage() {
 					<h2 className="mb-4 text-xl font-bold sm:hidden">
 						1. Select artists
 					</h2>
-					<div className="h-full border w-ful rounded-xl border-neutral-700">
+					<div className="w-full h-full border rounded-xl border-neutral-700">
 						<div className="flex flex-col gap-2 px-4 pt-4">
 							<div className="flex justify-between text-sm text-neutral-400">
 								<p>Artists</p>
