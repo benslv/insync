@@ -186,6 +186,8 @@ export default function StudioPage() {
 		return setSelectedArtists((prev) => [...prev, { name, id }]);
 	};
 
+	console.log(selectedArtists.length);
+
 	return (
 		<div className="flex flex-col items-center h-full mx-4 gap-y-8">
 			<div className="w-full p-6 prose text-center border prose-invert rounded-xl border-neutral-700 bg-neutral-800">
@@ -201,52 +203,68 @@ export default function StudioPage() {
 				</p>
 			</div>
 			<div className="flex flex-col w-full max-w-4xl h-max gap-y-8 gap-x-0 sm:flex-row sm:gap-y-0 sm:gap-x-4">
-				<div className="flex flex-col w-full h-full sm:w-1/2">
+				<div className="flex flex-col w-full sm:w-1/2">
 					<h2 className="mb-4 text-xl font-bold sm:hidden">
 						1. Select artists
 					</h2>
-					<TextInput
-						placeholder="Search"
-						value={searchTerm}
-						onChange={(event) => setSearchTerm(event.target.value)}
-						className="z-10 min-w-0 border-b-0 rounded-bl-none rounded-br-none rounded-xl border-neutral-700"
-					/>
-					<div className="w-full overflow-y-scroll transition duration-300 border rounded-tl-none rounded-tr-none h-96 rounded-xl border-neutral-700">
-						<Suspense
-							fallback={
-								<div className="flex items-center justify-center w-full h-full p-4 gap-x-4">
-									<p>Loading artists...</p> <Spinner />
-								</div>
-							}>
-							<Await
-								resolve={followedArtistsPromise}
-								errorElement={<p className="p-4">Error loading artists...</p>}>
-								{(artists) => {
-									const filteredArtists = artists.filter(({ name }) =>
-										name.toLowerCase().includes(searchTerm.toLowerCase())
-									);
+					<div className="h-full border w-ful rounded-xl border-neutral-700">
+						<div className="flex flex-col gap-2 px-4 pt-4">
+							<div className="flex justify-between text-sm text-neutral-400">
+								<p>Artists</p>
+								<p
+									className={`${
+										selectedArtists.length == 5 ? "text-green-500" : ""
+									}`}>
+									{selectedArtists.length}
+									<span className="text-neutral-400">/5</span>
+								</p>
+							</div>
+							<TextInput
+								placeholder="Search"
+								value={searchTerm}
+								onChange={(event) => setSearchTerm(event.target.value)}
+								className="z-10 w-full rounded-full border-neutral-700"
+							/>
+						</div>
+						<div className="w-full overflow-y-scroll transition duration-300 h-96">
+							<Suspense
+								fallback={
+									<div className="flex items-center justify-center w-full h-full p-4 gap-x-4">
+										<p>Loading artists...</p> <Spinner />
+									</div>
+								}>
+								<Await
+									resolve={followedArtistsPromise}
+									errorElement={
+										<p className="p-4">Error loading artists...</p>
+									}>
+									{(artists) => {
+										const filteredArtists = artists.filter(({ name }) =>
+											name.toLowerCase().includes(searchTerm.toLowerCase())
+										);
 
-									return (
-										<motion.div
-											initial={{ opacity: 0 }}
-											animate={{ opacity: 1 }}
-											className="flex flex-wrap items-start justify-center gap-2 p-4 h-max">
-											{filteredArtists.map(({ name, images, id }, i) => (
-												<ArtistChip
-													key={id}
-													image={images![0].url ?? ""}
-													text={name!}
-													onClick={() => handleChipClick({ name, id })}
-													selected={Boolean(
-														selectedArtists.find((artist) => artist.id === id)
-													)}
-												/>
-											))}
-										</motion.div>
-									);
-								}}
-							</Await>
-						</Suspense>
+										return (
+											<motion.div
+												initial={{ opacity: 0 }}
+												animate={{ opacity: 1 }}
+												className="flex flex-wrap items-start justify-center gap-2 p-4 h-max">
+												{filteredArtists.map(({ name, images, id }, i) => (
+													<ArtistChip
+														key={id}
+														image={images![0].url ?? ""}
+														text={name!}
+														onClick={() => handleChipClick({ name, id })}
+														selected={Boolean(
+															selectedArtists.find((artist) => artist.id === id)
+														)}
+													/>
+												))}
+											</motion.div>
+										);
+									}}
+								</Await>
+							</Suspense>
+						</div>
 					</div>
 				</div>
 				<div className="w-full h-max sm:w-1/2">
@@ -255,7 +273,7 @@ export default function StudioPage() {
 					</h2>
 					<Form
 						method="post"
-						className="flex flex-col items-center p-6 border shadow gap-y-4 rounded-xl border-neutral-700">
+						className="flex flex-col items-center p-4 border shadow gap-y-4 rounded-xl border-neutral-700">
 						{selectedArtists.map((artist) => (
 							<input
 								key={artist.id}
