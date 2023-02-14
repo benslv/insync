@@ -189,7 +189,7 @@ export default function StudioPage() {
 	console.log(selectedArtists.length);
 
 	return (
-		<div className="flex flex-col items-center w-full h-full mx-4 gap-y-8">
+		<div className="flex flex-col items-center w-full h-full px-4 gap-y-8">
 			<div className="w-full p-6 prose text-center border prose-invert rounded-xl border-neutral-700 bg-neutral-800">
 				<h2 className="prose-3xl">Studio Mode</h2>
 				<p>
