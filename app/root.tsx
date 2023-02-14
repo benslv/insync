@@ -44,10 +44,10 @@ export default function App() {
 				<Meta />
 				<Links />
 			</head>
-			<body className="h-full bg-neutral-900 text-white">
+			<body className="flex flex-col text-white h-max bg-neutral-900">
 				<Outlet />
 				<footer className="flex h-32 flex-col justify-between space-y-2 bg-[#0C0C0C] p-4 text-white sm:flex-row sm:space-y-0">
-					<div className="flex h-full flex-col justify-between">
+					<div className="flex flex-col justify-between h-full">
 						<p>{`© ${new Date().getFullYear()} insync`}</p>
 						<p>
 							Crafted by{" "}
@@ -97,8 +97,8 @@ export function CatchBoundary() {
 				<Meta />
 				<Links />
 			</head>
-			<body className="flex h-full flex-col overflow-hidden bg-neutral-900 text-white">
-				<div className="flex h-full w-full flex-1 flex-col items-center justify-center gap-y-4 overflow-hidden">
+			<body className="flex flex-col h-full overflow-hidden text-white bg-neutral-900">
+				<div className="flex flex-col items-center justify-center flex-1 w-full h-full overflow-hidden gap-y-4">
 					<h1 className="text-3xl sm:text-5xl">Oops!</h1>
 					<p>Something went wrong.</p>
 					<p>
@@ -108,13 +108,13 @@ export function CatchBoundary() {
 						</code>
 					</p>
 					<Link
-						className="w-max rounded-full bg-green-500 px-4 py-2 text-sm font-bold uppercase text-neutral-900 transition-colors hover:bg-green-400"
+						className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full w-max text-neutral-900 hover:bg-green-400"
 						to="/">
 						Back Home
 					</Link>
 				</div>
 				<footer className="z-10 flex h-32 flex-col justify-between space-y-2  bg-[#0C0C0C] p-4 text-white sm:flex-row sm:space-y-0">
-					<div className="flex h-full flex-col justify-between">
+					<div className="flex flex-col justify-between h-full">
 						<p>{`© ${new Date().getFullYear()} insync`}</p>
 						<p>
 							Crafted by{" "}

@@ -187,8 +187,8 @@ export default function StudioPage() {
 	};
 
 	return (
-		<div className="mx-4 flex flex-col items-center gap-y-8">
-			<div className="prose prose-invert w-full rounded-xl border border-neutral-700 bg-neutral-800 p-6 text-center">
+		<div className="flex flex-col items-center h-full mx-4 gap-y-8">
+			<div className="w-full p-6 prose text-center border prose-invert rounded-xl border-neutral-700 bg-neutral-800">
 				<h2 className="prose-3xl">Studio Mode</h2>
 				<p>
 					Build playlists based on the people you follow! Select up to 5 artists
@@ -200,8 +200,8 @@ export default function StudioPage() {
 					upbeat vibe? Crank that energy slider right up!
 				</p>
 			</div>
-			<div className="flex w-full max-w-4xl flex-col gap-y-8 gap-x-0 sm:flex-row sm:gap-y-0 sm:gap-x-8">
-				<div className="flex w-full flex-col sm:w-1/2">
+			<div className="flex flex-col w-full max-w-4xl h-max gap-y-8 gap-x-0 sm:flex-row sm:gap-y-0 sm:gap-x-4">
+				<div className="flex flex-col w-full h-full sm:w-1/2">
 					<h2 className="mb-4 text-xl font-bold sm:hidden">
 						1. Select artists
 					</h2>
@@ -209,12 +209,12 @@ export default function StudioPage() {
 						placeholder="Search"
 						value={searchTerm}
 						onChange={(event) => setSearchTerm(event.target.value)}
-						className="z-10 min-w-0 rounded-xl rounded-bl-none rounded-br-none border-b-0 border-neutral-700"
+						className="z-10 min-w-0 border-b-0 rounded-bl-none rounded-br-none rounded-xl border-neutral-700"
 					/>
-					<div className="h-96 w-full overflow-y-scroll rounded-xl rounded-tl-none rounded-tr-none border border-neutral-700 transition duration-300">
+					<div className="w-full overflow-y-scroll transition duration-300 border rounded-tl-none rounded-tr-none h-96 rounded-xl border-neutral-700">
 						<Suspense
 							fallback={
-								<div className="flex h-full w-full items-center justify-center gap-x-4 p-4">
+								<div className="flex items-center justify-center w-full h-full p-4 gap-x-4">
 									<p>Loading artists...</p> <Spinner />
 								</div>
 							}>
@@ -230,7 +230,7 @@ export default function StudioPage() {
 										<motion.div
 											initial={{ opacity: 0 }}
 											animate={{ opacity: 1 }}
-											className="flex h-max flex-wrap items-start justify-center gap-2 p-4">
+											className="flex flex-wrap items-start justify-center gap-2 p-4 h-max">
 											{filteredArtists.map(({ name, images, id }, i) => (
 												<ArtistChip
 													key={id}
@@ -249,13 +249,13 @@ export default function StudioPage() {
 						</Suspense>
 					</div>
 				</div>
-				<div className="w-full sm:w-1/2">
+				<div className="w-full h-max sm:w-1/2">
 					<h2 className="mb-4 text-xl font-bold sm:hidden">
 						2. Generate playlist
 					</h2>
 					<Form
 						method="post"
-						className="flex flex-col items-center gap-y-4 rounded-xl border border-neutral-700 p-6 shadow">
+						className="flex flex-col items-center p-6 border shadow gap-y-4 rounded-xl border-neutral-700">
 						{selectedArtists.map((artist) => (
 							<input
 								key={artist.id}
@@ -270,13 +270,13 @@ export default function StudioPage() {
 								id="name"
 								name="name"
 								placeholder="insync mixtape"
-								className="mt-1 w-full"
+								className="w-full mt-1"
 							/>
 						</div>
-						<div className="flex w-full items-center justify-between gap-x-4">
+						<div className="flex items-center justify-between w-full gap-x-4">
 							<Label>How many tracks? (max. 100)</Label>
 							<NumberInput
-								className="hide-spinner w-12"
+								className="w-12 hide-spinner"
 								name="track_count"
 								min={1}
 								max={100}
@@ -320,7 +320,7 @@ export default function StudioPage() {
 						<button
 							type="submit"
 							disabled={selectedArtists.length === 0 || isGenerating}
-							className="rounded-full bg-green-500 px-4 py-2 text-sm font-bold uppercase text-neutral-900 transition-all hover:bg-green-400 disabled:opacity-50">
+							className="px-4 py-2 text-sm font-bold uppercase transition-all bg-green-500 rounded-full text-neutral-900 hover:bg-green-400 disabled:opacity-50">
 							{generateButtonText}
 						</button>
 					</Form>
