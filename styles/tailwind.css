@@ -21,6 +21,10 @@
 		font-display: swap;
 	}
 
+	:root {
+		color-scheme: dark;
+	}
+
 	input[type="number"]::-webkit-outer-spin-button.hide-spinner,
 	input[type="number"]::-webkit-inner-spin-button.hide-spinner {
 		-webkit-appearance: none;

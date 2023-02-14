@@ -166,10 +166,10 @@ export default function Index() {
 		: "Generate";
 
 	return (
-		<div className="h-full overflow-hidden">
+		<div className="h-screen overflow-hidden">
 			<div className="relative z-10 flex h-full max-h-full">
-				<div className="flex flex-col items-center justify-center w-full h-full px-8 text-center border-r gap-y-4 drop-shadow-xl border-white/20 sm:items-start sm:max-w-xl sm:text-left md:px-16">
-					<div className="flex flex-col items-center w-full sm:items-start gap-y-4">
+				<div className="flex flex-col items-center justify-center w-full h-full px-8 text-center border-r gap-y-4 border-white/20 drop-shadow-xl sm:max-w-xl sm:items-start sm:text-left md:px-16">
+					<div className="flex flex-col items-center w-full gap-y-4 sm:items-start">
 						<h1 className="w-full text-5xl tracking-tighter">
 							<Balancer>Stay in sync with the music you love</Balancer>
 						</h1>
@@ -182,23 +182,20 @@ export default function Index() {
 						{oAuthUrl ? (
 							<a
 								href={oAuthUrl}
-								className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
-							>
+								className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full w-max text-neutral-900 hover:bg-green-400">
 								Connect to Spotify
 							</a>
 						) : (
 							<div className="flex w-full h-16 gap-x-2">
 								<Link
 									to="./basic"
-									className="flex items-center justify-center w-full h-full transition duration-300 border rounded-2xl border-neutral-700 bg-neutral-900 hover:border-neutral-500"
-								>
+									className="flex items-center justify-center w-full h-full transition duration-300 border rounded-2xl border-neutral-700 bg-neutral-900 hover:border-neutral-500">
 									<p className="text-xl">Basic</p>
 								</Link>
 								<Link
 									to="./studio"
-									className="relative w-full h-full bg-gradient-to-br from-white/10 via-white/75 group to-white/10 rounded-2xl"
-								>
-									<div className="shadow-tile absolute flex inset-0.5  items-center justify-center rounded-[14px] bg-gradient-to-br from-black via-[#222] to-black hover:ring-[2px] ring-white/20 transition-all duration-300 overflow-hidden">
+									className="relative w-full h-full group rounded-2xl bg-gradient-to-br from-white/10 via-white/75 to-white/10">
+									<div className="absolute inset-0.5 flex items-center  justify-center overflow-hidden rounded-[14px] bg-gradient-to-br from-black via-[#222] to-black shadow-tile ring-white/20 transition-all duration-300 hover:ring-[2px]">
 										<p className="text-2xl font-semibold tracking-tighter">
 											Studio
 										</p>
@@ -212,7 +209,7 @@ export default function Index() {
 					{userProfile ? (
 						<div className="flex flex-col w-full gap-y-2">
 							<hr className="border-neutral-600" />
-							<div className="flex flex-col items-center sm:justify-between sm:flex-row gap-x-2">
+							<div className="flex flex-col items-center gap-x-2 sm:flex-row sm:justify-between">
 								<div className="flex items-center gap-x-2">
 									<ProfileImage userProfile={userProfile} />
 									<p className="text-sm">Logged in as {userProfile.id}</p>
@@ -221,8 +218,7 @@ export default function Index() {
 									<button
 										type="submit"
 										value="logout"
-										className="text-sm underline"
-									>
+										className="text-sm underline">
 										Logout
 									</button>
 								</Form>
@@ -238,8 +234,7 @@ export default function Index() {
 				initial={{ opacity: 0 }}
 				animate={{ opacity: 1 }}
 				transition={{ delay: 0.5, duration: 2 }}
-				className="relative z-0 flex sm:hidden blur-md"
-			>
+				className="relative z-0 flex blur-md sm:hidden">
 				<BackgroundCircles />
 			</motion.div>
 		</div>
@@ -249,7 +244,7 @@ export default function Index() {
 export function ErrorBoundary() {
 	return (
 		<div className="flex h-full max-h-full">
-			<div className="z-10 flex flex-col items-center justify-center w-full h-full px-8 text-center border-r gap-y-4 drop-shadow-xl border-white/20 sm:items-start sm:max-w-xl sm:text-left md:px-16">
+			<div className="z-10 flex flex-col items-center justify-center w-full h-full px-8 text-center border-r gap-y-4 border-white/20 drop-shadow-xl sm:max-w-xl sm:items-start sm:text-left md:px-16">
 				<div className="w-full">
 					<h1 className="mb-2 text-3xl tracking-tighter sm:text-5xl">
 						Whoops!
@@ -263,8 +258,7 @@ export function ErrorBoundary() {
 				<Form method="post" action="/logout">
 					<button
 						type="submit"
-						className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
-					>
+						className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full w-max text-neutral-900 hover:bg-green-400">
 						Home
 					</button>
 				</Form>
@@ -273,8 +267,7 @@ export function ErrorBoundary() {
 				initial={{ opacity: 0 }}
 				animate={{ opacity: 1 }}
 				transition={{ delay: 0.5, duration: 2 }}
-				className="relative z-0 flex sm:hidden blur-md"
-			>
+				className="relative z-0 flex blur-md sm:hidden">
 				<BackgroundCircles />
 			</motion.div>
 		</div>
@@ -316,8 +309,7 @@ function Spinner() {
 				bounce: 0,
 				ease: "linear",
 				duration: 0.75,
-			}}
-		>
+			}}>
 			<title>spinner-one-third</title>
 			<path d="M16 0.75c-0.69 0-1.25 0.56-1.25 1.25s0.56 1.25 1.25 1.25v0c7.042 0.001 12.75 5.71 12.75 12.751 0 3.521-1.427 6.709-3.734 9.016v0c-0.226 0.226-0.365 0.538-0.365 0.883 0 0.69 0.56 1.25 1.25 1.25 0.346 0 0.659-0.14 0.885-0.367l0-0c2.759-2.76 4.465-6.572 4.465-10.782 0-8.423-6.828-15.251-15.25-15.251h-0z" />
 		</motion.svg>
@@ -340,8 +332,7 @@ function PlaylistTypeGroup() {
 				orientation="horizontal"
 				id="selection"
 				name="selection"
-				className="flex p-1 border rounded-full bg-neutral-900 border-neutral-700 gap-x-2 "
-			>
+				className="flex p-1 border rounded-full gap-x-2 border-neutral-700 bg-neutral-900 ">
 				<RadioGroup.Item value="popular" id="r1" className={itemClassName}>
 					<label htmlFor="r1" className="cursor-pointer">
 						Popular

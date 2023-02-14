@@ -44,9 +44,9 @@ export default function App() {
 				<Meta />
 				<Links />
 			</head>
-			<body className="h-full text-white bg-neutral-900">
+			<body className="flex flex-col text-white h-max bg-neutral-900">
 				<Outlet />
-				<footer className="bg-[#0C0C0C] text-white p-4 h-32 flex flex-col sm:flex-row space-y-2 sm:space-y-0 justify-between">
+				<footer className="flex h-32 flex-col justify-between space-y-2 bg-[#0C0C0C] p-4 text-white sm:flex-row sm:space-y-0">
 					<div className="flex flex-col justify-between h-full">
 						<p>{`© ${new Date().getFullYear()} insync`}</p>
 						<p>
@@ -55,8 +55,7 @@ export default function App() {
 								href="https://twitter.com/bensilverman_"
 								target="_blank"
 								rel="noreferrer"
-								className="text-green-500 transition-colors hover:text-green-400"
-							>
+								className="text-green-500 transition-colors hover:text-green-400">
 								Ben Silverman
 							</a>{" "}
 							&{" "}
@@ -64,8 +63,7 @@ export default function App() {
 								href="https://twitter.com/hieemeli"
 								target="_blank"
 								rel="noreferrer"
-								className="text-green-500 transition-colors hover:text-green-400"
-							>
+								className="text-green-500 transition-colors hover:text-green-400">
 								Eemeli Ruohomäki
 							</a>
 						</p>
@@ -105,18 +103,17 @@ export function CatchBoundary() {
 					<p>Something went wrong.</p>
 					<p>
 						Error {caught.status}:{" "}
-						<code className="bg-[#0C0C0C] px-2 py-1 rounded-lg">
+						<code className="rounded-lg bg-[#0C0C0C] px-2 py-1">
 							{caught.statusText}
 						</code>
 					</p>
 					<Link
-						className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
-						to="/"
-					>
+						className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full w-max text-neutral-900 hover:bg-green-400"
+						to="/">
 						Back Home
 					</Link>
 				</div>
-				<footer className="bg-[#0C0C0C] text-white z-10 p-4 h-32 flex  flex-col sm:flex-row space-y-2 sm:space-y-0 justify-between">
+				<footer className="z-10 flex h-32 flex-col justify-between space-y-2  bg-[#0C0C0C] p-4 text-white sm:flex-row sm:space-y-0">
 					<div className="flex flex-col justify-between h-full">
 						<p>{`© ${new Date().getFullYear()} insync`}</p>
 						<p>
@@ -125,8 +122,7 @@ export function CatchBoundary() {
 								href="https://twitter.com/bensilverman_"
 								target="_blank"
 								rel="noreferrer"
-								className="text-green-500 transition-colors hover:text-green-400"
-							>
+								className="text-green-500 transition-colors hover:text-green-400">
 								Ben Silverman
 							</a>{" "}
 							&{" "}
@@ -134,8 +130,7 @@ export function CatchBoundary() {
 								href="https://twitter.com/hieemeli"
 								target="_blank"
 								rel="noreferrer"
-								className="text-green-500 transition-colors hover:text-green-400"
-							>
+								className="text-green-500 transition-colors hover:text-green-400">
 								Eemeli Ruohomäki
 							</a>
 						</p>

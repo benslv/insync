@@ -6,43 +6,35 @@ export default function GenerateIndex() {
 	const selectedRoute = matches[2].pathname;
 
 	return (
-		<div className="flex flex-col items-center justify-between w-full h-full py-8">
+		<div className="flex flex-col items-center justify-between w-full h-full min-h-screen py-8 gap-y-8">
 			<div className="flex flex-col items-center gap-y-2">
-				<p className="text-sm text-neutral-400">
-					Choose generation method:
-				</p>
-				<div className="flex p-1 border rounded-lg w-max bg-neutral-900 border-neutral-600 gap-x-1">
+				<p className="text-sm text-neutral-400">Choose generation method:</p>
+				<div className="flex p-1 border rounded-lg w-max gap-x-1 border-neutral-600 bg-neutral-900">
 					<Link
 						to="./basic"
-						className={`px-2 align-baseline py-1 rounded-md hover:bg-neutral-800 border transition-colors ${
+						className={`rounded-md border px-2 py-1 align-baseline transition-colors hover:bg-neutral-800 ${
 							selectedRoute === "/basic"
 								? "border-neutral-500 bg-neutral-700"
 								: "border-neutral-900"
-						}`}
-					>
+						}`}>
 						Basic
 					</Link>
 					<Link
 						to="./studio"
-						className={`px-2 align-baseline py-1 rounded-md hover:bg-neutral-800 border transition-colors ${
+						className={`rounded-md border px-2 py-1 align-baseline transition-colors hover:bg-neutral-800 ${
 							selectedRoute === "/studio"
 								? "border-neutral-500 bg-neutral-700"
 								: "border-neutral-900"
-						}`}
-					>
+						}`}>
 						Studio
 					</Link>
 				</div>
 			</div>
-			<div className="flex flex-col items-center p-6 mx-2 border w-fit rounded-xl border-neutral-600 gap-y-4">
-				<h1 className="text-5xl tracking-tighter">Generate</h1>
 
-				<Outlet />
-			</div>
+			<Outlet />
 			<Link
 				to="/"
-				className="flex transition-all duration-150 text-neutral-500 h-max w-max hover:text-neutral-200"
-			>
+				className="flex transition-all duration-150 h-max w-max text-neutral-500 hover:text-neutral-200">
 				<LongArrowUpLeft />
 				Go back
 			</Link>

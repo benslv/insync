@@ -10,8 +10,7 @@ export const Label = forwardRef(
 			<label
 				ref={ref}
 				className={`text-sm text-neutral-400 ${className}`}
-				{...rest}
-			>
+				{...rest}>
 				{children}
 			</label>
 		);
