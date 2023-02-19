@@ -169,8 +169,8 @@ export default function Index() {
 	return (
 		<div className="h-screen overflow-hidden">
 			<div className="relative z-10 flex h-full max-h-full">
-				<div className="flex h-full w-full flex-col items-center justify-center gap-y-4 border-r border-white/20 px-8 text-center drop-shadow-xl sm:max-w-xl sm:items-start sm:text-left md:px-16">
-					<div className="flex w-full flex-col items-center gap-y-4 sm:items-start">
+				<div className="flex flex-col items-center justify-center w-full h-full px-8 text-center border-r gap-y-4 border-white/20 drop-shadow-xl sm:max-w-xl sm:items-start sm:text-left md:px-16">
+					<div className="flex flex-col items-center w-full gap-y-4 sm:items-start">
 						<h1 className="w-full text-5xl tracking-tighter">
 							<Balancer>Stay in sync with the music you love</Balancer>
 						</h1>
@@ -180,36 +180,37 @@ export default function Index() {
 								Connect your account for personalised music discovery.
 							</Balancer>
 						</p>
-						<OnboardingModal />
 						{oAuthUrl ? (
 							<a
 								href={oAuthUrl}
-								className="w-max rounded-full bg-green-500 px-4 py-2 text-sm font-bold uppercase text-neutral-900 transition-colors hover:bg-green-400">
+								className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full w-max text-neutral-900 hover:bg-green-400">
 								Connect to Spotify
 							</a>
 						) : (
-							<div className="flex h-16 w-full gap-x-2">
+							<div className="flex w-full h-16 gap-x-2">
 								<Link
 									to="./basic"
-									className="flex h-full w-full items-center justify-center rounded-2xl border border-neutral-700 bg-neutral-900 transition duration-300 hover:border-neutral-500">
+									className="flex items-center justify-center w-full h-full transition duration-300 border rounded-2xl border-neutral-700 bg-neutral-900 hover:border-neutral-500">
 									<p className="text-xl">Basic</p>
 								</Link>
 								<Link
 									to="./studio"
-									className="group relative h-full w-full rounded-2xl bg-gradient-to-br from-white/10 via-white/75 to-white/10">
+									className="relative w-full h-full group rounded-2xl bg-gradient-to-br from-white/10 via-white/75 to-white/10">
 									<div className="absolute inset-0.5 flex items-center  justify-center overflow-hidden rounded-[14px] bg-gradient-to-br from-black via-[#222] to-black shadow-tile ring-white/20 transition-all duration-300 hover:ring-[2px]">
 										<p className="text-2xl font-semibold tracking-tighter">
 											Studio
 										</p>
-										<div className="absolute inset-0 h-full w-full bg-gradient-to-t from-green-500 to-transparent opacity-10 transition-all duration-300 group-hover:opacity-20"></div>
+										<div className="absolute inset-0 w-full h-full transition-all duration-300 bg-gradient-to-t from-green-500 to-transparent opacity-10 group-hover:opacity-20"></div>
 									</div>
 								</Link>
 							</div>
 						)}
+
+						<OnboardingModal />
 					</div>
 
 					{userProfile ? (
-						<div className="flex w-full flex-col gap-y-2">
+						<div className="flex flex-col w-full gap-y-2">
 							<hr className="border-neutral-600" />
 							<div className="flex flex-col items-center gap-x-2 sm:flex-row sm:justify-between">
 								<div className="flex items-center gap-x-2">
@@ -228,7 +229,7 @@ export default function Index() {
 						</div>
 					) : null}
 				</div>
-				<div className="relative hidden h-full w-full items-center overflow-hidden sm:flex sm:justify-end">
+				<div className="relative items-center hidden w-full h-full overflow-hidden sm:flex sm:justify-end">
 					<BackgroundCircles />
 				</div>
 			</div>
@@ -246,7 +247,7 @@ export default function Index() {
 export function ErrorBoundary() {
 	return (
 		<div className="flex h-full max-h-full">
-			<div className="z-10 flex h-full w-full flex-col items-center justify-center gap-y-4 border-r border-white/20 px-8 text-center drop-shadow-xl sm:max-w-xl sm:items-start sm:text-left md:px-16">
+			<div className="z-10 flex flex-col items-center justify-center w-full h-full px-8 text-center border-r gap-y-4 border-white/20 drop-shadow-xl sm:max-w-xl sm:items-start sm:text-left md:px-16">
 				<div className="w-full">
 					<h1 className="mb-2 text-3xl tracking-tighter sm:text-5xl">
 						Whoops!
@@ -260,7 +261,7 @@ export function ErrorBoundary() {
 				<Form method="post" action="/logout">
 					<button
 						type="submit"
-						className="w-max rounded-full bg-green-500 px-4 py-2 text-sm font-bold uppercase text-neutral-900 transition-colors hover:bg-green-400">
+						className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full w-max text-neutral-900 hover:bg-green-400">
 						Home
 					</button>
 				</Form>
@@ -279,7 +280,7 @@ export function ErrorBoundary() {
 function ProfileImage({ userProfile }: { userProfile: PrivateUser }) {
 	if (userProfile.images && userProfile.images.length === 0) {
 		return (
-			<div className="flex h-4 w-4 items-center justify-center rounded-full border border-white">
+			<div className="flex items-center justify-center w-4 h-4 border border-white rounded-full">
 				?
 			</div>
 		);
@@ -289,7 +290,7 @@ function ProfileImage({ userProfile }: { userProfile: PrivateUser }) {
 		<img
 			src={userProfile.images![0].url}
 			alt=""
-			className="h-4 w-4 rounded-full border border-white"
+			className="w-4 h-4 border border-white rounded-full"
 			height={16}
 			width={16}
 		/>
@@ -334,7 +335,7 @@ function PlaylistTypeGroup() {
 				orientation="horizontal"
 				id="selection"
 				name="selection"
-				className="flex gap-x-2 rounded-full border border-neutral-700 bg-neutral-900 p-1 ">
+				className="flex p-1 border rounded-full gap-x-2 border-neutral-700 bg-neutral-900 ">
 				<RadioGroup.Item value="popular" id="r1" className={itemClassName}>
 					<label htmlFor="r1" className="cursor-pointer">
 						Popular
