@@ -1,6 +1,6 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { ArrowLeft, ArrowRight, Plus } from "iconoir-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 
 import { Label } from "./Label";
@@ -17,6 +17,16 @@ export function OnboardingModal() {
 		setCurrentPage((page) => Math.min(numPages - 1, page + 1));
 	const prevPage = () => setCurrentPage((page) => Math.max(0, page - 1));
 
+	useEffect(() => {
+		const shouldOpenModal = localStorage.getItem("first_time");
+
+		if (shouldOpenModal === null) {
+			setIsOpen(true);
+		} else {
+			setIsOpen(JSON.parse(shouldOpenModal));
+		}
+	}, []);
+
 	const pages = [
 		<StepOne key={0} />,
 		<StepTwo key={1} />,
@@ -27,9 +37,16 @@ export function OnboardingModal() {
 	const numPages = pages.length;
 
 	return (
-		<Dialog.Root open={isOpen} onOpenChange={setIsOpen}>
+		<Dialog.Root
+			open={isOpen}
+			onOpenChange={(open) => {
+				setCurrentPage(0);
+				setIsOpen(open);
+			}}>
 			<Dialog.Trigger asChild>
-				<button>How does it work?</button>
+				<button className="text-sm italic text-green-400">
+					How does it work?
+				</button>
 			</Dialog.Trigger>
 			<AnimatePresence>
 				{isOpen ? (
@@ -46,7 +63,7 @@ export function OnboardingModal() {
 						</Dialog.Overlay>
 						<Dialog.Content
 							asChild
-							className="fixed top-1/2 left-1/2 z-10 h-max w-10/12 max-w-[640px] -translate-x-1/2 -translate-y-1/2 items-center rounded-xl border border-neutral-700 bg-neutral-800 p-6 focus:outline-none sm:h-[376px] sm:min-h-[376px]">
+							className="fixed top-1/2 left-1/2 z-10 h-max w-10/12 max-w-[640px] -translate-x-1/2 -translate-y-1/2 items-center rounded-xl border border-neutral-700 bg-neutral-800 px-2 py-6 focus:outline-none sm:h-[376px] sm:min-h-[376px] sm:p-6">
 							<motion.div
 								animate={{ opacity: 1 }}
 								initial={{ opacity: 0 }}
@@ -138,26 +155,25 @@ function StepOne() {
 
 function StepTwo() {
 	return (
-		<div className="relative flex h-full flex-col items-center gap-y-4">
+		<div className="relative flex h-full flex-col items-center gap-y-12">
 			<h1 className="text-center text-neutral-300">
-				Selection your preferred generation model
+				Select your preferred generation model
 			</h1>
-			<div className="flex flex-grow flex-col items-center justify-center gap-y-4 gap-x-4 sm:flex-row sm:items-center sm:justify-evenly">
+			<div className="flex flex-grow flex-col items-start justify-center gap-y-4 gap-x-4 sm:flex-row sm:items-start sm:justify-evenly">
 				<div className="flex flex-col items-center gap-y-4">
 					<h2 className="text-3xl">Basic</h2>
-					<ul className="list-disc">
-						<li>Item 1</li>
-						<li>Item 2</li>
-						<li>Item 3</li>
+					<ul className="list-disc pl-4">
+						<li>Simpler to use!</li>
+						<li>Three playlist types: Popular, Latest and Random.</li>
 					</ul>
 				</div>
-				<div className="h-0 w-28 border border-neutral-700 sm:h-28 sm:w-0" />
+				<div className="h-0 w-28 self-center border border-neutral-700 sm:h-28 sm:w-0" />
 				<div className="flex flex-col items-center gap-y-4">
 					<h2 className="text-3xl font-bold">Studio</h2>
-					<ul className="list-disc">
-						<li>Item 1</li>
-						<li>Item 2</li>
-						<li>Item 3</li>
+					<ul className="list-disc pl-4">
+						<li>Select up to 5 artists you follow.</li>
+						<li>Tweak parameters to fine-tune your playlist's vibe.</li>
+						<li>Up to 150 tracks per playlist!</li>
 					</ul>
 				</div>
 			</div>
@@ -213,10 +229,27 @@ function StepThree() {
 function StepFour() {
 	return (
 		<div className="relative flex h-full flex-grow flex-col items-center gap-y-4">
-			<h1 className="text-center text-neutral-300">Let's go!</h1>
-			<div className="flex flex-grow flex-col items-center justify-center gap-y-4 gap-x-4 sm:flex-row sm:items-center sm:justify-between">
-				<p>Click the button below to close this screen a</p>
+			<h1 className="text-center text-xl text-neutral-300">All done!</h1>
+			<div className="flex flex-grow flex-col items-center justify-center gap-y-2 text-center">
+				<p>
+					That's all there is to it! Click the button below to close this popup,
+					then select which generator you want to start with.
+				</p>
+				<p>
+					If this is your first time using insync, why not check out the Basic
+					generator first?
+				</p>
 			</div>
+			<Dialog.Close asChild>
+				<button
+					type="button"
+					onClick={() => {
+						localStorage.setItem("first_time", "false");
+					}}
+					className="rounded-full bg-green-500 px-4 py-2 text-sm font-bold uppercase text-neutral-900 transition-colors hover:bg-green-400">
+					Get Started
+				</button>
+			</Dialog.Close>
 		</div>
 	);
 }
