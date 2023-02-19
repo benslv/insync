@@ -1,7 +1,7 @@
 import * as Dialog from "@radix-ui/react-dialog";
+import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, Plus } from "iconoir-react";
 import { useEffect, useState } from "react";
-import { AnimatePresence, motion } from "framer-motion";
 
 import { Label } from "./Label";
 import { NumberInput } from "./NumberInput";
