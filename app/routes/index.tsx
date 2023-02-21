@@ -1,25 +1,16 @@
-import * as RadioGroup from "@radix-ui/react-radio-group";
-import type { ActionArgs, LoaderArgs } from "@remix-run/node";
+import type { LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
-import {
-	Form,
-	Link,
-	useActionData,
-	useLoaderData,
-	useTransition,
-} from "@remix-run/react";
+import { Form, Link, useLoaderData } from "@remix-run/react";
+import { SpotifyWebApi } from "@thomasngrlt/spotify-web-api-ts";
+import type { PrivateUser } from "@thomasngrlt/spotify-web-api-ts/types/types/SpotifyObjects";
 import { addSeconds } from "date-fns";
 import { motion } from "framer-motion";
 import Balancer from "react-wrap-balancer";
-import { SpotifyWebApi } from "@thomasngrlt/spotify-web-api-ts";
-import type { PrivateUser } from "@thomasngrlt/spotify-web-api-ts/types/types/SpotifyObjects";
-import { z } from "zod";
 
 import { BackgroundCircles } from "~/components/BackgroundCircles";
-import { generatePlaylist } from "~/models/generate.server";
-import { commitSession, destroySession, getSession } from "~/sessions";
-import { tokenHasExpired } from "~/utils/tokenHasExpired";
 import { OnboardingModal } from "~/components/OnboardingModal";
+import { commitSession, getSession } from "~/sessions";
+import { tokenHasExpired } from "~/utils/tokenHasExpired";
 
 export async function loader({ request }: LoaderArgs) {
 	const session = await getSession(request.headers.get("Cookie"));
@@ -92,80 +83,8 @@ export async function loader({ request }: LoaderArgs) {
 	});
 }
 
-export async function action({ request }: ActionArgs) {
-	const formData = await request.formData();
-	const intent = z.string().parse(formData.get("_intent"));
-	const selection = z
-		.union([z.literal("popular"), z.literal("latest"), z.literal("random")])
-		.catch("popular")
-		.parse(formData.get("selection"));
-
-	const playlistTitle = z
-		.string()
-		.trim()
-		.min(1)
-		.catch("insync mixtape")
-		.parse(formData.get("playlist_title"));
-
-	console.log("selection >>>", selection);
-	console.log("playlistTitle >>> ", playlistTitle);
-
-	const session = await getSession(request.headers.get("Cookie"));
-
-	switch (intent) {
-		case "logout": {
-			throw redirect("/", {
-				headers: {
-					"Set-Cookie": await destroySession(session),
-				},
-			});
-		}
-		case "generate": {
-			const generateResult = await generatePlaylist(request, {
-				selection,
-				title: playlistTitle,
-			});
-
-			if (!generateResult.ok) {
-				const message = generateResult.message;
-
-				return json({ error: true, message });
-			}
-
-			const playlistId = generateResult.playlistId;
-
-			session.set("playlist_id", playlistId);
-
-			throw redirect("/playlist", {
-				headers: {
-					"Set-Cookie": await commitSession(session),
-				},
-			});
-		}
-		default: {
-			return json({
-				error: true,
-				message: `Unhandled form intent: ${intent}`,
-			});
-		}
-	}
-}
-
 export default function Index() {
 	const { userProfile, oAuthUrl } = useLoaderData<typeof loader>();
-	const errors = useActionData<typeof action>();
-	const transition = useTransition();
-
-	const isGenerating =
-		transition.state === "submitting" &&
-		transition.submission.formData.get("_intent") === "generate";
-
-	const generateButtonText = isGenerating
-		? "Generating..."
-		: transition.state === "loading"
-		? "Loading..."
-		: "Generate";
-
 	return (
 		<div className="h-screen overflow-hidden">
 			<div className="relative z-10 flex h-full max-h-full">
@@ -294,64 +213,5 @@ function ProfileImage({ userProfile }: { userProfile: PrivateUser }) {
 			height={16}
 			width={16}
 		/>
-	);
-}
-
-function Spinner() {
-	return (
-		<motion.svg
-			fill="#ffffff"
-			width="32px"
-			height="32px"
-			viewBox="0 0 32 32"
-			version="1.1"
-			xmlns="http://www.w3.org/2000/svg"
-			animate={{ rotate: 360 }}
-			transition={{
-				repeat: Infinity,
-				bounce: 0,
-				ease: "linear",
-				duration: 0.75,
-			}}>
-			<title>spinner-one-third</title>
-			<path d="M16 0.75c-0.69 0-1.25 0.56-1.25 1.25s0.56 1.25 1.25 1.25v0c7.042 0.001 12.75 5.71 12.75 12.751 0 3.521-1.427 6.709-3.734 9.016v0c-0.226 0.226-0.365 0.538-0.365 0.883 0 0.69 0.56 1.25 1.25 1.25 0.346 0 0.659-0.14 0.885-0.367l0-0c2.759-2.76 4.465-6.572 4.465-10.782 0-8.423-6.828-15.251-15.25-15.251h-0z" />
-		</motion.svg>
-	);
-}
-
-function PlaylistTypeGroup() {
-	const itemClassName =
-		"relative px-4 py-1 rounded-full hover:bg-neutral-800 data-[state=checked]:bg-neutral-700 border border-neutral-900 transition-colors data-[state=checked]:border-neutral-500";
-
-	return (
-		<div className="flex flex-col gap-y-2">
-			<label htmlFor="selection" className="text-sm text-neutral-400">
-				Selection method:
-			</label>
-			<RadioGroup.Root
-				defaultValue="popular"
-				loop={false}
-				aria-label="Playlist type"
-				orientation="horizontal"
-				id="selection"
-				name="selection"
-				className="flex gap-x-2 rounded-full border border-neutral-700 bg-neutral-900 p-1 ">
-				<RadioGroup.Item value="popular" id="r1" className={itemClassName}>
-					<label htmlFor="r1" className="cursor-pointer">
-						Popular
-					</label>
-				</RadioGroup.Item>
-				<RadioGroup.Item value="latest" id="r2" className={itemClassName}>
-					<label htmlFor="r2" className="cursor-pointer">
-						Latest
-					</label>
-				</RadioGroup.Item>
-				<RadioGroup.Item value="random" id="r3" className={itemClassName}>
-					<label htmlFor="r3" className="cursor-pointer">
-						Random
-					</label>
-				</RadioGroup.Item>
-			</RadioGroup.Root>
-		</div>
 	);
 }
