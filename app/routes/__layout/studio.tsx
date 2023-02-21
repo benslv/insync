@@ -186,11 +186,9 @@ export default function StudioPage() {
 		return setSelectedArtists((prev) => [...prev, { name, id }]);
 	};
 
-	console.log(selectedArtists.length);
-
 	return (
-		<div className="flex flex-col items-center w-full h-full px-4 gap-y-8">
-			<div className="w-full p-6 prose text-center border prose-invert rounded-xl border-neutral-700 bg-neutral-800">
+		<div className="flex h-full w-full flex-col items-center gap-y-8 px-4">
+			<div className="prose prose-invert w-full rounded-xl border border-neutral-700 bg-neutral-800 p-6 text-center">
 				<h2 className="prose-3xl">Studio Mode</h2>
 				<p>
 					Build playlists based on the people you follow! Select up to 5 artists
@@ -202,12 +200,12 @@ export default function StudioPage() {
 					upbeat vibe? Crank that energy slider right up!
 				</p>
 			</div>
-			<div className="flex flex-col w-full max-w-4xl h-max gap-y-8 gap-x-0 sm:flex-row sm:gap-y-0 sm:gap-x-4">
-				<div className="flex flex-col w-full sm:w-1/2">
+			<div className="flex h-max w-full max-w-4xl flex-col gap-y-8 gap-x-0 sm:flex-row sm:gap-y-0 sm:gap-x-4">
+				<div className="flex w-full flex-col sm:w-1/2">
 					<h2 className="mb-4 text-xl font-bold sm:hidden">
 						1. Select artists
 					</h2>
-					<div className="w-full h-full border rounded-xl border-neutral-700">
+					<div className="h-full w-full rounded-xl border border-neutral-700">
 						<div className="flex flex-col gap-2 px-4 pt-4">
 							<div className="flex justify-between text-sm text-neutral-400">
 								<p>Artists</p>
@@ -226,10 +224,10 @@ export default function StudioPage() {
 								className="z-10 w-full rounded-full border-neutral-700"
 							/>
 						</div>
-						<div className="w-full overflow-y-scroll transition duration-300 h-96">
+						<div className="h-96 w-full overflow-y-scroll transition duration-300">
 							<Suspense
 								fallback={
-									<div className="flex items-center justify-center w-full h-full p-4 gap-x-4">
+									<div className="flex h-full w-full items-center justify-center gap-x-4 p-4">
 										<p>Loading artists...</p> <Spinner />
 									</div>
 								}>
@@ -247,7 +245,7 @@ export default function StudioPage() {
 											<motion.div
 												initial={{ opacity: 0 }}
 												animate={{ opacity: 1 }}
-												className="flex flex-wrap items-start justify-center gap-2 p-4 h-max">
+												className="flex h-max flex-wrap items-start justify-center gap-2 p-4">
 												{filteredArtists.map(({ name, images, id }, i) => (
 													<ArtistChip
 														key={id}
@@ -267,13 +265,13 @@ export default function StudioPage() {
 						</div>
 					</div>
 				</div>
-				<div className="w-full h-max sm:w-1/2">
+				<div className="h-max w-full sm:w-1/2">
 					<h2 className="mb-4 text-xl font-bold sm:hidden">
 						2. Generate playlist
 					</h2>
 					<Form
 						method="post"
-						className="flex flex-col items-center p-4 border shadow gap-y-4 rounded-xl border-neutral-700">
+						className="flex flex-col items-center gap-y-4 rounded-xl border border-neutral-700 p-4 shadow">
 						{selectedArtists.map((artist) => (
 							<input
 								key={artist.id}
@@ -288,13 +286,13 @@ export default function StudioPage() {
 								id="name"
 								name="name"
 								placeholder="insync mixtape"
-								className="w-full mt-1"
+								className="mt-1 w-full"
 							/>
 						</div>
-						<div className="flex items-center justify-between w-full gap-x-4">
+						<div className="flex w-full items-center justify-between gap-x-4">
 							<Label>How many tracks? (max. 100)</Label>
 							<NumberInput
-								className="w-12 hide-spinner"
+								className="hide-spinner w-12"
 								name="track_count"
 								min={1}
 								max={100}
@@ -338,7 +336,7 @@ export default function StudioPage() {
 						<button
 							type="submit"
 							disabled={selectedArtists.length === 0 || isGenerating}
-							className="px-4 py-2 text-sm font-bold uppercase transition-all bg-green-500 rounded-full text-neutral-900 hover:bg-green-400 disabled:opacity-50">
+							className="rounded-full bg-green-500 px-4 py-2 text-sm font-bold uppercase text-neutral-900 transition-all hover:bg-green-400 disabled:opacity-50">
 							{generateButtonText}
 						</button>
 					</Form>
