@@ -246,10 +246,10 @@ export default function StudioPage() {
 												initial={{ opacity: 0 }}
 												animate={{ opacity: 1 }}
 												className="flex h-max flex-wrap items-start justify-center gap-2 p-4">
-												{filteredArtists.map(({ name, images, id }, i) => (
+												{filteredArtists.map(({ name, images, id }) => (
 													<ArtistChip
 														key={id}
-														image={images![0].url ?? ""}
+														image={images![images.length - 1].url ?? ""}
 														text={name!}
 														onClick={() => handleChipClick({ name, id })}
 														selected={Boolean(
