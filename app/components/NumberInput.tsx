@@ -56,7 +56,7 @@ export const NumberInput = forwardRef(
 					max={100}
 					onBlur={handleBlur}
 					onChange={handleChange}
-					className={`w-8 min-w-0 border-neutral-500 bg-neutral-800 px-2 py-1 text-center transition-colors focus:bg-neutral-600 ${className}`}
+					className={`w-12 min-w-0 border-neutral-500 bg-neutral-800 px-2 py-1 text-center transition-colors focus:bg-neutral-600 ${className}`}
 					{...rest}
 				/>
 				<button

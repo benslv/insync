@@ -289,7 +289,7 @@ export default function StudioPage() {
 								className="mt-1 w-full"
 							/>
 						</div>
-						<div className="flex w-full items-center justify-between gap-x-4">
+						<div className="flex w-full flex-wrap items-center justify-between gap-x-4 gap-y-2">
 							<Label>How many tracks? (max. 100)</Label>
 							<NumberInput
 								className="hide-spinner w-12"

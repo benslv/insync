@@ -45,7 +45,7 @@ export function OnboardingModal() {
 				setIsOpen(open);
 			}}>
 			<Dialog.Trigger asChild>
-				<button className="text-sm transition duration-150 text-neutral-400 hover:text-neutral-200">
+				<button className="text-sm text-neutral-400 transition duration-150 hover:text-neutral-200">
 					How does it work?
 				</button>
 			</Dialog.Trigger>
@@ -53,7 +53,7 @@ export function OnboardingModal() {
 				{isOpen ? (
 					<Dialog.Portal forceMount>
 						<Dialog.Overlay
-							className="fixed z-10 w-screen h-screen bg-black/50"
+							className="fixed z-10 h-screen w-screen bg-black/50"
 							asChild>
 							<motion.div
 								animate={{ opacity: 1 }}
@@ -70,7 +70,7 @@ export function OnboardingModal() {
 								initial={{ opacity: 0 }}
 								exit={{ opacity: 0 }}
 								transition={{ duration: 0.05 }}>
-								<div className="flex items-center justify-between w-full h-full gap-4">
+								<div className="flex h-full w-full items-center justify-between gap-4">
 									<button
 										type="button"
 										onClick={prevPage}
@@ -81,12 +81,12 @@ export function OnboardingModal() {
 										}`}>
 										<ArrowLeft />
 									</button>
-									<div className="flex flex-col items-center flex-grow w-full h-full gap-y-8">
+									<div className="flex h-full w-full flex-grow flex-col items-center gap-y-8">
 										<motion.div
 											animate={{ opacity: 1 }}
 											initial={{ opacity: 0 }}
 											exit={{ opacity: 0 }}
-											className="w-full h-full">
+											className="h-full w-full">
 											{pages[currentPage]}
 										</motion.div>
 										<Pager pageCount={numPages} currentPage={currentPage} />
@@ -136,11 +136,11 @@ function Pager({
 
 function StepOne() {
 	return (
-		<div className="relative flex flex-col items-center flex-grow h-full gap-y-4">
+		<div className="relative flex h-full flex-grow flex-col items-center gap-y-4">
 			<h1 className="text-center text-neutral-300">
 				Connect your Spotify account with insync
 			</h1>
-			<div className="flex flex-col items-center justify-center flex-grow gap-y-4 gap-x-4 sm:flex-row sm:items-center sm:justify-between">
+			<div className="flex flex-grow flex-col items-center justify-center gap-y-4 gap-x-4 sm:flex-row sm:items-center sm:justify-between">
 				<h2 className="text-5xl">insync</h2>
 				<Plus height={90} width={90} strokeWidth={0.2} />
 				<img
@@ -156,20 +156,20 @@ function StepOne() {
 
 function StepTwo() {
 	return (
-		<div className="flex flex-col items-center w-full h-full gap-y-12">
+		<div className="flex h-full w-full flex-col items-center gap-y-12">
 			<h1 className="text-center text-neutral-300">
 				Select your preferred generation model
 			</h1>
-			<div className="flex flex-col items-start justify-center flex-grow w-full gap-y-4 gap-x-4 sm:flex-row sm:items-start sm:justify-evenly">
-				<div className="flex flex-col items-center w-full gap-y-4">
+			<div className="flex w-full flex-grow flex-col items-start justify-center gap-y-4 gap-x-4 sm:flex-row sm:items-start sm:justify-evenly">
+				<div className="flex w-full flex-col items-center gap-y-4">
 					<h2 className="text-3xl">Basic</h2>
 					<div className="space-y-2 text-center text-neutral-300">
 						<p>Simpler to use!</p>
 						<p>Three playlist types: Popular, Latest and Random.</p>
 					</div>
 				</div>
-				<div className="self-center h-0 border w-28 border-neutral-700 sm:h-full sm:w-0" />
-				<div className="flex flex-col items-center w-full gap-y-4">
+				<div className="h-0 w-28 self-center border border-neutral-700 sm:h-full sm:w-0" />
+				<div className="flex w-full flex-col items-center gap-y-4">
 					<h2 className="text-3xl font-bold">Studio</h2>
 					<div className="space-y-2 text-center text-neutral-300">
 						<p>Select up to 5 artists you follow.</p>
@@ -184,25 +184,25 @@ function StepTwo() {
 
 function StepThree() {
 	return (
-		<div className="relative flex flex-col items-center h-full gap-y-4">
+		<div className="relative flex h-full flex-col items-center gap-y-4">
 			<h1 className="text-center text-neutral-300">
 				Tweak parameters to your liking
 			</h1>
-			<div className="flex flex-col items-center justify-center flex-grow gap-y-4 gap-x-4 sm:flex-row sm:items-center sm:justify-evenly">
-				<div className="flex flex-col items-center p-4 border shadow gap-y-4 rounded-xl border-neutral-700 bg-neutral-900">
+			<div className="flex flex-grow flex-col items-center justify-center gap-y-4 gap-x-4 sm:flex-row sm:items-center sm:justify-evenly">
+				<div className="flex flex-col items-center gap-y-4 rounded-xl border border-neutral-700 bg-neutral-900 p-4 shadow">
 					<div className="w-full">
 						<Label>Playlist Name</Label>
 						<TextInput
 							id="name"
 							name="name"
 							placeholder="insync mixtape"
-							className="w-full mt-1"
+							className="mt-1 w-full"
 						/>
 					</div>
-					<div className="flex items-center justify-between w-full gap-x-4">
+					<div className="flex w-full flex-wrap items-center justify-between gap-x-4 gap-y-2">
 						<Label>How many tracks? (max. 100)</Label>
 						<NumberInput
-							className="w-12 hide-spinner"
+							className="hide-spinner w-12"
 							name="track_count"
 							min={1}
 							max={100}
@@ -229,9 +229,9 @@ function StepThree() {
 
 function StepFour() {
 	return (
-		<div className="relative flex flex-col items-center flex-grow h-full gap-y-4">
-			<h1 className="text-xl text-center text-neutral-300">All done!</h1>
-			<div className="flex flex-col items-center justify-center flex-grow text-center gap-y-2">
+		<div className="relative flex h-full flex-grow flex-col items-center gap-y-4">
+			<h1 className="text-center text-xl text-neutral-300">All done!</h1>
+			<div className="flex flex-grow flex-col items-center justify-center gap-y-2 text-center">
 				<p>
 					That's all there is to it! Click the button below to close this popup,
 					then select which generator you want to start with.
@@ -247,7 +247,7 @@ function StepFour() {
 					onClick={() => {
 						localStorage.setItem("first_time", "false");
 					}}
-					className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full text-neutral-900 hover:bg-green-400">
+					className="rounded-full bg-green-500 px-4 py-2 text-sm font-bold uppercase text-neutral-900 transition-colors hover:bg-green-400">
 					Get Started
 				</button>
 			</Dialog.Close>
@@ -258,9 +258,9 @@ function StepFour() {
 function StepFive() {
 	return (
 		<>
-			<div className="flex flex-col items-center justify-center w-full h-full gap-4">
-				<div className="flex flex-col gap-4 p-4 w-max rounded-xl bg-neutral-700">
-					<div className="relative w-32 h-2 overflow-hidden rounded-full bg-neutral-600">
+			<div className="flex h-full w-full flex-col items-center justify-center gap-4">
+				<div className="flex w-max flex-col gap-4 rounded-xl bg-neutral-700 p-4">
+					<div className="relative h-2 w-32 overflow-hidden rounded-full bg-neutral-600">
 						<motion.div
 							initial={{ width: 0 }}
 							animate={{ width: "100%" }}
@@ -270,10 +270,10 @@ function StepFive() {
 								repeatType: "reverse",
 								duration: 4,
 							}}
-							className="absolute inset-0 h-full bg-green-500 rounded-full"
+							className="absolute inset-0 h-full rounded-full bg-green-500"
 						/>
 					</div>
-					<div className="relative w-32 h-2 overflow-hidden rounded-full bg-neutral-600">
+					<div className="relative h-2 w-32 overflow-hidden rounded-full bg-neutral-600">
 						<motion.div
 							initial={{ width: "25%" }}
 							animate={{ width: "75%" }}
@@ -282,10 +282,10 @@ function StepFive() {
 								repeatType: "reverse",
 								duration: 3,
 							}}
-							className="absolute inset-0 h-full bg-green-500 rounded-full"
+							className="absolute inset-0 h-full rounded-full bg-green-500"
 						/>
 					</div>
-					<div className="relative w-32 h-2 overflow-hidden rounded-full bg-neutral-600">
+					<div className="relative h-2 w-32 overflow-hidden rounded-full bg-neutral-600">
 						<motion.div
 							initial={{ width: "90%" }}
 							animate={{ width: "10%" }}
@@ -294,15 +294,15 @@ function StepFive() {
 								repeatType: "reverse",
 								duration: 2,
 							}}
-							className="absolute inset-0 h-full bg-green-500 rounded-full"
+							className="absolute inset-0 h-full rounded-full bg-green-500"
 						/>
 					</div>
 				</div>
-				<div className="relative flex gap-4 p-4 rounded-full w-max bg-neutral-700">
+				<div className="relative flex w-max gap-4 rounded-full bg-neutral-700 p-4">
 					{/* three bars  */}
-					<div className="w-12 h-4 rounded-full bg-neutral-600" />
-					<div className="w-12 h-4 rounded-full bg-neutral-600" />
-					<div className="w-12 h-4 rounded-full bg-neutral-600" />
+					<div className="h-4 w-12 rounded-full bg-neutral-600" />
+					<div className="h-4 w-12 rounded-full bg-neutral-600" />
+					<div className="h-4 w-12 rounded-full bg-neutral-600" />
 
 					{/* moving highlight bar */}
 					<motion.div
@@ -315,8 +315,8 @@ function StepFive() {
 							repeatType: "reverse",
 							duration: 1,
 						}}
-						className="absolute flex items-center transform inset-y-1 inset-x-2">
-						<div className="w-16 h-6 rounded-full bg-white/5" />
+						className="absolute inset-y-1 inset-x-2 flex transform items-center">
+						<div className="h-6 w-16 rounded-full bg-white/5" />
 					</motion.div>
 				</div>
 			</div>
