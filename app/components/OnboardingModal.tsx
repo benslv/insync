@@ -1,6 +1,6 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Plus } from "iconoir-react";
+import { ArrowLeft, ArrowRight, Plus, HelpCircle } from "iconoir-react";
 import { useEffect, useState } from "react";
 
 import { Label } from "./Label";
@@ -45,7 +45,8 @@ export function OnboardingModal() {
 				setIsOpen(open);
 			}}>
 			<Dialog.Trigger asChild>
-				<button className="text-sm transition duration-150 text-neutral-400 hover:text-neutral-200">
+				<button className="flex items-center gap-2 text-sm transition duration-150 text-neutral-400 hover:text-neutral-200">
+					<HelpCircle />
 					How does it work?
 				</button>
 			</Dialog.Trigger>
