@@ -188,18 +188,6 @@ export default function StudioPage() {
 
 	return (
 		<div className="flex h-full w-full flex-col items-center gap-y-8 px-4">
-			<div className="prose prose-invert w-full rounded-xl border border-neutral-700 bg-neutral-800 p-6 text-center">
-				<h2 className="prose-3xl">Studio Mode</h2>
-				<p>
-					Build playlists based on the people you follow! Select up to 5 artists
-					and insync will generate a custom playlist for you based on similar
-					music.
-				</p>
-				<p>
-					Use the sliders to tailor the playlist to your liking. Fancy a more
-					upbeat vibe? Crank that energy slider right up!
-				</p>
-			</div>
 			<div className="flex h-max w-full max-w-4xl flex-col gap-y-8 gap-x-0 sm:flex-row sm:gap-y-0 sm:gap-x-4">
 				<div className="flex w-full flex-col sm:w-1/2">
 					<h2 className="mb-4 text-xl font-bold sm:hidden">
