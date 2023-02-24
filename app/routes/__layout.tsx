@@ -11,6 +11,7 @@ export default function GenerateIndex() {
 				<p className="text-sm text-neutral-400">Choose generation method:</p>
 				<div className="flex w-max gap-x-1 rounded-lg border border-neutral-600 bg-neutral-900 p-1">
 					<Link
+						replace
 						to="./basic"
 						className={`rounded-md border px-2 py-1 align-baseline transition-colors hover:bg-neutral-800 ${
 							selectedRoute === "/basic"
@@ -20,6 +21,7 @@ export default function GenerateIndex() {
 						Basic
 					</Link>
 					<Link
+						replace
 						to="./studio"
 						className={`rounded-md border px-2 py-1 align-baseline transition-colors hover:bg-neutral-800 ${
 							selectedRoute === "/studio"
