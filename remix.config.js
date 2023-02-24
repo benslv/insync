@@ -11,6 +11,6 @@ module.exports = {
 	// serverBuildPath: "api/index.js",
 	// publicPath: "/build/",
 	future: {
-		v2_routeConvention: true,
+		v2_routeConvention: false,
 	},
 };
