@@ -84,9 +84,7 @@ export async function generatePlaylist(
 			console.log(topTrackChunk[0].length);
 
 			artistTopTracks.push(
-				...topTrackChunk.filter(
-					(arr): arr is Track[] => arr.length !== 0
-				)
+				...topTrackChunk.filter((arr): arr is Track[] => arr.length !== 0)
 			);
 		}
 
@@ -144,14 +142,8 @@ function sortByMostPopular(a: Track, b: Track) {
 }
 
 function sortByLatest(a: Track, b: Track) {
-	const aDate = parseDate(
-		a.album.release_date,
-		a.album.release_date_precision
-	);
-	const bDate = parseDate(
-		b.album.release_date,
-		b.album.release_date_precision
-	);
+	const aDate = parseDate(a.album.release_date, a.album.release_date_precision);
+	const bDate = parseDate(b.album.release_date, b.album.release_date_precision);
 
 	return differenceInDays(bDate, aDate);
 }

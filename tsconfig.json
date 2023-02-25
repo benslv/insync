@@ -1,13 +1,13 @@
 {
 	"include": ["remix.env.d.ts", "**/*.ts", "**/*.tsx"],
 	"compilerOptions": {
-		"lib": ["DOM", "DOM.Iterable", "es2020"],
+		"lib": ["DOM", "DOM.Iterable", "ES2021"],
 		"isolatedModules": true,
 		"esModuleInterop": true,
 		"jsx": "react-jsx",
 		"moduleResolution": "node",
 		"resolveJsonModule": true,
-		"target": "es2020",
+		"target": "ES2021",
 		"strict": true,
 		"allowJs": true,
 		"forceConsistentCasingInFileNames": true,

@@ -22,8 +22,10 @@ interface PlaylistItemWithTrack extends PlaylistItem {
 export async function loader({ request }: LoaderArgs) {
 	const session = await getSession(request.headers.get("Cookie"));
 	const redirectUri = new URL(request.url).origin;
+	const url = new URL(request.url);
+	const playlistId = url.searchParams.get("id");
 
-	if (!session.has("access_token") || !session.has("playlist_id")) {
+	if (!session.has("access_token") || !playlistId) {
 		throw redirect("/");
 	}
 
@@ -35,8 +37,9 @@ export async function loader({ request }: LoaderArgs) {
 
 	if (tokenHasExpired(session)) {
 		const refreshToken = session.get("refresh_token");
-		const { access_token, expires_in } =
-			await spotify.getRefreshedAccessToken(refreshToken);
+		const { access_token, expires_in } = await spotify.getRefreshedAccessToken(
+			refreshToken
+		);
 
 		session.set("access_token", access_token);
 
@@ -47,11 +50,12 @@ export async function loader({ request }: LoaderArgs) {
 	const accessToken = session.get("access_token");
 	spotify.setAccessToken(accessToken);
 
-	const playlistId = session.get("playlist_id");
-
-	const playlist = await spotify.playlists.getPlaylist(playlistId);
-
-	return json({ playlist });
+	try {
+		const playlist = await spotify.playlists.getPlaylist(playlistId);
+		return json({ ok: true, playlist });
+	} catch (err) {
+		return redirect("/");
+	}
 }
 
 export default function GeneratePage() {
@@ -84,35 +88,29 @@ export default function GeneratePage() {
 		images?.[1]?.url || images?.[0].url || "/images/cover.png";
 
 	return (
-		<div className="h-full overflow-hidden">
-			<div className="relative z-10 flex items-center justify-center w-full h-full px-4">
-				<div className="relative z-10 flex flex-col items-center justify-center max-w-xl gap-y-8">
+		<div className="h-screen overflow-hidden">
+			<div className="relative z-10 flex h-full w-full items-center justify-center px-4">
+				<div className="relative z-10 flex max-w-xl flex-col items-center justify-center gap-y-8">
 					<motion.h1
 						initial={{ opacity: 0, y: -20 }}
 						animate={{ opacity: 1, y: 0 }}
-						className="mb-2 text-3xl text-center sm:text-5xl"
-					>
-						<Balancer>
-							Your playlist with {artists} + others
-						</Balancer>
+						className="mb-2 text-center text-3xl sm:text-5xl">
+						<Balancer>Your playlist with {artists} + others</Balancer>
 					</motion.h1>
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}
 						animate={{ opacity: 1, y: 0 }}
 						transition={{ delay: 0.2 }}
-						className="flex flex-col items-center px-8 py-8 space-y-4 border rounded-lg shadow-md bg-neutral-800 border-neutral-700"
-					>
+						className="flex flex-col items-center space-y-4 rounded-lg border border-neutral-700 bg-neutral-800 px-8 py-8 shadow-md">
 						<img
 							src={playlistImageUrl}
 							alt={`Playlist for ${username}`}
-							className="shadow-md w-52 h-52 bg-neutral-400"
+							className="h-52 w-52 bg-neutral-400 shadow-md"
 							height={208}
 							width={208}
 						/>
 						<div className="text-center">
-							<h2 className="text-2xl">
-								{playlistName || "insync mixtape"}
-							</h2>
+							<h2 className="text-2xl">{playlistName || "insync mixtape"}</h2>
 							<p className="text-sm text-neutral-300">
 								For {username || "you"}
 							</p>
@@ -121,8 +119,7 @@ export default function GeneratePage() {
 							href={playlistUrl}
 							target="_blank"
 							rel="noreferrer"
-							className="px-4 py-2 text-sm font-bold uppercase transition-colors bg-green-500 rounded-full hover:bg-green-400 text-neutral-900 w-max"
-						>
+							className="w-max rounded-full bg-green-500 px-4 py-2 text-sm font-bold uppercase text-neutral-900 transition-colors hover:bg-green-400">
 							Open
 						</a>
 					</motion.div>
@@ -132,8 +129,7 @@ export default function GeneratePage() {
 				initial={{ opacity: 0 }}
 				animate={{ opacity: 1 }}
 				transition={{ delay: 0.5, duration: 2 }}
-				className="relative z-0 top-2/3 sm:top-1/2"
-			>
+				className="relative top-2/3 z-0 sm:top-1/2">
 				<BackgroundCircles />
 			</motion.div>
 		</div>
