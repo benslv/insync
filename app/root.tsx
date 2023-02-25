@@ -34,7 +34,10 @@ export const meta: MetaFunction = () => ({
 });
 
 export const links: LinksFunction = () => {
-	return [{ rel: "stylesheet", href: styles }];
+	return [
+		{ rel: "stylesheet", href: styles },
+		{ rel: "manifest", href: "/resources/manifest.json" },
+	];
 };
 
 export default function App() {
