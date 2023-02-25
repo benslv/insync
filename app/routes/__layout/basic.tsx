@@ -90,7 +90,7 @@ export default function BasicPage() {
 			</details>
 			<Form
 				method="post"
-				className="flex w-max flex-col items-center gap-y-4 self-center">
+				className="flex w-full flex-col items-center gap-y-4 self-center sm:w-max">
 				<Label htmlFor="playlist_title" className="self-start">
 					Playlist Name:
 				</Label>
@@ -99,6 +99,7 @@ export default function BasicPage() {
 					id="playlist_title"
 					autoComplete="off"
 					placeholder="insync mixtape"
+					className="w-full"
 				/>
 				<PlaylistTypeGroup />
 				<div className="flex items-center gap-x-2">
