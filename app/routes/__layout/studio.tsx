@@ -190,8 +190,8 @@ export default function StudioPage() {
 		<div className="flex h-full w-full flex-col items-center gap-y-8 px-4">
 			<div className="flex h-max w-full max-w-4xl flex-col gap-y-8 gap-x-0 sm:flex-row sm:gap-y-0 sm:gap-x-4">
 				<div className="flex w-full flex-col sm:w-1/2">
-					<h2 className="mb-4 text-xl font-bold sm:hidden">
-						1. Select artists
+					<h2 className="mb-4 text-xl text-neutral-300 sm:hidden">
+						Select artists
 					</h2>
 					<div className="h-full w-full rounded-xl border border-neutral-700">
 						<div className="flex flex-col gap-2 px-4 pt-4">
@@ -212,7 +212,7 @@ export default function StudioPage() {
 								className="z-10 w-full rounded-full border-neutral-700"
 							/>
 						</div>
-						<div className="h-96 w-full overflow-y-scroll transition duration-300">
+						<div className="h-full max-h-[33vh] w-full overflow-y-scroll transition duration-300 sm:max-h-96">
 							<Suspense
 								fallback={
 									<div className="flex h-full w-full items-center justify-center gap-x-4 p-4">
@@ -254,8 +254,8 @@ export default function StudioPage() {
 					</div>
 				</div>
 				<div className="h-max w-full sm:w-1/2">
-					<h2 className="mb-4 text-xl font-bold sm:hidden">
-						2. Generate playlist
+					<h2 className="mb-4 text-xl text-neutral-300 sm:hidden">
+						Generate playlist
 					</h2>
 					<Form
 						method="post"
