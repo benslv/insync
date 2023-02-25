@@ -135,7 +135,9 @@ export default function Index() {
 							<div className="flex flex-col items-center gap-x-2 sm:flex-row sm:justify-between">
 								<div className="flex items-center gap-x-2">
 									<ProfileImage userProfile={userProfile} />
-									<p className="text-sm">Logged in as {userProfile.id}</p>
+									<p className="text-sm">
+										Logged in as {userProfile.display_name}
+									</p>
 								</div>
 								<Form method="post" action="/logout">
 									<button
