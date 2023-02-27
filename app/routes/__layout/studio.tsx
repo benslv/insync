@@ -141,7 +141,7 @@ export async function action({ request }: ActionArgs) {
 		userId,
 		options.name,
 		{
-			description: `A tailor-made mixtape for ${userId}, based off ${artistDesc}. Create your own at insync.vercel.app!`,
+			description: `A tailor-made mixtape for ${userId}, based off ${artistDesc}. Create your own at insync.rocks!`,
 		}
 	);
 
