@@ -29,10 +29,13 @@ export async function loader({ request }: LoaderArgs) {
 		clientSecret: process.env.CLIENT_SECRET,
 	});
 
-	const topArtists = await depage(spotify.personalization.getMyTopArtists, {
-		limit: 50,
-		time_range: "short_term",
-	});
+	const topArtists = await depage(
+		spotify.personalization.getMyTopArtists.bind(spotify),
+		{
+			limit: 50,
+			time_range: "short_term",
+		}
+	);
 
 	return json({ ok: true, data: topArtists });
 }
