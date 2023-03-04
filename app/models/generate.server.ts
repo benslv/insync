@@ -1,7 +1,7 @@
 import { redirect } from "@remix-run/node";
-import { differenceInDays, parse } from "date-fns";
 import { SpotifyWebApi } from "@thomasngrlt/spotify-web-api-ts";
 import type { Track } from "@thomasngrlt/spotify-web-api-ts/types/types/SpotifyObjects";
+import { differenceInDays, parse } from "date-fns";
 
 import { getSession } from "~/sessions";
 import { chunk } from "~/utils/chunk";
@@ -61,6 +61,13 @@ export async function generatePlaylist(
 		}
 
 		const allArtistIds = artistIdChunks.flatMap((chunk) => chunk.items);
+
+		if (allArtistIds.length === 0) {
+			return {
+				ok: false,
+				message: "You need to follow at least 1 artist.",
+			};
+		}
 
 		const artistTopTracks: Track[][] = [];
 
