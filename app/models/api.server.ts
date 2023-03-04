@@ -32,13 +32,8 @@ export async function getAllFollowedArtists(
 	return allArtists;
 }
 
-type PagingOptions = {
-	limit?: number;
-	offset?: number;
-};
-
 export async function depage<TReturn, TOptions>(
-	fn: (options: TOptions | PagingOptions) => Promise<Paging<TReturn>>,
+	fn: (options: TOptions) => Promise<Paging<TReturn>>,
 	options: Parameters<typeof fn>[0]
 ) {
 	const chunks = [await fn(options)];
