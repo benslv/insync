@@ -1,5 +1,8 @@
 import type { SpotifyWebApi } from "@thomasngrlt/spotify-web-api-ts/types";
-import type { Artist } from "@thomasngrlt/spotify-web-api-ts/types/types/SpotifyObjects";
+import type {
+	Artist,
+	Paging,
+} from "@thomasngrlt/spotify-web-api-ts/types/types/SpotifyObjects";
 
 export async function getAllFollowedArtists(
 	spotify: SpotifyWebApi
@@ -27,4 +30,30 @@ export async function getAllFollowedArtists(
 	const allArtists = artistChunks.flatMap((chunk) => chunk.items);
 
 	return allArtists;
+}
+
+type PagingOptions = {
+	limit?: number;
+	offset?: number;
+};
+
+export async function depage<TReturn, TOptions>(
+	fn: (options: TOptions | PagingOptions) => Promise<Paging<TReturn>>,
+	options: Parameters<typeof fn>[0]
+) {
+	const chunks = [await fn(options)];
+
+	let next = chunks[0].next;
+	let offset = chunks[0].items.length;
+
+	if (chunks[0].total ?? 0 > chunks[0].limit) {
+		while (next !== null) {
+			const nextChunk = await fn({ ...options, limit: 50, offset });
+
+			chunks.push(nextChunk);
+			next = nextChunk.next;
+		}
+	}
+
+	return chunks.flatMap((chunk) => chunk.items);
 }
