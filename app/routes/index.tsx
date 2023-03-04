@@ -6,7 +6,6 @@ import type { PrivateUser } from "@thomasngrlt/spotify-web-api-ts/types/types/Sp
 import { addSeconds } from "date-fns";
 import { motion } from "framer-motion";
 import Balancer from "react-wrap-balancer";
-import { z } from "zod";
 
 import { BackgroundCircles } from "~/components/BackgroundCircles";
 import { OnboardingModal } from "~/components/OnboardingModal";
