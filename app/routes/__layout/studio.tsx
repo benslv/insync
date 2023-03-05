@@ -410,11 +410,14 @@ function TimeRangeFilter({ includesTop }: { includesTop: boolean }) {
 		submit(event.currentTarget, { replace: true });
 	};
 
+	const itemClassName =
+		"rounded-full py-1 px-3 text-sm text-neutral-400 transition-colors hover:border-neutral-600 hover:bg-neutral-600 data-[state=checked]:border-neutral-600 data-[state=checked]:bg-neutral-700";
+
 	return (
 		<Form
 			method="get"
 			onChange={handleChange}
-			className="z-0 -ml-4 flex-grow  rounded-br-full rounded-tr-full border border-neutral-700 bg-neutral-800 pl-6">
+			className="z-0 -ml-5 flex-grow rounded-br-full rounded-tr-full border border-neutral-700 bg-neutral-800 pl-6 sm:-ml-4">
 			<input type="hidden" name="includeTop" value={String(includesTop)} />
 			<RadioGroup.Root
 				defaultValue="medium"
@@ -424,26 +427,17 @@ function TimeRangeFilter({ includesTop }: { includesTop: boolean }) {
 				orientation="horizontal"
 				loop={false}
 				className="flex justify-between">
-				<RadioGroup.Item
-					value="short"
-					id="r1"
-					className="rounded-full border border-neutral-800 py-1 px-3 text-sm text-neutral-400 transition-colors hover:border-neutral-600 hover:bg-neutral-600 data-[state=checked]:border-neutral-600 data-[state=checked]:bg-neutral-700">
+				<RadioGroup.Item value="short" id="r1" className={itemClassName}>
 					<label htmlFor="r1" className="cursor-pointer">
 						4 weeks
 					</label>
 				</RadioGroup.Item>
-				<RadioGroup.Item
-					value="medium"
-					id="r2"
-					className="rounded-full border border-neutral-800 py-1 px-3 text-sm text-neutral-400 transition-colors hover:border-neutral-600 hover:bg-neutral-600 data-[state=checked]:border-neutral-600 data-[state=checked]:bg-neutral-700">
+				<RadioGroup.Item value="medium" id="r2" className={itemClassName}>
 					<label htmlFor="r2" className="cursor-pointer">
 						6 months
 					</label>
 				</RadioGroup.Item>
-				<RadioGroup.Item
-					value="long"
-					id="r3"
-					className="rounded-full border border-neutral-800 py-1 px-3 text-sm text-neutral-400 transition-colors hover:border-neutral-600 hover:bg-neutral-600 data-[state=checked]:border-neutral-600 data-[state=checked]:bg-neutral-700">
+				<RadioGroup.Item value="long" id="r3" className={itemClassName}>
 					<label htmlFor="r3" className="cursor-pointer">
 						All time
 					</label>
