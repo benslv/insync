@@ -5,8 +5,10 @@ import {
 	Form,
 	useLoaderData,
 	useSearchParams,
+	useSubmit,
 	useTransition,
 } from "@remix-run/react";
+import * as RadioGroup from "@radix-ui/react-radio-group";
 import { SpotifyWebApi } from "@thomasngrlt/spotify-web-api-ts";
 import { addSeconds } from "date-fns";
 import { motion } from "framer-motion";
@@ -204,7 +206,7 @@ export default function StudioPage() {
 	const [searchTerm, setSearchTerm] = useState("");
 	const transition = useTransition();
 
-	const includesTop = searchParams.get("includeTop") === "true";
+	const includeTop = searchParams.get("includeTop") === "true";
 	const range = searchParams.get("range");
 	const isGenerating = transition.state === "submitting";
 
@@ -258,58 +260,22 @@ export default function StudioPage() {
 									<input
 										type="hidden"
 										name="includeTop"
-										value={String(!includesTop)}
+										value={String(!includeTop)}
 									/>
-									{!includesTop && (
+									{!includeTop && (
 										<input type="hidden" name="range" value="short" />
 									)}
 									<button
 										type="submit"
 										className={`rounded-full border py-1 px-3 text-sm transition-colors hover:cursor-pointer ${
-											includesTop
+											includeTop
 												? "border-green-600 bg-green-900 text-green-400 hover:border-green-500 hover:bg-green-800"
 												: "border-neutral-600 bg-neutral-800 text-neutral-400 hover:border-neutral-500 hover:bg-neutral-700"
 										}`}>
 										Include top artists
 									</button>
 								</Form>
-								{includesTop && (
-									<div className="z-0 -ml-4 flex flex-grow justify-between rounded-br-full rounded-tr-full border border-neutral-700 bg-neutral-800 pl-6">
-										<Form method="get" replace>
-											<input
-												type="hidden"
-												name="includeTop"
-												value={String(includesTop)}
-											/>
-											<input type="hidden" name="range" value="short" />
-											<button className="rounded-full py-1 px-3 text-sm text-neutral-400 transition-colors hover:bg-neutral-600">
-												4 weeks
-											</button>
-										</Form>
-										<Form method="get" replace>
-											<input
-												type="hidden"
-												name="includeTop"
-												value={String(includesTop)}
-											/>
-											<input type="hidden" name="range" value="medium" />
-											<button className="rounded-full py-1 px-3 text-sm text-neutral-400 transition-colors hover:bg-neutral-600">
-												6 months
-											</button>
-										</Form>
-										<Form method="get" replace>
-											<input
-												type="hidden"
-												name="includeTop"
-												value={String(includesTop)}
-											/>
-											<input type="hidden" name="range" value="long" />
-											<button className="rounded-full py-1 px-3 text-sm text-neutral-400 transition-colors hover:bg-neutral-600">
-												All time
-											</button>
-										</Form>
-									</div>
-								)}
+								{includeTop && <TimeRangeFilter includesTop={includeTop} />}
 							</div>
 						</div>
 
@@ -434,5 +400,55 @@ export default function StudioPage() {
 				</div>
 			</div>
 		</div>
+	);
+}
+
+function TimeRangeFilter({ includesTop }: { includesTop: boolean }) {
+	const submit = useSubmit();
+
+	const handleChange = (event: React.FormEvent<HTMLFormElement>) => {
+		submit(event.currentTarget, { replace: true });
+	};
+
+	return (
+		<Form
+			method="get"
+			onChange={handleChange}
+			className="z-0 -ml-4 flex-grow  rounded-br-full rounded-tr-full border border-neutral-700 bg-neutral-800 pl-6">
+			<input type="hidden" name="includeTop" value={String(includesTop)} />
+			<RadioGroup.Root
+				defaultValue="medium"
+				id="range"
+				name="range"
+				aria-label="Time range"
+				orientation="horizontal"
+				loop={false}
+				className="flex justify-between">
+				<RadioGroup.Item
+					value="short"
+					id="r1"
+					className="rounded-full border border-neutral-800 py-1 px-3 text-sm text-neutral-400 transition-colors hover:border-neutral-600 hover:bg-neutral-600 data-[state=checked]:border-neutral-600 data-[state=checked]:bg-neutral-700">
+					<label htmlFor="r1" className="cursor-pointer">
+						4 weeks
+					</label>
+				</RadioGroup.Item>
+				<RadioGroup.Item
+					value="medium"
+					id="r2"
+					className="rounded-full border border-neutral-800 py-1 px-3 text-sm text-neutral-400 transition-colors hover:border-neutral-600 hover:bg-neutral-600 data-[state=checked]:border-neutral-600 data-[state=checked]:bg-neutral-700">
+					<label htmlFor="r2" className="cursor-pointer">
+						6 months
+					</label>
+				</RadioGroup.Item>
+				<RadioGroup.Item
+					value="long"
+					id="r3"
+					className="rounded-full border border-neutral-800 py-1 px-3 text-sm text-neutral-400 transition-colors hover:border-neutral-600 hover:bg-neutral-600 data-[state=checked]:border-neutral-600 data-[state=checked]:bg-neutral-700">
+					<label htmlFor="r3" className="cursor-pointer">
+						All time
+					</label>
+				</RadioGroup.Item>
+			</RadioGroup.Root>
+		</Form>
 	);
 }
