@@ -1,6 +1,12 @@
 import type { ActionArgs } from "@remix-run/node";
 import { defer, json, redirect } from "@remix-run/node";
-import { Await, Form, useLoaderData, useTransition } from "@remix-run/react";
+import {
+	Await,
+	Form,
+	useLoaderData,
+	useSearchParams,
+	useTransition,
+} from "@remix-run/react";
 import { SpotifyWebApi } from "@thomasngrlt/spotify-web-api-ts";
 import { addSeconds } from "date-fns";
 import { motion } from "framer-motion";
@@ -15,7 +21,7 @@ import { RangeGroup } from "~/components/RangeGroup";
 import { Spinner } from "~/components/Spinner";
 import { TextInput } from "~/components/TextInput";
 import {
-	artistModeSchema,
+	// artistModeSchema,
 	getAllFollowedArtists,
 	getTopArtists,
 	timeRangeSchema,
@@ -62,31 +68,18 @@ export async function loader({ request }: ActionArgs) {
 	}
 
 	const url = new URL(request.url);
-
-	const mode = artistModeSchema
-		.catch("following")
-		.parse(url.searchParams.get("mode"));
-
 	const timeRange = timeRangeSchema.parse(url.searchParams.get("range"));
 
-	let artistsDataPromise;
+	const followedArtistsPromise = getAllFollowedArtists(spotify).catch(() => []);
+	const topArtistsPromise = getTopArtists(spotify, timeRange).catch(() => []);
 
-	switch (mode) {
-		case "following": {
-			artistsDataPromise = getAllFollowedArtists(spotify).then((artists) =>
-				artists.sort((a, b) => a.name.localeCompare(b.name))
-			);
-			break;
-		}
-
-		case "top": {
-			artistsDataPromise = getTopArtists(spotify, timeRange);
-			break;
-		}
-	}
+	const artistDataPromise = Promise.all([
+		followedArtistsPromise,
+		topArtistsPromise,
+	]);
 
 	return defer(
-		{ artistsDataPromise },
+		{ artistDataPromise },
 		{
 			headers: {
 				"Cache-Control": "max-age=600",
@@ -182,9 +175,14 @@ type MiniArtist = {
 };
 
 export default function StudioPage() {
-	const { artistsDataPromise } = useLoaderData<typeof loader>();
+	const { artistDataPromise } = useLoaderData<typeof loader>();
+	const [searchParams, setSearchParams] = useSearchParams();
+
 	const [selectedArtists, setSelectedArtists] = useState<MiniArtist[]>([]);
 	const [searchTerm, setSearchTerm] = useState("");
+	const [includeTop, setIncludeTop] = useState(
+		searchParams.get("includeTop") === "true"
+	);
 	const transition = useTransition();
 
 	const isGenerating = transition.state === "submitting";
@@ -207,6 +205,11 @@ export default function StudioPage() {
 		if (selectedArtists.length === 5) return;
 
 		return setSelectedArtists((prev) => [...prev, { name, id }]);
+	};
+
+	const handleIncludeTop = () => {
+		setIncludeTop((prev) => !prev);
+		setSearchParams();
 	};
 
 	return (
@@ -234,6 +237,9 @@ export default function StudioPage() {
 								onChange={(event) => setSearchTerm(event.target.value)}
 								className="z-10 w-full rounded-full border-neutral-700"
 							/>
+							<button onClick={() => setIncludeTop((prev) => !prev)}>
+								includeTop {String(includeTop)}
+							</button>
 						</div>
 						<div className="h-full max-h-[33vh] w-full overflow-y-scroll transition duration-300 sm:max-h-96">
 							<Suspense
@@ -243,11 +249,22 @@ export default function StudioPage() {
 									</div>
 								}>
 								<Await
-									resolve={artistsDataPromise}
+									resolve={artistDataPromise}
 									errorElement={
 										<p className="p-4">Error loading artists...</p>
 									}>
-									{(artists) => {
+									{([followedArtists, topArtists]) => {
+										const ids = followedArtists.map((artist) => artist.id);
+
+										const artists = includeTop
+											? [
+													...followedArtists,
+													...topArtists.filter(
+														(artist) => !ids.includes(artist.id)
+													),
+											  ]
+											: followedArtists;
+
 										const filteredArtists = artists.filter(({ name }) =>
 											name.toLowerCase().includes(searchTerm.toLowerCase())
 										);

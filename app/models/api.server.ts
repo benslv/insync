@@ -55,24 +55,14 @@ export async function depage<TReturn, TOptions>(
 	return chunks.flatMap((chunk) => chunk.items);
 }
 
-export const artistModeSchema = z.union([
-	z.literal("following"),
-	z.literal("top"),
-]);
-export type ArtistMode = z.infer<typeof artistModeSchema>;
-
 export const timeRangeSchema = z
-	.union([
-		z.literal("short_term"),
-		z.literal("medium_term"),
-		z.literal("long_term"),
-	])
-	.catch("medium_term");
+	.union([z.literal("short"), z.literal("medium"), z.literal("long")])
+	.catch("medium");
 export type TimeRange = z.infer<typeof timeRangeSchema>;
 
 export async function getTopArtists(spotify: SpotifyWebApi, range?: TimeRange) {
 	return depage(spotify.personalization.getMyTopArtists.bind(spotify), {
 		limit: 50,
-		time_range: range,
+		time_range: range && `${range}_term`,
 	});
 }
