@@ -11,7 +11,7 @@ import {
 import * as RadioGroup from "@radix-ui/react-radio-group";
 import { SpotifyWebApi } from "@thomasngrlt/spotify-web-api-ts";
 import { addSeconds } from "date-fns";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Suspense, useState } from "react";
 import { z } from "zod";
 
@@ -275,7 +275,29 @@ export default function StudioPage() {
 										Include top artists
 									</button>
 								</Form>
-								{includeTop && <TimeRangeFilter includesTop={includeTop} />}
+								<AnimatePresence initial={false}>
+									{includeTop && (
+										<>
+											<motion.div
+												className="hidden flex-grow md:block"
+												initial={{ opacity: 0, x: -10 }}
+												animate={{ opacity: 1, x: 0 }}
+												exit={{ opacity: 0, x: -10 }}
+												transition={{ bounce: false, duration: 0.15 }}>
+												<TimeRangeFilter includesTop={includeTop} />
+											</motion.div>
+											<motion.div
+												layout
+												className="block flex-grow md:hidden"
+												initial={{ opacity: 0, y: -10 }}
+												animate={{ opacity: 1, y: 0 }}
+												exit={{ opacity: 0, y: -10 }}
+												transition={{ bounce: false, duration: 0.15 }}>
+												<TimeRangeFilter includesTop={includeTop} />
+											</motion.div>
+										</>
+									)}
+								</AnimatePresence>
 							</div>
 						</div>
 
@@ -302,7 +324,7 @@ export default function StudioPage() {
 											<motion.div
 												initial={{ opacity: 0 }}
 												animate={{ opacity: 1 }}
-												className="flex h-max flex-wrap items-start justify-center gap-2 p-4">
+												className="flex h-max flex-wrap items-start justify-center gap-2 p-4 pt-2">
 												{filteredArtists.map(({ name, images, id }) => (
 													<ArtistChip
 														key={id}
@@ -417,7 +439,7 @@ function TimeRangeFilter({ includesTop }: { includesTop: boolean }) {
 		<Form
 			method="get"
 			onChange={handleChange}
-			className="z-0 flex-grow rounded-full border border-neutral-700 bg-neutral-800 md:-ml-4 md:rounded-none md:rounded-br-full md:rounded-tr-full md:pl-6">
+			className="z-0 rounded-full border border-neutral-700 bg-neutral-800 md:-ml-4 md:rounded-none md:rounded-br-full md:rounded-tr-full md:pl-6">
 			<input type="hidden" name="includeTop" value={String(includesTop)} />
 			<RadioGroup.Root
 				defaultValue="medium"
