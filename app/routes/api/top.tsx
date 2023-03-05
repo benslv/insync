@@ -1,17 +1,16 @@
 import type { LoaderArgs } from "@remix-run/node";
+import { defer } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { SpotifyWebApi } from "@thomasngrlt/spotify-web-api-ts";
 import { z } from "zod";
 
-import { getTopArtists } from "~/models/api.server";
+import { getAllFollowedArtists, getTopArtists } from "~/models/api.server";
 import { destroySession, getSession } from "~/sessions";
 import { tokenHasExpired } from "~/utils/tokenHasExpired";
 
-const timeRangeSchema = z.union([
-	z.literal("short_term"),
-	z.literal("medium_term"),
-	z.literal("long_term"),
-]);
+const timeRangeSchema = z
+	.union([z.literal("short"), z.literal("medium"), z.literal("long")])
+	.catch("medium");
 
 export async function loader({ request }: LoaderArgs) {
 	const session = await getSession(request.headers.get("Cookie"));
@@ -37,12 +36,40 @@ export async function loader({ request }: LoaderArgs) {
 	});
 
 	const url = new URL(request.url);
+	const includeTop = z
+		.union([z.literal("true"), z.literal("false")])
+		.catch("false")
+		.parse(url.searchParams.get("includeTop"));
+
+	const followedArtistsPromise = getAllFollowedArtists(spotify).catch(() => []);
+
+	if (includeTop === "false") {
+		return defer(
+			{
+				artistData: followedArtistsPromise,
+			},
+			{
+				headers: {
+					"Cache-Control": "max-age=600",
+				},
+			}
+		);
+	}
+
 	const timeRange = timeRangeSchema.parse(url.searchParams.get("range"));
+	const topArtistsPromise = getTopArtists(spotify, timeRange);
 
-	const topArtists = await getTopArtists(spotify, timeRange);
+	const artistDataPromise = Promise.all([
+		followedArtistsPromise,
+		topArtistsPromise,
+	]).then(([followed, top]) => {
+		const ids = followed.map((artist) => artist.id);
 
-	return json(
-		{ ok: true, data: topArtists },
+		return [...followed, ...top.filter((artist) => !ids.includes(artist.id))];
+	});
+
+	return defer(
+		{ artistDataPromise },
 		{
 			headers: {
 				"Cache-Control": "max-age=600",
