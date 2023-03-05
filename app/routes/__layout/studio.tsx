@@ -14,11 +14,16 @@ import { RangeSlider } from "~/components/Range";
 import { RangeGroup } from "~/components/RangeGroup";
 import { Spinner } from "~/components/Spinner";
 import { TextInput } from "~/components/TextInput";
-import { getAllFollowedArtists } from "~/models/api.server";
+import {
+	artistModeSchema,
+	getAllFollowedArtists,
+	getTopArtists,
+	timeRangeSchema,
+} from "~/models/api.server";
 import { commitSession, getSession } from "~/sessions";
 import { tokenHasExpired } from "~/utils/tokenHasExpired";
 
-const generateOptions = z.object({
+const generateOptionsSchema = z.object({
 	trackCount: z.coerce.number().min(1).max(100).catch(20),
 	name: z.string().min(1).catch("Insync Studio Mixtape"),
 	tempo: z.number().min(30).max(300).catch(100),
@@ -27,8 +32,6 @@ const generateOptions = z.object({
 });
 
 const seedArtistSchema = z.array(z.string()).catch([]);
-
-type GenerateOptions = z.infer<typeof generateOptions>;
 
 export async function loader({ request }: ActionArgs) {
 	const session = await getSession(request.headers.get("Cookie"));
@@ -58,12 +61,32 @@ export async function loader({ request }: ActionArgs) {
 		session.set("expiry_date", expiryDate);
 	}
 
-	const followedArtistsPromise = getAllFollowedArtists(spotify).then(
-		(artists) => artists.sort((a, b) => a.name.localeCompare(b.name))
-	);
+	const url = new URL(request.url);
+
+	const mode = artistModeSchema
+		.catch("following")
+		.parse(url.searchParams.get("mode"));
+
+	const timeRange = timeRangeSchema.parse(url.searchParams.get("range"));
+
+	let artistsDataPromise;
+
+	switch (mode) {
+		case "following": {
+			artistsDataPromise = getAllFollowedArtists(spotify).then((artists) =>
+				artists.sort((a, b) => a.name.localeCompare(b.name))
+			);
+			break;
+		}
+
+		case "top": {
+			artistsDataPromise = getTopArtists(spotify, timeRange);
+			break;
+		}
+	}
 
 	return defer(
-		{ followedArtistsPromise },
+		{ artistsDataPromise },
 		{
 			headers: {
 				"Cache-Control": "max-age=600",
@@ -78,7 +101,7 @@ export async function action({ request }: ActionArgs) {
 	const session = await getSession(request.headers.get("Cookie"));
 	const redirectUri = new URL(request.url).origin;
 
-	const options: GenerateOptions = generateOptions.parse({
+	const options = generateOptionsSchema.parse({
 		trackCount: formData.get("track_count"),
 		name: formData.get("name"),
 		tempo: formData.get("name"),
@@ -159,7 +182,7 @@ type MiniArtist = {
 };
 
 export default function StudioPage() {
-	const { followedArtistsPromise } = useLoaderData<typeof loader>();
+	const { artistsDataPromise } = useLoaderData<typeof loader>();
 	const [selectedArtists, setSelectedArtists] = useState<MiniArtist[]>([]);
 	const [searchTerm, setSearchTerm] = useState("");
 	const transition = useTransition();
@@ -220,7 +243,7 @@ export default function StudioPage() {
 									</div>
 								}>
 								<Await
-									resolve={followedArtistsPromise}
+									resolve={artistsDataPromise}
 									errorElement={
 										<p className="p-4">Error loading artists...</p>
 									}>

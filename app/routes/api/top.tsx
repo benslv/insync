@@ -1,10 +1,17 @@
 import type { LoaderArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { SpotifyWebApi } from "@thomasngrlt/spotify-web-api-ts";
-import { depage } from "~/models/api.server";
+import { z } from "zod";
 
+import { getTopArtists } from "~/models/api.server";
 import { destroySession, getSession } from "~/sessions";
 import { tokenHasExpired } from "~/utils/tokenHasExpired";
+
+const timeRangeSchema = z.union([
+	z.literal("short_term"),
+	z.literal("medium_term"),
+	z.literal("long_term"),
+]);
 
 export async function loader({ request }: LoaderArgs) {
 	const session = await getSession(request.headers.get("Cookie"));
@@ -29,13 +36,17 @@ export async function loader({ request }: LoaderArgs) {
 		clientSecret: process.env.CLIENT_SECRET,
 	});
 
-	const topArtists = await depage(
-		spotify.personalization.getMyTopArtists.bind(spotify),
+	const url = new URL(request.url);
+	const timeRange = timeRangeSchema.parse(url.searchParams.get("range"));
+
+	const topArtists = await getTopArtists(spotify, timeRange);
+
+	return json(
+		{ ok: true, data: topArtists },
 		{
-			limit: 50,
-			time_range: "short_term",
+			headers: {
+				"Cache-Control": "max-age=600",
+			},
 		}
 	);
-
-	return json({ ok: true, data: topArtists });
 }
