@@ -426,7 +426,7 @@ function TimeRangeFilter({ includesTop }: { includesTop: boolean }) {
 				aria-label="Time range"
 				orientation="horizontal"
 				loop={false}
-				className="flex justify-between">
+				className="flex justify-between gap-x-2 md:gap-x-0">
 				<RadioGroup.Item value="short" id="r1" className={itemClassName}>
 					<label htmlFor="r1" className="cursor-pointer">
 						4 weeks
