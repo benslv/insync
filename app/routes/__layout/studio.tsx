@@ -231,7 +231,7 @@ export default function StudioPage() {
 	};
 
 	return (
-		<div className="flex h-full w-full flex-col items-center gap-y-8 px-4">
+		<div className="items-center flex h-full w-full flex-col gap-y-8 px-4">
 			<div className="flex h-max w-full max-w-4xl flex-col gap-y-8 gap-x-0 sm:flex-row sm:gap-y-0 sm:gap-x-4">
 				<div className="flex w-full flex-col sm:w-1/2">
 					<h2 className="mb-4 text-xl text-neutral-300 sm:hidden">
@@ -255,7 +255,7 @@ export default function StudioPage() {
 								onChange={(event) => setSearchTerm(event.target.value)}
 								className="z-10 w-full rounded-full border-neutral-700"
 							/>
-							<div className="flex items-center">
+							<div className="items-center flex flex-col gap-y-2 md:flex-row">
 								<Form method="get" className="z-10" replace>
 									<input
 										type="hidden"
@@ -282,7 +282,7 @@ export default function StudioPage() {
 						<div className="h-full max-h-[33vh] w-full overflow-y-scroll transition duration-300 sm:max-h-96">
 							<Suspense
 								fallback={
-									<div className="flex h-full w-full items-center justify-center gap-x-4 p-4">
+									<div className="items-center flex h-full w-full justify-center gap-x-4 p-4">
 										<p>Loading artists...</p> <Spinner />
 									</div>
 								}>
@@ -328,7 +328,7 @@ export default function StudioPage() {
 					</h2>
 					<Form
 						method="post"
-						className="flex flex-col items-center gap-y-4 rounded-xl border border-neutral-700 p-4 shadow">
+						className="items-center flex flex-col gap-y-4 rounded-xl border border-neutral-700 p-4 shadow">
 						{selectedArtists.map((artist) => (
 							<input
 								key={artist.id}
@@ -346,7 +346,7 @@ export default function StudioPage() {
 								className="mt-1 w-full"
 							/>
 						</div>
-						<div className="flex w-full flex-wrap items-center justify-between gap-x-4 gap-y-2">
+						<div className="items-center flex w-full flex-wrap justify-between gap-x-4 gap-y-2">
 							<Label>How many tracks? (max. 100)</Label>
 							<NumberInput
 								className="hide-spinner w-12"
@@ -417,7 +417,7 @@ function TimeRangeFilter({ includesTop }: { includesTop: boolean }) {
 		<Form
 			method="get"
 			onChange={handleChange}
-			className="z-0 -ml-5 flex-grow rounded-br-full rounded-tr-full border border-neutral-700 bg-neutral-800 pl-6 sm:-ml-4">
+			className="z-0 flex-grow rounded-full border border-neutral-700 bg-neutral-800 md:-ml-4 md:rounded-none md:rounded-br-full md:rounded-tr-full md:pl-6">
 			<input type="hidden" name="includeTop" value={String(includesTop)} />
 			<RadioGroup.Root
 				defaultValue="medium"
