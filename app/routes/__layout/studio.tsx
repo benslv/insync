@@ -3,7 +3,6 @@ import { defer, json, redirect } from "@remix-run/node";
 import {
 	Await,
 	Form,
-	useFetcher,
 	useLoaderData,
 	useSearchParams,
 	useTransition,
@@ -73,9 +72,7 @@ export async function loader({ request }: ActionArgs) {
 		.catch("false")
 		.parse(url.searchParams.get("includeTop"));
 
-	const timeRange = timeRangeSchema.parse(url.searchParams.get("range"));
-
-	const followedArtistsPromise = getAllFollowedArtists(spotify).catch(() => []);
+	const followedArtistsPromise = getAllFollowedArtists(spotify);
 
 	if (includeTop === "false") {
 		return defer(
@@ -91,7 +88,8 @@ export async function loader({ request }: ActionArgs) {
 		);
 	}
 
-	const topArtistsPromise = getTopArtists(spotify, timeRange).catch(() => []);
+	const timeRange = timeRangeSchema.parse(url.searchParams.get("range"));
+	const topArtistsPromise = getTopArtists(spotify, timeRange);
 
 	const artistDataPromise = Promise.all([
 		followedArtistsPromise,
@@ -255,37 +253,66 @@ export default function StudioPage() {
 								onChange={(event) => setSearchTerm(event.target.value)}
 								className="z-10 w-full rounded-full border-neutral-700"
 							/>
-							<Form method="get" replace>
-								<input
-									type="hidden"
-									name="includeTop"
-									value={String(!includesTop)}
-								/>
-								<input type="hidden" name="range" value="short" />
-								<div className="flex">
+							<div className="flex items-center">
+								<Form method="get" className="z-10" replace>
+									<input
+										type="hidden"
+										name="includeTop"
+										value={String(!includesTop)}
+									/>
+									{!includesTop && (
+										<input type="hidden" name="range" value="short" />
+									)}
 									<button
 										type="submit"
-										className={`rounded-full border py-1 px-3 text-sm transition-colors hover:cursor-pointer  ${
+										className={`rounded-full border py-1 px-3 text-sm transition-colors hover:cursor-pointer ${
 											includesTop
 												? "border-green-600 bg-green-900 text-green-400 hover:border-green-500 hover:bg-green-800"
 												: "border-neutral-600 bg-neutral-800 text-neutral-400 hover:border-neutral-500 hover:bg-neutral-700"
 										}`}>
 										Include top artists
 									</button>
-									<div className="ml-6 flex gap-x-4">
-										<button className="text-sm text-neutral-400">
-											4 weeks
-										</button>
-										<button className="text-sm text-neutral-400">
-											6 months
-										</button>
-										<button className="text-sm text-neutral-400">
-											All time
-										</button>
+								</Form>
+								{includesTop && (
+									<div className="z-0 -ml-4 flex flex-grow justify-between rounded-br-full rounded-tr-full border border-neutral-700 bg-neutral-800 pl-6">
+										<Form method="get" replace>
+											<input
+												type="hidden"
+												name="includeTop"
+												value={String(includesTop)}
+											/>
+											<input type="hidden" name="range" value="short" />
+											<button className="rounded-full py-1 px-3 text-sm text-neutral-400 transition-colors hover:bg-neutral-600">
+												4 weeks
+											</button>
+										</Form>
+										<Form method="get" replace>
+											<input
+												type="hidden"
+												name="includeTop"
+												value={String(includesTop)}
+											/>
+											<input type="hidden" name="range" value="medium" />
+											<button className="rounded-full py-1 px-3 text-sm text-neutral-400 transition-colors hover:bg-neutral-600">
+												6 months
+											</button>
+										</Form>
+										<Form method="get" replace>
+											<input
+												type="hidden"
+												name="includeTop"
+												value={String(includesTop)}
+											/>
+											<input type="hidden" name="range" value="long" />
+											<button className="rounded-full py-1 px-3 text-sm text-neutral-400 transition-colors hover:bg-neutral-600">
+												All time
+											</button>
+										</Form>
 									</div>
-								</div>
-							</Form>
+								)}
+							</div>
 						</div>
+
 						<div className="h-full max-h-[33vh] w-full overflow-y-scroll transition duration-300 sm:max-h-96">
 							<Suspense
 								fallback={
