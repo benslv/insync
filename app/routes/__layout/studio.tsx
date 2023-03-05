@@ -3,6 +3,7 @@ import { defer, json, redirect } from "@remix-run/node";
 import {
 	Await,
 	Form,
+	useFetcher,
 	useLoaderData,
 	useSearchParams,
 	useTransition,
@@ -21,7 +22,6 @@ import { RangeGroup } from "~/components/RangeGroup";
 import { Spinner } from "~/components/Spinner";
 import { TextInput } from "~/components/TextInput";
 import {
-	// artistModeSchema,
 	getAllFollowedArtists,
 	getTopArtists,
 	timeRangeSchema,
@@ -68,15 +68,39 @@ export async function loader({ request }: ActionArgs) {
 	}
 
 	const url = new URL(request.url);
+	const includeTop = z
+		.union([z.literal("true"), z.literal("false")])
+		.catch("false")
+		.parse(url.searchParams.get("includeTop"));
+
 	const timeRange = timeRangeSchema.parse(url.searchParams.get("range"));
 
 	const followedArtistsPromise = getAllFollowedArtists(spotify).catch(() => []);
+
+	if (includeTop === "false") {
+		return defer(
+			{
+				artistDataPromise: followedArtistsPromise,
+			},
+			{
+				headers: {
+					"Cache-Control": "max-age=600",
+					"Set-Cookie": await commitSession(session),
+				},
+			}
+		);
+	}
+
 	const topArtistsPromise = getTopArtists(spotify, timeRange).catch(() => []);
 
 	const artistDataPromise = Promise.all([
 		followedArtistsPromise,
 		topArtistsPromise,
-	]);
+	]).then(([followed, top]) => {
+		const ids = followed.map((artist) => artist.id);
+
+		return [...followed, ...top.filter((artist) => !ids.includes(artist.id))];
+	});
 
 	return defer(
 		{ artistDataPromise },
@@ -176,15 +200,14 @@ type MiniArtist = {
 
 export default function StudioPage() {
 	const { artistDataPromise } = useLoaderData<typeof loader>();
-	const [searchParams, setSearchParams] = useSearchParams();
+	const [searchParams] = useSearchParams();
 
 	const [selectedArtists, setSelectedArtists] = useState<MiniArtist[]>([]);
 	const [searchTerm, setSearchTerm] = useState("");
-	const [includeTop, setIncludeTop] = useState(
-		searchParams.get("includeTop") === "true"
-	);
 	const transition = useTransition();
 
+	const includesTop = searchParams.get("includeTop") === "true";
+	const range = searchParams.get("range");
 	const isGenerating = transition.state === "submitting";
 
 	const generateButtonText = isGenerating
@@ -207,11 +230,6 @@ export default function StudioPage() {
 		return setSelectedArtists((prev) => [...prev, { name, id }]);
 	};
 
-	const handleIncludeTop = () => {
-		setIncludeTop((prev) => !prev);
-		setSearchParams();
-	};
-
 	return (
 		<div className="flex h-full w-full flex-col items-center gap-y-8 px-4">
 			<div className="flex h-max w-full max-w-4xl flex-col gap-y-8 gap-x-0 sm:flex-row sm:gap-y-0 sm:gap-x-4">
@@ -220,7 +238,7 @@ export default function StudioPage() {
 						Select artists
 					</h2>
 					<div className="h-full w-full rounded-xl border border-neutral-700">
-						<div className="flex flex-col gap-2 px-4 pt-4">
+						<div className="flex flex-col gap-2 px-4 pt-4 pb-2">
 							<div className="flex justify-between text-sm text-neutral-400">
 								<p>Artists</p>
 								<p
@@ -237,9 +255,36 @@ export default function StudioPage() {
 								onChange={(event) => setSearchTerm(event.target.value)}
 								className="z-10 w-full rounded-full border-neutral-700"
 							/>
-							<button onClick={() => setIncludeTop((prev) => !prev)}>
-								includeTop {String(includeTop)}
-							</button>
+							<Form method="get" replace>
+								<input
+									type="hidden"
+									name="includeTop"
+									value={String(!includesTop)}
+								/>
+								<input type="hidden" name="range" value="short" />
+								<div className="flex">
+									<button
+										type="submit"
+										className={`rounded-full border py-1 px-3 text-sm transition-colors hover:cursor-pointer  ${
+											includesTop
+												? "border-green-600 bg-green-900 text-green-400 hover:border-green-500 hover:bg-green-800"
+												: "border-neutral-600 bg-neutral-800 text-neutral-400 hover:border-neutral-500 hover:bg-neutral-700"
+										}`}>
+										Include top artists
+									</button>
+									<div className="ml-6 flex gap-x-4">
+										<button className="text-sm text-neutral-400">
+											4 weeks
+										</button>
+										<button className="text-sm text-neutral-400">
+											6 months
+										</button>
+										<button className="text-sm text-neutral-400">
+											All time
+										</button>
+									</div>
+								</div>
+							</Form>
 						</div>
 						<div className="h-full max-h-[33vh] w-full overflow-y-scroll transition duration-300 sm:max-h-96">
 							<Suspense
@@ -253,21 +298,12 @@ export default function StudioPage() {
 									errorElement={
 										<p className="p-4">Error loading artists...</p>
 									}>
-									{([followedArtists, topArtists]) => {
-										const ids = followedArtists.map((artist) => artist.id);
-
-										const artists = includeTop
-											? [
-													...followedArtists,
-													...topArtists.filter(
-														(artist) => !ids.includes(artist.id)
-													),
-											  ]
-											: followedArtists;
-
-										const filteredArtists = artists.filter(({ name }) =>
-											name.toLowerCase().includes(searchTerm.toLowerCase())
-										);
+									{(artists) => {
+										const filteredArtists = artists
+											.filter(({ name }) =>
+												name.toLowerCase().includes(searchTerm.toLowerCase())
+											)
+											.sort((a, b) => b.popularity - a.popularity);
 
 										return (
 											<motion.div
