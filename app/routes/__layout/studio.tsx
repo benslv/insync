@@ -314,6 +314,16 @@ export default function StudioPage() {
 										<p className="p-4">Error loading artists...</p>
 									}>
 									{(artists) => {
+										if (artists.length === 0) {
+											return (
+												<div className="items-center  flex h-full w-full flex-col justify-center">
+													<p className="text-sm text-neutral-400">
+														You need to be following at least one artist!
+													</p>
+												</div>
+											);
+										}
+
 										const filteredArtists = artists
 											.filter(({ name }) =>
 												name.toLowerCase().includes(searchTerm.toLowerCase())

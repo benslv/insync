@@ -5,6 +5,7 @@ import { SpotifyWebApi } from "@thomasngrlt/spotify-web-api-ts";
 import type { PrivateUser } from "@thomasngrlt/spotify-web-api-ts/types/types/SpotifyObjects";
 import { addSeconds } from "date-fns";
 import { motion } from "framer-motion";
+import { ProfileCircle } from "iconoir-react";
 import Balancer from "react-wrap-balancer";
 
 import { BackgroundCircles } from "~/components/BackgroundCircles";
@@ -200,11 +201,7 @@ export function ErrorBoundary() {
 
 function ProfileImage({ userProfile }: { userProfile: PrivateUser }) {
 	if (userProfile.images && userProfile.images.length === 0) {
-		return (
-			<div className="flex h-4 w-4 items-center justify-center rounded-full border border-white">
-				?
-			</div>
-		);
+		return <ProfileCircle className="h-4 w-4" />;
 	}
 
 	return (
