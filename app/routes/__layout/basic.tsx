@@ -63,7 +63,7 @@ export default function BasicPage() {
 		: "Generate";
 
 	return (
-		<div className="mx-4 flex max-w-lg flex-col gap-y-4 rounded-xl border border-neutral-700 p-6">
+		<div className="mx-2 flex max-w-lg flex-col gap-y-4 rounded-xl border border-neutral-700 p-6">
 			<p>
 				Create playlists based on the top songs from artists you follow on
 				Spotify!

@@ -227,7 +227,7 @@ export default function StudioPage() {
 	};
 
 	return (
-		<div className="flex h-full w-full flex-col items-center gap-y-8 px-4">
+		<div className="flex h-full w-full flex-col items-center gap-y-8 px-2 sm:px-4">
 			<div className="flex h-max w-full max-w-4xl flex-col gap-y-8 gap-x-0 sm:flex-row sm:gap-y-0 sm:gap-x-4">
 				<div className="flex w-full flex-col sm:w-1/2">
 					<h2 className="mb-4 text-xl text-neutral-300 sm:hidden">
@@ -267,12 +267,12 @@ export default function StudioPage() {
 									)}
 									<button
 										type="submit"
-										className={`whitespace-nowrap rounded-full border py-1 px-3 text-sm transition-colors hover:cursor-pointer ${
+										className={`whitespace-nowrap rounded-full border py-1 px-3 transition-colors hover:cursor-pointer sm:text-sm ${
 											includeTop
 												? "border-green-600 bg-green-900 text-green-200 hover:border-green-500 hover:bg-green-800"
 												: "border-neutral-600 bg-neutral-800 text-neutral-400 hover:border-neutral-500 hover:bg-neutral-700"
 										}`}>
-										Include top artists
+										Top artists
 									</button>
 								</Form>
 								<AnimatePresence initial={false}>
@@ -432,13 +432,13 @@ function TimeRangeFilter({ includesTop }: { includesTop: boolean }) {
 	};
 
 	const itemClassName =
-		"rounded-full py-1 px-3 text-sm text-neutral-400 transition-colors hover:border-neutral-600 hover:bg-neutral-600 data-[state=checked]:border-neutral-600 data-[state=checked]:bg-neutral-700";
+		"rounded-full py-1 px-3 transition-colors hover:border-neutral-600 hover:bg-neutral-600 data-[state=checked]:border-neutral-600 data-[state=checked]:bg-neutral-700";
 
 	return (
 		<Form
 			method="get"
 			onChange={handleChange}
-			className="z-0 overflow-x-scroll rounded-br-full rounded-tr-full border border-neutral-700 bg-neutral-800 pl-5 md:overflow-x-auto">
+			className="z-0 overflow-x-scroll rounded-br-full rounded-tr-full  border border-neutral-700 bg-neutral-800 pl-5 text-neutral-400 sm:text-sm md:overflow-x-auto">
 			<input type="hidden" name="includeTop" value={String(includesTop)} />
 			<RadioGroup.Root
 				defaultValue="medium"
