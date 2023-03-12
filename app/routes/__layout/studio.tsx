@@ -1,24 +1,36 @@
+import * as RadioGroup from "@radix-ui/react-radio-group";
 import type { ActionArgs } from "@remix-run/node";
 import { defer, json, redirect } from "@remix-run/node";
-import { Await, Form, useLoaderData, useTransition } from "@remix-run/react";
+import {
+	Await,
+	Form,
+	useLoaderData,
+	useNavigation,
+	useSearchParams,
+	useSubmit,
+} from "@remix-run/react";
 import { SpotifyWebApi } from "@thomasngrlt/spotify-web-api-ts";
 import { addSeconds } from "date-fns";
-import { motion } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import { Suspense, useState } from "react";
 import { z } from "zod";
 
-import { ArtistChip } from "~/components/ArtistChip";
+import { ArtistChip, ArtistChip2 } from "~/components/ArtistChip";
 import { Label } from "~/components/Label";
 import { NumberInput } from "~/components/NumberInput";
 import { RangeSlider } from "~/components/Range";
 import { RangeGroup } from "~/components/RangeGroup";
 import { Spinner } from "~/components/Spinner";
 import { TextInput } from "~/components/TextInput";
-import { getAllFollowedArtists } from "~/models/api.server";
+import {
+	getAllFollowedArtists,
+	getTopArtists,
+	timeRangeSchema,
+} from "~/models/api.server";
 import { commitSession, getSession } from "~/sessions";
 import { tokenHasExpired } from "~/utils/tokenHasExpired";
 
-const generateOptions = z.object({
+const generateOptionsSchema = z.object({
 	trackCount: z.coerce.number().min(1).max(100).catch(20),
 	name: z.string().min(1).catch("Insync Studio Mixtape"),
 	tempo: z.number().min(30).max(300).catch(100),
@@ -27,8 +39,6 @@ const generateOptions = z.object({
 });
 
 const seedArtistSchema = z.array(z.string()).catch([]);
-
-type GenerateOptions = z.infer<typeof generateOptions>;
 
 export async function loader({ request }: ActionArgs) {
 	const session = await getSession(request.headers.get("Cookie"));
@@ -58,12 +68,42 @@ export async function loader({ request }: ActionArgs) {
 		session.set("expiry_date", expiryDate);
 	}
 
-	const followedArtistsPromise = getAllFollowedArtists(spotify).then(
-		(artists) => artists.sort((a, b) => a.name.localeCompare(b.name))
-	);
+	const url = new URL(request.url);
+	const includeTop = z
+		.union([z.literal("true"), z.literal("false")])
+		.catch("false")
+		.parse(url.searchParams.get("includeTop"));
+
+	const followedArtistsPromise = getAllFollowedArtists(spotify);
+
+	if (includeTop === "false") {
+		return defer(
+			{
+				artistDataPromise: followedArtistsPromise,
+			},
+			{
+				headers: {
+					"Cache-Control": "max-age=600",
+					"Set-Cookie": await commitSession(session),
+				},
+			}
+		);
+	}
+
+	const timeRange = timeRangeSchema.parse(url.searchParams.get("range"));
+	const topArtistsPromise = getTopArtists(spotify, timeRange);
+
+	const artistDataPromise = Promise.all([
+		followedArtistsPromise,
+		topArtistsPromise,
+	]).then(([followed, top]) => {
+		const ids = followed.map((artist) => artist.id);
+
+		return [...followed, ...top.filter((artist) => !ids.includes(artist.id))];
+	});
 
 	return defer(
-		{ followedArtistsPromise },
+		{ artistDataPromise },
 		{
 			headers: {
 				"Cache-Control": "max-age=600",
@@ -78,7 +118,7 @@ export async function action({ request }: ActionArgs) {
 	const session = await getSession(request.headers.get("Cookie"));
 	const redirectUri = new URL(request.url).origin;
 
-	const options: GenerateOptions = generateOptions.parse({
+	const options = generateOptionsSchema.parse({
 		trackCount: formData.get("track_count"),
 		name: formData.get("name"),
 		tempo: formData.get("name"),
@@ -159,18 +199,21 @@ type MiniArtist = {
 };
 
 export default function StudioPage() {
-	const { followedArtistsPromise } = useLoaderData<typeof loader>();
+	const { artistDataPromise } = useLoaderData<typeof loader>();
+	const [searchParams] = useSearchParams();
+	const navigation = useNavigation();
+
 	const [selectedArtists, setSelectedArtists] = useState<MiniArtist[]>([]);
 	const [searchTerm, setSearchTerm] = useState("");
-	const transition = useTransition();
 
-	const isGenerating = transition.state === "submitting";
+	const includeTop = searchParams.get("includeTop") === "true";
+	const isGenerating =
+		navigation.state === "submitting" && navigation.formMethod === "post";
 
-	const generateButtonText = isGenerating
-		? "Generating..."
-		: transition.state === "loading"
-		? "Loading..."
-		: "Generate";
+	const generateButtonText = isGenerating ? "Generating..." : "Generate";
+
+	const isLoading =
+		navigation.state === "loading" && navigation.formMethod === "get";
 
 	const handleChipClick = ({ name, id }: MiniArtist) => {
 		const hasArtist = selectedArtists.find((artist) => artist.id === id);
@@ -187,14 +230,14 @@ export default function StudioPage() {
 	};
 
 	return (
-		<div className="flex h-full w-full flex-col items-center gap-y-8 px-4">
+		<div className="flex h-full w-full flex-col items-center gap-y-8 px-2 sm:px-4">
 			<div className="flex h-max w-full max-w-4xl flex-col gap-y-8 gap-x-0 sm:flex-row sm:gap-y-0 sm:gap-x-4">
 				<div className="flex w-full flex-col sm:w-1/2">
 					<h2 className="mb-4 text-xl text-neutral-300 sm:hidden">
 						Select artists
 					</h2>
-					<div className="h-full w-full rounded-xl border border-neutral-700">
-						<div className="flex flex-col gap-2 px-4 pt-4">
+					<div className="h-full w-full  rounded-xl border border-neutral-700">
+						<div className="flex flex-col gap-4 px-4 pt-4 pb-4">
 							<div className="flex justify-between text-sm text-neutral-400">
 								<p>Artists</p>
 								<p
@@ -209,10 +252,48 @@ export default function StudioPage() {
 								placeholder="Search"
 								value={searchTerm}
 								onChange={(event) => setSearchTerm(event.target.value)}
-								className="z-10 w-full rounded-full border-neutral-700"
+								className="z-10 w-full"
 							/>
+							<div className="flex items-center">
+								<Form
+									method="get"
+									className="z-10"
+									replace
+									preventScrollReset={true}>
+									<input
+										type="hidden"
+										name="includeTop"
+										value={String(!includeTop)}
+									/>
+									{!includeTop && (
+										<input type="hidden" name="range" value="short" />
+									)}
+									<button
+										type="submit"
+										className={`whitespace-nowrap rounded-full border py-1 px-3 transition-colors hover:cursor-pointer sm:text-sm ${
+											includeTop
+												? "border-green-600 bg-green-900 text-green-200 hover:border-green-500 hover:bg-green-800"
+												: "border-neutral-600 bg-neutral-800 text-neutral-400 hover:border-neutral-500 hover:bg-neutral-700"
+										}`}>
+										Top artists
+									</button>
+								</Form>
+								<AnimatePresence initial={false}>
+									{includeTop && (
+										<motion.div
+											className="-ml-4 overflow-x-scroll md:overflow-x-auto"
+											initial={{ opacity: 0, x: -10 }}
+											animate={{ opacity: 1, x: 0 }}
+											exit={{ opacity: 0, x: -10 }}
+											transition={{ bounce: false, duration: 0.15 }}>
+											<TimeRangeFilter includesTop={includeTop} />
+										</motion.div>
+									)}
+								</AnimatePresence>
+							</div>
 						</div>
-						<div className="h-full max-h-[33vh] w-full overflow-y-scroll transition duration-300 sm:max-h-96">
+
+						<div className="relative w-full transition duration-300 sm:max-h-96">
 							<Suspense
 								fallback={
 									<div className="flex h-full w-full items-center justify-center gap-x-4 p-4">
@@ -220,14 +301,14 @@ export default function StudioPage() {
 									</div>
 								}>
 								<Await
-									resolve={followedArtistsPromise}
+									resolve={artistDataPromise}
 									errorElement={
 										<p className="p-4">Error loading artists...</p>
 									}>
 									{(artists) => {
 										if (artists.length === 0) {
 											return (
-												<div className="flex  h-full w-full flex-col items-center justify-center">
+												<div className="flex h-full w-full flex-col items-center justify-center overflow-y-scroll">
 													<p className="text-sm text-neutral-400">
 														You need to be following at least one artist!
 													</p>
@@ -235,17 +316,19 @@ export default function StudioPage() {
 											);
 										}
 
-										const filteredArtists = artists.filter(({ name }) =>
-											name.toLowerCase().includes(searchTerm.toLowerCase())
-										);
+										const filteredArtists = artists
+											.filter(({ name }) =>
+												name.toLowerCase().includes(searchTerm.toLowerCase())
+											)
+											.sort((a, b) => b.popularity - a.popularity);
 
 										return (
 											<motion.div
 												initial={{ opacity: 0 }}
 												animate={{ opacity: 1 }}
-												className="flex h-max flex-wrap items-start justify-center gap-2 p-4">
+												className="grid h-[350px] grid-cols-4 gap-x-2 gap-y-4 overflow-y-scroll p-4 pt-2 sm:grid-cols-5">
 												{filteredArtists.map(({ name, images, id }) => (
-													<ArtistChip
+													<ArtistChip2
 														key={id}
 														image={images![images.length - 1].url ?? ""}
 														text={name!}
@@ -260,6 +343,18 @@ export default function StudioPage() {
 									}}
 								</Await>
 							</Suspense>
+							<AnimatePresence>
+								{isLoading && (
+									<motion.div
+										initial={{ opacity: 0 }}
+										animate={{ opacity: 1 }}
+										exit={{ opacity: 0 }}
+										transition={{ delay: 0.2, duration: 0.25 }}
+										className="absolute top-0 left-0 flex h-full w-full touch-none items-center justify-center bg-neutral-900/80">
+										<Spinner />
+									</motion.div>
+								)}
+							</AnimatePresence>
 						</div>
 					</div>
 				</div>
@@ -341,5 +436,49 @@ export default function StudioPage() {
 				</div>
 			</div>
 		</div>
+	);
+}
+
+function TimeRangeFilter({ includesTop }: { includesTop: boolean }) {
+	const submit = useSubmit();
+
+	const handleChange = (event: React.FormEvent<HTMLFormElement>) => {
+		submit(event.currentTarget, { replace: true, preventScrollReset: true });
+	};
+
+	const itemClassName =
+		"rounded-full py-1 px-3 transition-colors hover:border-neutral-600 hover:bg-neutral-600 data-[state=checked]:border-neutral-600 data-[state=checked]:bg-neutral-700";
+
+	return (
+		<Form
+			method="get"
+			onChange={handleChange}
+			className="z-0 overflow-x-scroll rounded-br-full rounded-tr-full  border border-neutral-700 bg-neutral-800 pl-5 text-neutral-400 sm:text-sm md:overflow-x-auto">
+			<input type="hidden" name="includeTop" value={String(includesTop)} />
+			<RadioGroup.Root
+				defaultValue="medium"
+				id="range"
+				name="range"
+				aria-label="Time range"
+				orientation="horizontal"
+				loop={false}
+				className="flex justify-between gap-x-1">
+				<RadioGroup.Item value="short" id="r1" className={itemClassName}>
+					<label htmlFor="r1" className="cursor-pointer whitespace-nowrap">
+						4 weeks
+					</label>
+				</RadioGroup.Item>
+				<RadioGroup.Item value="medium" id="r2" className={itemClassName}>
+					<label htmlFor="r2" className="cursor-pointer whitespace-nowrap">
+						6 months
+					</label>
+				</RadioGroup.Item>
+				<RadioGroup.Item value="long" id="r3" className={itemClassName}>
+					<label htmlFor="r3" className="cursor-pointer whitespace-nowrap">
+						All time
+					</label>
+				</RadioGroup.Item>
+			</RadioGroup.Root>
+		</Form>
 	);
 }

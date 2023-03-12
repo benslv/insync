@@ -1,5 +1,10 @@
 import type { SpotifyWebApi } from "@thomasngrlt/spotify-web-api-ts/types";
-import type { Artist } from "@thomasngrlt/spotify-web-api-ts/types/types/SpotifyObjects";
+import type {
+	Artist,
+	CursorBasedPaging,
+	Paging,
+} from "@thomasngrlt/spotify-web-api-ts/types/types/SpotifyObjects";
+import { z } from "zod";
 
 export async function getAllFollowedArtists(
 	spotify: SpotifyWebApi
@@ -24,7 +29,40 @@ export async function getAllFollowedArtists(
 		}
 	}
 
-	const allArtists = artistChunks.flatMap((chunk) => chunk.items);
+	return artistChunks.flatMap((chunk) => chunk.items);
+}
 
-	return allArtists;
+export async function depage<TReturn, TOptions>(
+	fn: (
+		options: TOptions
+	) => Promise<Paging<TReturn> | CursorBasedPaging<TReturn>>,
+	options: Parameters<typeof fn>[0]
+) {
+	const chunks = [await fn(options)];
+
+	let next = chunks[0].next;
+	let offset = chunks[0].items.length;
+
+	if (chunks[0].total ?? 0 > chunks[0].limit) {
+		while (next !== null) {
+			const nextChunk = await fn({ ...options, limit: 50, offset });
+
+			chunks.push(nextChunk);
+			next = nextChunk.next;
+		}
+	}
+
+	return chunks.flatMap((chunk) => chunk.items);
+}
+
+export const timeRangeSchema = z
+	.union([z.literal("short"), z.literal("medium"), z.literal("long")])
+	.catch("medium");
+export type TimeRange = z.infer<typeof timeRangeSchema>;
+
+export async function getTopArtists(spotify: SpotifyWebApi, range?: TimeRange) {
+	return depage(spotify.personalization.getMyTopArtists.bind(spotify), {
+		limit: 50,
+		time_range: range && `${range}_term`,
+	});
 }

@@ -58,7 +58,7 @@ export async function loader({ request }: LoaderArgs) {
 
 	if (!code) {
 		const oAuthUrl = spotify.getRefreshableAuthorizationUrl({
-			scope: ["user-follow-read", "playlist-modify-public"],
+			scope: ["user-follow-read", "playlist-modify-public", "user-top-read"],
 		});
 
 		return json({ userProfile: null, oAuthUrl });
