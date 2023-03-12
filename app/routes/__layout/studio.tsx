@@ -212,6 +212,9 @@ export default function StudioPage() {
 
 	const generateButtonText = isGenerating ? "Generating..." : "Generate";
 
+	const isLoading =
+		navigation.state === "loading" && navigation.formMethod === "get";
+
 	const handleChipClick = ({ name, id }: MiniArtist) => {
 		const hasArtist = selectedArtists.find((artist) => artist.id === id);
 
@@ -233,8 +236,8 @@ export default function StudioPage() {
 					<h2 className="mb-4 text-xl text-neutral-300 sm:hidden">
 						Select artists
 					</h2>
-					<div className="h-full w-full rounded-xl border border-neutral-700">
-						<div className="flex flex-col gap-2 px-4 pt-4 pb-2">
+					<div className="h-full w-full  rounded-xl border border-neutral-700">
+						<div className="flex flex-col gap-4 px-4 pt-4 pb-4">
 							<div className="flex justify-between text-sm text-neutral-400">
 								<p>Artists</p>
 								<p
@@ -290,7 +293,7 @@ export default function StudioPage() {
 							</div>
 						</div>
 
-						<div className="h-full max-h-[50vh] w-full overflow-y-scroll transition duration-300 sm:max-h-96">
+						<div className="relative w-full transition duration-300 sm:max-h-96">
 							<Suspense
 								fallback={
 									<div className="flex h-full w-full items-center justify-center gap-x-4 p-4">
@@ -305,7 +308,7 @@ export default function StudioPage() {
 									{(artists) => {
 										if (artists.length === 0) {
 											return (
-												<div className="flex  h-full w-full flex-col items-center justify-center">
+												<div className="flex h-full w-full flex-col items-center justify-center overflow-y-scroll">
 													<p className="text-sm text-neutral-400">
 														You need to be following at least one artist!
 													</p>
@@ -323,7 +326,7 @@ export default function StudioPage() {
 											<motion.div
 												initial={{ opacity: 0 }}
 												animate={{ opacity: 1 }}
-												className="grid grid-cols-4 gap-x-2 gap-y-4 p-4 pt-2 sm:grid-cols-5 ">
+												className="grid h-[350px] grid-cols-4 gap-x-2 gap-y-4 overflow-y-scroll p-4 pt-2 sm:grid-cols-5">
 												{filteredArtists.map(({ name, images, id }) => (
 													<ArtistChip2
 														key={id}
@@ -340,6 +343,18 @@ export default function StudioPage() {
 									}}
 								</Await>
 							</Suspense>
+							<AnimatePresence>
+								{isLoading && (
+									<motion.div
+										initial={{ opacity: 0 }}
+										animate={{ opacity: 1 }}
+										exit={{ opacity: 0 }}
+										transition={{ delay: 0.2, duration: 0.25 }}
+										className="absolute top-0 left-0 flex h-full w-full touch-none items-center justify-center bg-neutral-900/80">
+										<Spinner />
+									</motion.div>
+								)}
+							</AnimatePresence>
 						</div>
 					</div>
 				</div>
