@@ -231,7 +231,7 @@ export default function StudioPage() {
 	};
 
 	return (
-		<div className="items-center flex h-full w-full flex-col gap-y-8 px-4">
+		<div className="flex h-full w-full flex-col items-center gap-y-8 px-4">
 			<div className="flex h-max w-full max-w-4xl flex-col gap-y-8 gap-x-0 sm:flex-row sm:gap-y-0 sm:gap-x-4">
 				<div className="flex w-full flex-col sm:w-1/2">
 					<h2 className="mb-4 text-xl text-neutral-300 sm:hidden">
@@ -253,9 +253,9 @@ export default function StudioPage() {
 								placeholder="Search"
 								value={searchTerm}
 								onChange={(event) => setSearchTerm(event.target.value)}
-								className="z-10 w-full rounded-full border-neutral-700"
+								className="z-10 w-full border-neutral-700"
 							/>
-							<div className="items-center flex flex-col gap-y-2 md:flex-row">
+							<div className="flex items-center">
 								<Form method="get" className="z-10" replace>
 									<input
 										type="hidden"
@@ -267,7 +267,7 @@ export default function StudioPage() {
 									)}
 									<button
 										type="submit"
-										className={`rounded-full border py-1 px-3 text-sm transition-colors hover:cursor-pointer ${
+										className={`whitespace-nowrap rounded-full border py-1 px-3 text-sm transition-colors hover:cursor-pointer ${
 											includeTop
 												? "border-green-600 bg-green-900 text-green-400 hover:border-green-500 hover:bg-green-800"
 												: "border-neutral-600 bg-neutral-800 text-neutral-400 hover:border-neutral-500 hover:bg-neutral-700"
@@ -277,25 +277,14 @@ export default function StudioPage() {
 								</Form>
 								<AnimatePresence initial={false}>
 									{includeTop && (
-										<>
-											<motion.div
-												className="hidden flex-grow md:block"
-												initial={{ opacity: 0, x: -10 }}
-												animate={{ opacity: 1, x: 0 }}
-												exit={{ opacity: 0, x: -10 }}
-												transition={{ bounce: false, duration: 0.15 }}>
-												<TimeRangeFilter includesTop={includeTop} />
-											</motion.div>
-											<motion.div
-												layout
-												className="block flex-grow md:hidden"
-												initial={{ opacity: 0, y: -10 }}
-												animate={{ opacity: 1, y: 0 }}
-												exit={{ opacity: 0, y: -10 }}
-												transition={{ bounce: false, duration: 0.15 }}>
-												<TimeRangeFilter includesTop={includeTop} />
-											</motion.div>
-										</>
+										<motion.div
+											className="-ml-4 overflow-x-scroll"
+											initial={{ opacity: 0, x: -10 }}
+											animate={{ opacity: 1, x: 0 }}
+											exit={{ opacity: 0, x: -10 }}
+											transition={{ bounce: false, duration: 0.15 }}>
+											<TimeRangeFilter includesTop={includeTop} />
+										</motion.div>
 									)}
 								</AnimatePresence>
 							</div>
@@ -304,7 +293,7 @@ export default function StudioPage() {
 						<div className="h-full max-h-[33vh] w-full overflow-y-scroll transition duration-300 sm:max-h-96">
 							<Suspense
 								fallback={
-									<div className="items-center flex h-full w-full justify-center gap-x-4 p-4">
+									<div className="flex h-full w-full items-center justify-center gap-x-4 p-4">
 										<p>Loading artists...</p> <Spinner />
 									</div>
 								}>
@@ -316,7 +305,7 @@ export default function StudioPage() {
 									{(artists) => {
 										if (artists.length === 0) {
 											return (
-												<div className="items-center  flex h-full w-full flex-col justify-center">
+												<div className="flex  h-full w-full flex-col items-center justify-center">
 													<p className="text-sm text-neutral-400">
 														You need to be following at least one artist!
 													</p>
@@ -360,7 +349,7 @@ export default function StudioPage() {
 					</h2>
 					<Form
 						method="post"
-						className="items-center flex flex-col gap-y-4 rounded-xl border border-neutral-700 p-4 shadow">
+						className="flex flex-col items-center gap-y-4 rounded-xl border border-neutral-700 p-4 shadow">
 						{selectedArtists.map((artist) => (
 							<input
 								key={artist.id}
@@ -378,7 +367,7 @@ export default function StudioPage() {
 								className="mt-1 w-full"
 							/>
 						</div>
-						<div className="items-center flex w-full flex-wrap justify-between gap-x-4 gap-y-2">
+						<div className="flex w-full flex-wrap items-center justify-between gap-x-4 gap-y-2">
 							<Label>How many tracks? (max. 100)</Label>
 							<NumberInput
 								className="hide-spinner w-12"
@@ -449,7 +438,7 @@ function TimeRangeFilter({ includesTop }: { includesTop: boolean }) {
 		<Form
 			method="get"
 			onChange={handleChange}
-			className="z-0 rounded-full border border-neutral-700 bg-neutral-800 md:-ml-4 md:rounded-none md:rounded-br-full md:rounded-tr-full md:pl-6">
+			className="z-0 overflow-x-scroll rounded-br-full rounded-tr-full border border-neutral-700 bg-neutral-800 pl-4">
 			<input type="hidden" name="includeTop" value={String(includesTop)} />
 			<RadioGroup.Root
 				defaultValue="medium"
@@ -458,19 +447,19 @@ function TimeRangeFilter({ includesTop }: { includesTop: boolean }) {
 				aria-label="Time range"
 				orientation="horizontal"
 				loop={false}
-				className="flex justify-between gap-x-2 md:gap-x-0">
+				className="flex justify-between gap-x-1">
 				<RadioGroup.Item value="short" id="r1" className={itemClassName}>
-					<label htmlFor="r1" className="cursor-pointer">
+					<label htmlFor="r1" className="cursor-pointer whitespace-nowrap">
 						4 weeks
 					</label>
 				</RadioGroup.Item>
 				<RadioGroup.Item value="medium" id="r2" className={itemClassName}>
-					<label htmlFor="r2" className="cursor-pointer">
+					<label htmlFor="r2" className="cursor-pointer whitespace-nowrap">
 						6 months
 					</label>
 				</RadioGroup.Item>
 				<RadioGroup.Item value="long" id="r3" className={itemClassName}>
-					<label htmlFor="r3" className="cursor-pointer">
+					<label htmlFor="r3" className="cursor-pointer whitespace-nowrap">
 						All time
 					</label>
 				</RadioGroup.Item>
