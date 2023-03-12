@@ -14,7 +14,7 @@ export function ArtistChip({
 	return (
 		<div
 			onClick={onClick}
-			className={`flex h-8 w-max items-center gap-x-2 rounded-full border-2 bg-neutral-800 py-1 pl-1 pr-2 transition-colors hover:cursor-pointer hover:bg-neutral-700
+			className={`flex h-8 w-max items-center gap-x-2 rounded-full border bg-neutral-800 py-1 pl-1 pr-2 transition-colors hover:cursor-pointer hover:bg-neutral-700
 			${
 				selected
 					? "border-green-600 hover:border-green-500"
