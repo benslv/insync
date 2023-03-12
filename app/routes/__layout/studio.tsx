@@ -249,7 +249,7 @@ export default function StudioPage() {
 								placeholder="Search"
 								value={searchTerm}
 								onChange={(event) => setSearchTerm(event.target.value)}
-								className="z-10 w-full border-neutral-700"
+								className="z-10 w-full"
 							/>
 							<div className="flex items-center">
 								<Form
