@@ -1,14 +1,14 @@
+import * as RadioGroup from "@radix-ui/react-radio-group";
 import type { ActionArgs } from "@remix-run/node";
 import { defer, json, redirect } from "@remix-run/node";
 import {
 	Await,
 	Form,
 	useLoaderData,
+	useNavigation,
 	useSearchParams,
 	useSubmit,
-	useTransition,
 } from "@remix-run/react";
-import * as RadioGroup from "@radix-ui/react-radio-group";
 import { SpotifyWebApi } from "@thomasngrlt/spotify-web-api-ts";
 import { addSeconds } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
@@ -201,20 +201,16 @@ type MiniArtist = {
 export default function StudioPage() {
 	const { artistDataPromise } = useLoaderData<typeof loader>();
 	const [searchParams] = useSearchParams();
+	const navigation = useNavigation();
 
 	const [selectedArtists, setSelectedArtists] = useState<MiniArtist[]>([]);
 	const [searchTerm, setSearchTerm] = useState("");
-	const transition = useTransition();
 
 	const includeTop = searchParams.get("includeTop") === "true";
-	const range = searchParams.get("range");
-	const isGenerating = transition.state === "submitting";
+	const isGenerating =
+		navigation.state === "submitting" && navigation.formMethod === "post";
 
-	const generateButtonText = isGenerating
-		? "Generating..."
-		: transition.state === "loading"
-		? "Loading..."
-		: "Generate";
+	const generateButtonText = isGenerating ? "Generating..." : "Generate";
 
 	const handleChipClick = ({ name, id }: MiniArtist) => {
 		const hasArtist = selectedArtists.find((artist) => artist.id === id);
