@@ -290,7 +290,7 @@ export default function StudioPage() {
 							</div>
 						</div>
 
-						<div className="h-full max-h-[33vh] w-full overflow-y-scroll transition duration-300 sm:max-h-96">
+						<div className="h-full max-h-[50vh] w-full overflow-y-scroll transition duration-300 sm:max-h-96">
 							<Suspense
 								fallback={
 									<div className="flex h-full w-full items-center justify-center gap-x-4 p-4">
