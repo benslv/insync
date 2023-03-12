@@ -269,7 +269,7 @@ export default function StudioPage() {
 										type="submit"
 										className={`whitespace-nowrap rounded-full border py-1 px-3 text-sm transition-colors hover:cursor-pointer ${
 											includeTop
-												? "border-green-600 bg-green-900 text-green-400 hover:border-green-500 hover:bg-green-800"
+												? "border-green-600 bg-green-900 text-green-200 hover:border-green-500 hover:bg-green-800"
 												: "border-neutral-600 bg-neutral-800 text-neutral-400 hover:border-neutral-500 hover:bg-neutral-700"
 										}`}>
 										Include top artists
