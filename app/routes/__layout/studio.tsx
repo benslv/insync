@@ -252,7 +252,11 @@ export default function StudioPage() {
 								className="z-10 w-full border-neutral-700"
 							/>
 							<div className="flex items-center">
-								<Form method="get" className="z-10" replace>
+								<Form
+									method="get"
+									className="z-10"
+									replace
+									preventScrollReset={true}>
 									<input
 										type="hidden"
 										name="includeTop"
@@ -424,7 +428,7 @@ function TimeRangeFilter({ includesTop }: { includesTop: boolean }) {
 	const submit = useSubmit();
 
 	const handleChange = (event: React.FormEvent<HTMLFormElement>) => {
-		submit(event.currentTarget, { replace: true });
+		submit(event.currentTarget, { replace: true, preventScrollReset: true });
 	};
 
 	const itemClassName =
