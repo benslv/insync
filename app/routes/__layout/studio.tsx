@@ -278,7 +278,7 @@ export default function StudioPage() {
 								<AnimatePresence initial={false}>
 									{includeTop && (
 										<motion.div
-											className="-ml-4 overflow-x-scroll"
+											className="-ml-4 overflow-x-scroll md:overflow-x-auto"
 											initial={{ opacity: 0, x: -10 }}
 											animate={{ opacity: 1, x: 0 }}
 											exit={{ opacity: 0, x: -10 }}
@@ -438,7 +438,7 @@ function TimeRangeFilter({ includesTop }: { includesTop: boolean }) {
 		<Form
 			method="get"
 			onChange={handleChange}
-			className="z-0 overflow-x-scroll rounded-br-full rounded-tr-full border border-neutral-700 bg-neutral-800 pl-4">
+			className="z-0 overflow-x-scroll rounded-br-full rounded-tr-full border border-neutral-700 bg-neutral-800 pl-5 md:overflow-x-auto">
 			<input type="hidden" name="includeTop" value={String(includesTop)} />
 			<RadioGroup.Root
 				defaultValue="medium"
