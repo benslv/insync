@@ -57,7 +57,7 @@ export function ArtistChip2({
 					alt={`${text} profile`}
 					width={56}
 					height={56}
-					className="h-14 w-14 rounded-full object-cover"></img>
+					className="h-14 w-14 cursor-pointer rounded-full object-cover"></img>
 				<AnimatePresence>
 					{selected && (
 						<motion.div
