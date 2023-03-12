@@ -15,7 +15,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Suspense, useState } from "react";
 import { z } from "zod";
 
-import { ArtistChip } from "~/components/ArtistChip";
+import { ArtistChip, ArtistChip2 } from "~/components/ArtistChip";
 import { Label } from "~/components/Label";
 import { NumberInput } from "~/components/NumberInput";
 import { RangeSlider } from "~/components/Range";
@@ -323,9 +323,9 @@ export default function StudioPage() {
 											<motion.div
 												initial={{ opacity: 0 }}
 												animate={{ opacity: 1 }}
-												className="flex h-max flex-wrap items-start justify-center gap-2 p-4 pt-2">
+												className="grid grid-cols-4 gap-x-2 gap-y-4 p-4 pt-2 sm:grid-cols-5 ">
 												{filteredArtists.map(({ name, images, id }) => (
-													<ArtistChip
+													<ArtistChip2
 														key={id}
 														image={images![images.length - 1].url ?? ""}
 														text={name!}
