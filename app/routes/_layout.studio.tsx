@@ -14,21 +14,20 @@ import { addSeconds } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import { Suspense, useState } from "react";
 import { z } from "zod";
-
-import { ArtistChip2 } from "~/components/ArtistChip";
-import { Label } from "~/components/Label";
-import { NumberInput } from "~/components/NumberInput";
-import { RangeSlider } from "~/components/Range";
-import { RangeGroup } from "~/components/RangeGroup";
-import { Spinner } from "~/components/Spinner";
-import { TextInput } from "~/components/TextInput";
+import { ArtistChip2 } from "../components/ArtistChip";
+import { Label } from "../components/Label";
+import { NumberInput } from "../components/NumberInput";
+import { RangeSlider } from "../components/Range";
+import { RangeGroup } from "../components/RangeGroup";
+import { Spinner } from "../components/Spinner";
+import { TextInput } from "../components/TextInput";
 import {
 	getAllFollowedArtists,
 	getTopArtists,
 	timeRangeSchema,
-} from "~/models/api.server";
-import { commitSession, getSession } from "~/sessions";
-import { tokenHasExpired } from "~/utils/tokenHasExpired";
+} from "../models/api.server";
+import { commitSession, getSession } from "../sessions";
+import { tokenHasExpired } from "../utils/tokenHasExpired";
 
 const generateOptionsSchema = z.object({
 	trackCount: z.coerce.number().min(1).max(100).catch(20),
@@ -57,9 +56,8 @@ export async function loader({ request }: ActionFunctionArgs) {
 
 	if (tokenHasExpired(session)) {
 		const refreshToken = session.get("refresh_token");
-		const { access_token, expires_in } = await spotify.getRefreshedAccessToken(
-			refreshToken
-		);
+		const { access_token, expires_in } =
+			await spotify.getRefreshedAccessToken(refreshToken);
 
 		session.set("access_token", access_token);
 		spotify.setAccessToken(access_token);
@@ -146,9 +144,8 @@ export async function action({ request }: ActionFunctionArgs) {
 
 	if (tokenHasExpired(session)) {
 		const refreshToken = session.get("refresh_token");
-		const { access_token, expires_in } = await spotify.getRefreshedAccessToken(
-			refreshToken
-		);
+		const { access_token, expires_in } =
+			await spotify.getRefreshedAccessToken(refreshToken);
 
 		session.set("access_token", access_token);
 		spotify.setAccessToken(access_token);
@@ -185,7 +182,7 @@ export async function action({ request }: ActionFunctionArgs) {
 		}
 	);
 
-	const snapshotId = await spotify.playlists.addItemsToPlaylist(
+	await spotify.playlists.addItemsToPlaylist(
 		playlist.id,
 		recommendations.tracks.map((track) => track.uri)
 	);

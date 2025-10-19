@@ -9,10 +9,9 @@ import type {
 import { addSeconds } from "date-fns";
 import { motion } from "framer-motion";
 import React from "react";
-
-import { BackgroundCircles } from "~/components/BackgroundCircles";
-import { getSession } from "~/sessions";
-import { tokenHasExpired } from "~/utils/tokenHasExpired";
+import { BackgroundCircles } from "../components/BackgroundCircles";
+import { getSession } from "../sessions";
+import { tokenHasExpired } from "../utils/tokenHasExpired";
 
 interface PlaylistItemWithTrack extends PlaylistItem {
 	track: Track;

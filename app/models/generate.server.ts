@@ -2,9 +2,8 @@ import { redirect } from "@remix-run/node";
 import { SpotifyWebApi } from "@thomasngrlt/spotify-web-api-ts";
 import type { Track } from "@thomasngrlt/spotify-web-api-ts/types/types/SpotifyObjects";
 import { differenceInDays, parse } from "date-fns";
-
-import { getSession } from "~/sessions";
-import { chunk } from "~/utils/chunk";
+import { getSession } from "../sessions";
+import { chunk } from "../utils/chunk";
 
 type GenerateOptions = {
 	selection: "popular" | "latest" | "random";

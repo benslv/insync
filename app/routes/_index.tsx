@@ -4,11 +4,10 @@ import { Form, Link, useLoaderData } from "@remix-run/react";
 import { SpotifyWebApi } from "@thomasngrlt/spotify-web-api-ts";
 import { addSeconds } from "date-fns";
 import { motion } from "framer-motion";
-
-import { BackgroundCircles } from "~/components/BackgroundCircles";
-import OnboardingModal from "~/components/OnboardingModal";
-import { commitSession, getSession } from "~/sessions";
-import { tokenHasExpired } from "~/utils/tokenHasExpired";
+import { BackgroundCircles } from "../components/BackgroundCircles";
+import OnboardingModal from "../components/OnboardingModal";
+import { commitSession, getSession } from "../sessions";
+import { tokenHasExpired } from "../utils/tokenHasExpired";
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const session = await getSession(request.headers.get("Cookie"));

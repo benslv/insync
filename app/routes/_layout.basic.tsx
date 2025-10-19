@@ -4,11 +4,10 @@ import { redirect } from "@remix-run/node";
 import { Form, useActionData, useNavigation } from "@remix-run/react";
 import { motion } from "framer-motion";
 import { z } from "zod";
-import { Label } from "~/components/Label";
-import { TextInput } from "~/components/TextInput";
-
-import { generatePlaylist } from "~/models/generate.server";
-import { commitSession, getSession } from "~/sessions";
+import { Label } from "../components/Label";
+import { TextInput } from "../components/TextInput";
+import { generatePlaylist } from "../models/generate.server";
+import { commitSession, getSession } from "../sessions";
 
 export async function action({ request }: ActionFunctionArgs) {
 	const formData = await request.formData();
@@ -59,8 +58,8 @@ export default function BasicPage() {
 	const generateButtonText = isGenerating
 		? "Generating..."
 		: navigation.state === "loading"
-		? "Loading..."
-		: "Generate";
+			? "Loading..."
+			: "Generate";
 
 	return (
 		<div className="mx-2 flex max-w-lg flex-col gap-y-4 rounded-xl border border-neutral-700 p-6">
