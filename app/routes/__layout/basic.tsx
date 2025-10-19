@@ -1,7 +1,7 @@
 import * as RadioGroup from "@radix-ui/react-radio-group";
 import type { ActionArgs } from "@remix-run/node";
-import { json, redirect } from "@remix-run/node";
-import { Form, useActionData, useTransition } from "@remix-run/react";
+import { redirect } from "@remix-run/node";
+import { Form, useActionData, useNavigation } from "@remix-run/react";
 import { motion } from "framer-motion";
 import { z } from "zod";
 import { Label } from "~/components/Label";
@@ -36,7 +36,7 @@ export async function action({ request }: ActionArgs) {
 	if (!generateResult.ok) {
 		const message = generateResult.message;
 
-		return json({ error: true, message });
+		return { error: true, message };
 	}
 
 	const session = await getSession(request.headers.get("Cookie"));
@@ -52,13 +52,13 @@ export async function action({ request }: ActionArgs) {
 
 export default function BasicPage() {
 	const errors = useActionData<typeof action>();
-	const transition = useTransition();
+	const navigation = useNavigation();
 
-	const isGenerating = transition.state === "submitting";
+	const isGenerating = navigation.state === "submitting";
 
 	const generateButtonText = isGenerating
 		? "Generating..."
-		: transition.state === "loading"
+		: navigation.state === "loading"
 		? "Loading..."
 		: "Generate";
 

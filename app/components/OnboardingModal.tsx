@@ -1,13 +1,7 @@
 import * as Dialog from "@radix-ui/react-dialog";
 import { AnimatePresence, motion } from "framer-motion";
-import { ArrowLeft, ArrowRight, Plus, HelpCircle } from "iconoir-react";
-import { useEffect, useState } from "react";
-
-import { Label } from "./Label";
-import { NumberInput } from "./NumberInput";
-import { RangeSlider } from "./Range";
-import { RangeGroup } from "./RangeGroup";
-import { TextInput } from "./TextInput";
+import { ArrowLeft, ArrowRight, HelpCircle, Plus } from "iconoir-react";
+import { useState } from "react";
 
 export function OnboardingModal() {
 	const [currentPage, setCurrentPage] = useState(0);
