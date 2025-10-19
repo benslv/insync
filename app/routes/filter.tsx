@@ -1,6 +1,7 @@
 import type { LoaderFunctionArgs } from "react-router";
-import { Form, useLoaderData, useSubmit } from "react-router";
+import { Form, useSubmit } from "react-router";
 import { z } from "zod";
+import type { Route } from "./+types/filter";
 
 const sourceSchema = z
 	.union([z.literal("followed"), z.literal("top")])
@@ -14,8 +15,8 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 	return { source };
 };
 
-export default function Page() {
-	const { source } = useLoaderData<typeof loader>();
+export default function Page({ loaderData }: Route.ComponentProps) {
+	const { source } = loaderData;
 	const submit = useSubmit();
 
 	return (

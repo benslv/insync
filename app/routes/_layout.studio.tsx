@@ -9,7 +9,6 @@ import {
 	data,
 	Form,
 	redirect,
-	useLoaderData,
 	useNavigation,
 	useSearchParams,
 	useSubmit,
@@ -29,6 +28,7 @@ import {
 } from "../models/api.server";
 import { commitSession, getSession } from "../sessions";
 import { tokenHasExpired } from "../utils/tokenHasExpired";
+import type { Route } from "./+types/_layout.studio";
 
 const generateOptionsSchema = z.object({
 	trackCount: z.coerce.number().min(1).max(100).catch(20),
@@ -202,8 +202,8 @@ type MiniArtist = {
 	id: string;
 };
 
-export default function StudioPage() {
-	const { artistDataPromise } = useLoaderData<typeof loader>();
+export default function StudioPage({ loaderData }: Route.ComponentProps) {
+	const { artistDataPromise } = loaderData;
 	const [searchParams] = useSearchParams();
 	const navigation = useNavigation();
 

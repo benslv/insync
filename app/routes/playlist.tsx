@@ -7,10 +7,11 @@ import { addSeconds } from "date-fns";
 import { motion } from "framer-motion";
 import React from "react";
 import type { LoaderFunctionArgs } from "react-router";
-import { redirect, useLoaderData } from "react-router";
+import { redirect } from "react-router";
 import { BackgroundCircles } from "../components/BackgroundCircles";
 import { getSession } from "../sessions";
 import { tokenHasExpired } from "../utils/tokenHasExpired";
+import type { Route } from "./+types/playlist";
 
 interface PlaylistItemWithTrack extends PlaylistItem {
 	track: Track;
@@ -54,8 +55,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	}
 }
 
-export default function GeneratePage() {
-	const { playlist } = useLoaderData<typeof loader>();
+export default function GeneratePage({ loaderData }: Route.ComponentProps) {
+	const { playlist } = loaderData;
 
 	const artists = playlist.tracks.items
 		.filter(

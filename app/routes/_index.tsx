@@ -2,11 +2,12 @@ import { SpotifyWebApi } from "@thomasngrlt/spotify-web-api-ts";
 import { addSeconds } from "date-fns";
 import { motion } from "framer-motion";
 import type { LoaderFunctionArgs } from "react-router";
-import { data, Form, Link, redirect, useLoaderData } from "react-router";
+import { data, Form, Link, redirect } from "react-router";
 import { BackgroundCircles } from "../components/BackgroundCircles";
 import OnboardingModal from "../components/OnboardingModal";
 import { commitSession, getSession } from "../sessions";
 import { tokenHasExpired } from "../utils/tokenHasExpired";
+import type { Route } from "./+types/_index";
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const session = await getSession(request.headers.get("Cookie"));
@@ -83,8 +84,8 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	});
 }
 
-export default function Index() {
-	const { userProfile, oAuthUrl } = useLoaderData<typeof loader>();
+export default function Index({ loaderData }: Route.ComponentProps) {
+	const { userProfile, oAuthUrl } = loaderData;
 	return (
 		<div className="h-screen overflow-hidden">
 			<div className="relative z-10 flex h-full max-h-full">
