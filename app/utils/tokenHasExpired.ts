@@ -1,4 +1,4 @@
-import type { Session } from "@remix-run/node";
+import type { Session } from "react-router";
 import { isAfter, parseISO } from "date-fns";
 
 export function tokenHasExpired(session: Session) {

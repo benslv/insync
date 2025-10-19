@@ -1,11 +1,5 @@
-import type { LinksFunction } from "@remix-run/node";
-import {
-	Links,
-	Meta,
-	Outlet,
-	Scripts,
-	ScrollRestoration,
-} from "@remix-run/react";
+import type { LinksFunction } from "react-router";
+import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 
 import styles from "./tailwind.css?url";
 

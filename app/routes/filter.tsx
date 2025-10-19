@@ -1,6 +1,6 @@
-import type { LoaderFunctionArgs } from "@remix-run/node";
-import { json } from "@remix-run/node";
-import { Form, useLoaderData, useSubmit } from "@remix-run/react";
+import type { LoaderFunctionArgs } from "react-router";
+import { json } from "react-router";
+import { Form, useLoaderData, useSubmit } from "react-router";
 import { z } from "zod";
 
 const sourceSchema = z

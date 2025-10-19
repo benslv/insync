@@ -1,4 +1,4 @@
-import { redirect } from "@remix-run/node";
+import { redirect } from "react-router";
 import { SpotifyWebApi } from "@thomasngrlt/spotify-web-api-ts";
 import type { Track } from "@thomasngrlt/spotify-web-api-ts/types/types/SpotifyObjects";
 import { differenceInDays, parse } from "date-fns";

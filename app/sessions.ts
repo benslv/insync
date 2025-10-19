@@ -1,4 +1,4 @@
-import { createCookieSessionStorage } from "@remix-run/node";
+import { createCookieSessionStorage } from "react-router";
 import { z } from "zod";
 
 const cookieSecret = z.string().parse(process.env.COOKIE_SECRET);

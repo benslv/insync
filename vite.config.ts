@@ -1,4 +1,4 @@
-import { vitePlugin as remix } from "@remix-run/dev";
+import { reactRouter } from "@react-router/dev/vite";
 import { defineConfig } from "vite";
 
 export default defineConfig({
@@ -6,7 +6,7 @@ export default defineConfig({
 		port: 3000,
 	},
 	plugins: [
-		remix({
+		reactRouter({
 			ignoredRouteFiles: ["**/*.css"],
 			future: {
 				unstable_optimizeDeps: true,
