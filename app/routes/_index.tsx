@@ -1,9 +1,8 @@
-import type { LoaderFunctionArgs } from "react-router";
-import { json, redirect } from "react-router";
-import { Form, Link, useLoaderData } from "react-router";
 import { SpotifyWebApi } from "@thomasngrlt/spotify-web-api-ts";
 import { addSeconds } from "date-fns";
 import { motion } from "framer-motion";
+import type { LoaderFunctionArgs } from "react-router";
+import { data, Form, Link, redirect, useLoaderData } from "react-router";
 import { BackgroundCircles } from "../components/BackgroundCircles";
 import OnboardingModal from "../components/OnboardingModal";
 import { commitSession, getSession } from "../sessions";
@@ -39,7 +38,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 		session.set("user_id", userProfile.id);
 
-		return json(
+		return data(
 			{ userProfile, oAuthUrl: null },
 			{
 				headers: {
@@ -54,10 +53,14 @@ export async function loader({ request }: LoaderFunctionArgs) {
 
 	if (!code) {
 		const oAuthUrl = spotify.getRefreshableAuthorizationUrl({
-			scope: ["user-follow-read", "playlist-modify-public", "user-top-read"],
+			scope: [
+				"user-follow-read",
+				"playlist-modify-public",
+				"user-top-read",
+			],
 		});
 
-		return json({ userProfile: null, oAuthUrl });
+		return { userProfile: null, oAuthUrl };
 	}
 
 	const { access_token, expires_in, refresh_token } =
@@ -91,25 +94,29 @@ export default function Index() {
 							Stay in sync with the music you love
 						</h1>
 						<p className="w-full">
-							insync creates playlists from your followed artists on Spotify.
-							Connect your account for personalised music discovery.
+							insync creates playlists from your followed artists
+							on Spotify. Connect your account for personalised
+							music discovery.
 						</p>
 						{oAuthUrl ? (
 							<a
 								href={oAuthUrl}
-								className="w-max rounded-full bg-green-500 px-4 py-2 text-sm font-bold uppercase text-neutral-900 transition-colors hover:bg-green-400">
+								className="w-max rounded-full bg-green-500 px-4 py-2 text-sm font-bold uppercase text-neutral-900 transition-colors hover:bg-green-400"
+							>
 								Connect to Spotify
 							</a>
 						) : (
 							<div className="flex h-16 w-full gap-x-2">
 								<Link
 									to="./basic"
-									className="flex h-full w-full items-center justify-center rounded-2xl border border-neutral-700 bg-neutral-900 transition duration-300 hover:border-neutral-500">
+									className="flex h-full w-full items-center justify-center rounded-2xl border border-neutral-700 bg-neutral-900 transition duration-300 hover:border-neutral-500"
+								>
 									<p className="text-xl">Basic</p>
 								</Link>
 								<Link
 									to="./studio"
-									className="group relative h-full w-full rounded-2xl bg-gradient-to-br from-white/10 via-white/75 to-white/10">
+									className="group relative h-full w-full rounded-2xl bg-gradient-to-br from-white/10 via-white/75 to-white/10"
+								>
 									<div className="absolute inset-0.5 flex items-center  justify-center overflow-hidden rounded-[14px] bg-gradient-to-br from-black via-[#222] to-black shadow-tile ring-white/20 transition-all duration-300 hover:ring-[2px]">
 										<p className="text-2xl font-semibold tracking-tighter">
 											Studio
@@ -136,7 +143,8 @@ export default function Index() {
 									<button
 										type="submit"
 										value="logout"
-										className="text-sm underline">
+										className="text-sm underline"
+									>
 										Logout
 									</button>
 								</Form>
@@ -152,7 +160,8 @@ export default function Index() {
 				initial={{ opacity: 0 }}
 				animate={{ opacity: 1 }}
 				transition={{ delay: 0.5, duration: 2 }}
-				className="relative z-0 flex blur-md sm:hidden">
+				className="relative z-0 flex blur-md sm:hidden"
+			>
 				<BackgroundCircles />
 			</motion.div>
 		</div>
@@ -169,14 +178,15 @@ export function ErrorBoundary() {
 					</h1>
 					<p className="mb-2">insync ran into an error.</p>
 					<p>
-						Click the button below to be taken back to the homepage, and we'll
-						try again.
+						Click the button below to be taken back to the homepage,
+						and we'll try again.
 					</p>
 				</div>
 				<Form method="post" action="/logout">
 					<button
 						type="submit"
-						className="w-max rounded-full bg-green-500 px-4 py-2 text-sm font-bold uppercase text-neutral-900 transition-colors hover:bg-green-400">
+						className="w-max rounded-full bg-green-500 px-4 py-2 text-sm font-bold uppercase text-neutral-900 transition-colors hover:bg-green-400"
+					>
 						Home
 					</button>
 				</Form>
@@ -185,7 +195,8 @@ export function ErrorBoundary() {
 				initial={{ opacity: 0 }}
 				animate={{ opacity: 1 }}
 				transition={{ delay: 0.5, duration: 2 }}
-				className="relative z-0 flex blur-md sm:hidden">
+				className="relative z-0 flex blur-md sm:hidden"
+			>
 				<BackgroundCircles />
 			</motion.div>
 		</div>

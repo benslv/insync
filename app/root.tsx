@@ -1,7 +1,6 @@
-import type { LinksFunction } from "react-router";
-import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
+import { Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 
-import styles from "./tailwind.css?url";
+import "./app.css";
 
 export const meta = () => {
 	return [
@@ -41,16 +40,11 @@ export const meta = () => {
 	];
 };
 
-export const links: LinksFunction = () => {
-	return [{ rel: "stylesheet", href: styles }];
-};
-
 export default function App() {
 	return (
 		<html lang="en" className="h-full font-sans">
 			<head>
 				<Meta />
-				<Links />
 			</head>
 			<body className="flex h-max flex-col bg-neutral-900 text-white">
 				<Outlet />
@@ -63,7 +57,8 @@ export default function App() {
 								href="https://twitter.com/bensilverman_"
 								target="_blank"
 								rel="noreferrer"
-								className="text-green-500 transition-colors hover:text-green-400">
+								className="text-green-500 transition-colors hover:text-green-400"
+							>
 								Ben Silverman
 							</a>{" "}
 							&{" "}
@@ -71,7 +66,8 @@ export default function App() {
 								href="https://twitter.com/hieemeli"
 								target="_blank"
 								rel="noreferrer"
-								className="text-green-500 transition-colors hover:text-green-400">
+								className="text-green-500 transition-colors hover:text-green-400"
+							>
 								Eemeli Ruohomäki
 							</a>
 						</p>

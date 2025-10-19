@@ -1,5 +1,5 @@
-import { Link, Outlet, useMatches } from "react-router";
 import { LongArrowUpLeft } from "iconoir-react";
+import { Link, Outlet, useMatches } from "react-router";
 import OnboardingModal from "../components/OnboardingModal";
 
 export default function GenerateIndex() {

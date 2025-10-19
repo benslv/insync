@@ -11,16 +11,6 @@ export default function OnboardingModal() {
 		setCurrentPage((page) => Math.min(numPages - 1, page + 1));
 	const prevPage = () => setCurrentPage((page) => Math.max(0, page - 1));
 
-	/* useEffect(() => {
-		const shouldOpenModal = localStorage.getItem("first_time");
-
-		if (shouldOpenModal === null) {
-			setIsOpen(true);
-		} else {
-			setIsOpen(JSON.parse(shouldOpenModal));
-		}
-	}, []); */
-
 	const pages = [
 		<StepOne key={0} />,
 		<StepTwo key={1} />,
@@ -36,7 +26,8 @@ export default function OnboardingModal() {
 			onOpenChange={(open) => {
 				setCurrentPage(0);
 				setIsOpen(open);
-			}}>
+			}}
+		>
 			<Dialog.Trigger asChild>
 				<button className="hidden items-center gap-2 text-sm text-neutral-400 transition duration-150 hover:text-neutral-200 sm:flex">
 					<HelpCircle />
@@ -48,7 +39,8 @@ export default function OnboardingModal() {
 					<Dialog.Portal forceMount>
 						<Dialog.Overlay
 							className="fixed z-10 h-screen w-screen bg-black/50"
-							asChild>
+							asChild
+						>
 							<motion.div
 								animate={{ opacity: 1 }}
 								initial={{ opacity: 0 }}
@@ -58,12 +50,14 @@ export default function OnboardingModal() {
 						</Dialog.Overlay>
 						<Dialog.Content
 							asChild
-							className="fixed top-1/2 left-1/2 z-10 h-max w-10/12 max-w-[640px] -translate-x-1/2 -translate-y-1/2 items-center rounded-xl border border-neutral-700 bg-neutral-800 px-2 py-6 focus:outline-none sm:h-[376px] sm:min-h-[376px] sm:p-6">
+							className="fixed top-1/2 left-1/2 z-10 h-max w-10/12 max-w-[640px] -translate-x-1/2 -translate-y-1/2 items-center rounded-xl border border-neutral-700 bg-neutral-800 px-2 py-6 focus:outline-none sm:h-[376px] sm:min-h-[376px] sm:p-6"
+						>
 							<motion.div
 								animate={{ opacity: 1 }}
 								initial={{ opacity: 0 }}
 								exit={{ opacity: 0 }}
-								transition={{ duration: 0.05 }}>
+								transition={{ duration: 0.05 }}
+							>
 								<div className="flex h-full w-full items-center justify-between gap-4">
 									<button
 										type="button"
@@ -72,7 +66,8 @@ export default function OnboardingModal() {
 											currentPage === 0
 												? "cursor-default opacity-0"
 												: "cursor-pointer opacity-100"
-										}`}>
+										}`}
+									>
 										<ArrowLeft />
 									</button>
 									<div className="flex h-full w-full flex-grow flex-col items-center gap-y-8">
@@ -80,10 +75,14 @@ export default function OnboardingModal() {
 											animate={{ opacity: 1 }}
 											initial={{ opacity: 0 }}
 											exit={{ opacity: 0 }}
-											className="h-full w-full">
+											className="h-full w-full"
+										>
 											{pages[currentPage]}
 										</motion.div>
-										<Pager pageCount={numPages} currentPage={currentPage} />
+										<Pager
+											pageCount={numPages}
+											currentPage={currentPage}
+										/>
 									</div>
 									<button
 										type="button"
@@ -92,7 +91,8 @@ export default function OnboardingModal() {
 											currentPage === numPages - 1
 												? "cursor-default opacity-0"
 												: "cursor-pointer opacity-100"
-										}`}>
+										}`}
+									>
 										<ArrowRight />
 									</button>
 								</div>
@@ -120,7 +120,9 @@ function Pager({
 					<div
 						key={i}
 						className={`h-1 w-6 rounded-full transition-colors ${
-							currentPage === i ? "bg-neutral-500" : "bg-neutral-700"
+							currentPage === i
+								? "bg-neutral-500"
+								: "bg-neutral-700"
 						}`}
 					/>
 				))}
@@ -164,10 +166,14 @@ function StepTwo() {
 				</div>
 				<div className="h-0 w-28 self-center border border-neutral-700 sm:h-full sm:w-0" />
 				<div className="flex w-full flex-col items-center gap-y-4">
-					<h2 className="text-3xl font-bold tracking-tighter">Studio</h2>
+					<h2 className="text-3xl font-bold tracking-tighter">
+						Studio
+					</h2>
 					<div className="space-y-2 text-center text-neutral-300">
 						<p>Select up to 5 artists you follow.</p>
-						<p>Tweak parameters to fine-tune your playlist's vibe.</p>
+						<p>
+							Tweak parameters to fine-tune your playlist's vibe.
+						</p>
 						<p>Up to 150 tracks per playlist!</p>
 					</div>
 				</div>
@@ -244,12 +250,13 @@ function StepFour() {
 			<h1 className="text-center text-xl text-neutral-300">All done!</h1>
 			<div className="flex flex-grow flex-col items-center justify-center gap-y-2 text-center">
 				<p>
-					That's all there is to it! Click the button below to close this popup,
-					then select which generator you want to start with.
+					That's all there is to it! Click the button below to close
+					this popup, then select which generator you want to start
+					with.
 				</p>
 				<p>
-					If this is your first time using insync, why not check out the Basic
-					generator first?
+					If this is your first time using insync, why not check out
+					the Basic generator first?
 				</p>
 			</div>
 			<Dialog.Close asChild>
@@ -258,7 +265,8 @@ function StepFour() {
 					onClick={() => {
 						localStorage.setItem("first_time", "false");
 					}}
-					className="rounded-full bg-green-500 px-4 py-2 text-sm font-bold uppercase text-neutral-900 transition-colors hover:bg-green-400">
+					className="rounded-full bg-green-500 px-4 py-2 text-sm font-bold uppercase text-neutral-900 transition-colors hover:bg-green-400"
+				>
 					Get Started
 				</button>
 			</Dialog.Close>

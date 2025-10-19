@@ -1,5 +1,4 @@
 import type { LoaderFunctionArgs } from "react-router";
-import { json } from "react-router";
 import { Form, useLoaderData, useSubmit } from "react-router";
 import { z } from "zod";
 
@@ -12,7 +11,7 @@ export const loader = async ({ request }: LoaderFunctionArgs) => {
 
 	const source = sourceSchema.parse(url.searchParams.get("source"));
 
-	return json({ source });
+	return { source };
 };
 
 export default function Page() {

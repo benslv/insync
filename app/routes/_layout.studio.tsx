@@ -1,11 +1,19 @@
 import * as RadioGroup from "@radix-ui/react-radio-group";
-import type { ActionFunctionArgs } from "react-router";
-import { defer, json, redirect } from "react-router";
-import { Await, Form, useLoaderData, useNavigation, useSearchParams, useSubmit } from "react-router";
 import { SpotifyWebApi } from "@thomasngrlt/spotify-web-api-ts";
 import { addSeconds } from "date-fns";
 import { AnimatePresence, motion } from "framer-motion";
 import { Suspense, useState } from "react";
+import type { ActionFunctionArgs } from "react-router";
+import {
+	Await,
+	data,
+	Form,
+	redirect,
+	useLoaderData,
+	useNavigation,
+	useSearchParams,
+	useSubmit,
+} from "react-router";
 import { z } from "zod";
 import { ArtistChip2 } from "../components/ArtistChip";
 import { Label } from "../components/Label";
@@ -68,7 +76,7 @@ export async function loader({ request }: ActionFunctionArgs) {
 	const followedArtistsPromise = getAllFollowedArtists(spotify);
 
 	if (includeTop === "false") {
-		return defer(
+		return data(
 			{
 				artistDataPromise: followedArtistsPromise,
 			},
@@ -90,10 +98,13 @@ export async function loader({ request }: ActionFunctionArgs) {
 	]).then(([followed, top]) => {
 		const ids = followed.map((artist) => artist.id);
 
-		return [...followed, ...top.filter((artist) => !ids.includes(artist.id))];
+		return [
+			...followed,
+			...top.filter((artist) => !ids.includes(artist.id)),
+		];
 	});
 
-	return defer(
+	return data(
 		{ artistDataPromise },
 		{
 			headers: {
@@ -122,10 +133,11 @@ export async function action({ request }: ActionFunctionArgs) {
 		.map((artist) => JSON.parse(artist) as MiniArtist);
 
 	if (seedArtists.length === 0) {
-		return json({
+		return {
 			ok: false,
-			message: "You need to select at least one artist to generate a playlist!",
-		});
+			message:
+				"You need to select at least one artist to generate a playlist!",
+		};
 	}
 
 	const spotify = new SpotifyWebApi({
@@ -165,7 +177,9 @@ export async function action({ request }: ActionFunctionArgs) {
 		style: "short",
 		type: "conjunction",
 	});
-	const artistDesc = formatter.format(seedArtists.map((artist) => artist.name));
+	const artistDesc = formatter.format(
+		seedArtists.map((artist) => artist.name)
+	);
 
 	const playlist = await spotify.playlists.createPlaylist(
 		userId,
@@ -198,12 +212,12 @@ export default function StudioPage() {
 
 	const includeTop = searchParams.get("includeTop") === "true";
 	const isGenerating =
-		navigation.state === "submitting" && navigation.formMethod === "post";
+		navigation.state === "submitting" && navigation.formMethod === "POST";
 
 	const generateButtonText = isGenerating ? "Generating..." : "Generate";
 
 	const isLoading =
-		navigation.state === "loading" && navigation.formMethod === "get";
+		navigation.state === "loading" && navigation.formMethod === "GET";
 
 	const handleChipClick = ({ name, id }: MiniArtist) => {
 		const hasArtist = selectedArtists.find((artist) => artist.id === id);
@@ -232,8 +246,11 @@ export default function StudioPage() {
 								<p>Artists</p>
 								<p
 									className={`${
-										selectedArtists.length == 5 ? "text-green-500" : ""
-									}`}>
+										selectedArtists.length == 5
+											? "text-green-500"
+											: ""
+									}`}
+								>
 									{selectedArtists.length}
 									<span className="text-neutral-400">/5</span>
 								</p>
@@ -241,7 +258,9 @@ export default function StudioPage() {
 							<TextInput
 								placeholder="Search"
 								value={searchTerm}
-								onChange={(event) => setSearchTerm(event.target.value)}
+								onChange={(event) =>
+									setSearchTerm(event.target.value)
+								}
 								className="z-10 w-full"
 							/>
 							<div className="flex items-center">
@@ -249,14 +268,19 @@ export default function StudioPage() {
 									method="get"
 									className="z-10"
 									replace
-									preventScrollReset={true}>
+									preventScrollReset={true}
+								>
 									<input
 										type="hidden"
 										name="includeTop"
 										value={String(!includeTop)}
 									/>
 									{!includeTop && (
-										<input type="hidden" name="range" value="short" />
+										<input
+											type="hidden"
+											name="range"
+											value="short"
+										/>
 									)}
 									<button
 										type="submit"
@@ -264,7 +288,8 @@ export default function StudioPage() {
 											includeTop
 												? "border-green-600 bg-green-900 text-green-200 hover:border-green-500 hover:bg-green-800"
 												: "border-neutral-600 bg-neutral-800 text-neutral-400 hover:border-neutral-500 hover:bg-neutral-700"
-										}`}>
+										}`}
+									>
 										Top artists
 									</button>
 								</Form>
@@ -275,8 +300,14 @@ export default function StudioPage() {
 											initial={{ opacity: 0, x: -10 }}
 											animate={{ opacity: 1, x: 0 }}
 											exit={{ opacity: 0, x: -10 }}
-											transition={{ bounce: false, duration: 0.15 }}>
-											<TimeRangeFilter includesTop={includeTop} />
+											transition={{
+												bounce: 0,
+												duration: 0.15,
+											}}
+										>
+											<TimeRangeFilter
+												includesTop={includeTop}
+											/>
 										</motion.div>
 									)}
 								</AnimatePresence>
@@ -289,18 +320,23 @@ export default function StudioPage() {
 									<div className="flex h-full w-full items-center justify-center gap-x-4 p-4">
 										<p>Loading artists...</p> <Spinner />
 									</div>
-								}>
+								}
+							>
 								<Await
 									resolve={artistDataPromise}
 									errorElement={
-										<p className="p-4">Error loading artists...</p>
-									}>
+										<p className="p-4">
+											Error loading artists...
+										</p>
+									}
+								>
 									{(artists) => {
 										if (artists.length === 0) {
 											return (
 												<div className="flex h-full w-full flex-col items-center justify-center overflow-y-scroll">
 													<p className="text-sm text-neutral-400">
-														You need to be following at least one artist!
+														You need to be following
+														at least one artist!
 													</p>
 												</div>
 											);
@@ -308,26 +344,49 @@ export default function StudioPage() {
 
 										const filteredArtists = artists
 											.filter(({ name }) =>
-												name.toLowerCase().includes(searchTerm.toLowerCase())
+												name
+													.toLowerCase()
+													.includes(
+														searchTerm.toLowerCase()
+													)
 											)
-											.sort((a, b) => b.popularity - a.popularity);
+											.sort(
+												(a, b) =>
+													b.popularity - a.popularity
+											);
 
 										return (
 											<motion.div
 												initial={{ opacity: 0 }}
 												animate={{ opacity: 1 }}
-												className="grid h-[350px] grid-cols-4 gap-x-2 gap-y-4 overflow-y-scroll p-4 pt-2 sm:grid-cols-5">
-												{filteredArtists.map(({ name, images, id }) => (
-													<ArtistChip2
-														key={id}
-														image={images![images.length - 1].url ?? ""}
-														text={name!}
-														onClick={() => handleChipClick({ name, id })}
-														selected={Boolean(
-															selectedArtists.find((artist) => artist.id === id)
-														)}
-													/>
-												))}
+												className="grid h-[350px] grid-cols-4 gap-x-2 gap-y-4 overflow-y-scroll p-4 pt-2 sm:grid-cols-5"
+											>
+												{filteredArtists.map(
+													({ name, images, id }) => (
+														<ArtistChip2
+															key={id}
+															image={
+																images![
+																	images.length -
+																		1
+																].url ?? ""
+															}
+															text={name!}
+															onClick={() =>
+																handleChipClick(
+																	{ name, id }
+																)
+															}
+															selected={Boolean(
+																selectedArtists.find(
+																	(artist) =>
+																		artist.id ===
+																		id
+																)
+															)}
+														/>
+													)
+												)}
 											</motion.div>
 										);
 									}}
@@ -339,8 +398,12 @@ export default function StudioPage() {
 										initial={{ opacity: 0 }}
 										animate={{ opacity: 1 }}
 										exit={{ opacity: 0 }}
-										transition={{ delay: 0.2, duration: 0.25 }}
-										className="absolute top-0 left-0 flex h-full w-full touch-none items-center justify-center bg-neutral-900/80">
+										transition={{
+											delay: 0.2,
+											duration: 0.25,
+										}}
+										className="absolute top-0 left-0 flex h-full w-full touch-none items-center justify-center bg-neutral-900/80"
+									>
 										<Spinner />
 									</motion.div>
 								)}
@@ -354,7 +417,8 @@ export default function StudioPage() {
 					</h2>
 					<Form
 						method="post"
-						className="flex flex-col items-center gap-y-4 rounded-xl border border-neutral-700 p-4 shadow">
+						className="flex flex-col items-center gap-y-4 rounded-xl border border-neutral-700 p-4 shadow"
+					>
 						{selectedArtists.map((artist) => (
 							<input
 								key={artist.id}
@@ -381,7 +445,11 @@ export default function StudioPage() {
 								max={100}
 							/>
 						</div>
-						<RangeGroup label="Tempo (BPM)" leftText="30" rightText="300">
+						<RangeGroup
+							label="Tempo (BPM)"
+							leftText="30"
+							rightText="300"
+						>
 							<RangeSlider
 								name="tempo"
 								id="tempo"
@@ -393,7 +461,8 @@ export default function StudioPage() {
 						<RangeGroup
 							label="Popularity"
 							leftText="Obscure finds"
-							rightText="Chart toppers">
+							rightText="Chart toppers"
+						>
 							<RangeSlider
 								name="popularity"
 								id="popularity"
@@ -406,7 +475,8 @@ export default function StudioPage() {
 						<RangeGroup
 							label="Energy"
 							leftText="Chilling out"
-							rightText="Ramping up">
+							rightText="Ramping up"
+						>
 							<RangeSlider
 								name="energy"
 								id="energy"
@@ -418,8 +488,11 @@ export default function StudioPage() {
 						</RangeGroup>
 						<button
 							type="submit"
-							disabled={selectedArtists.length === 0 || isGenerating}
-							className="rounded-full bg-green-500 px-4 py-2 text-sm font-bold uppercase text-neutral-900 transition-all hover:bg-green-400 disabled:opacity-50">
+							disabled={
+								selectedArtists.length === 0 || isGenerating
+							}
+							className="rounded-full bg-green-500 px-4 py-2 text-sm font-bold uppercase text-neutral-900 transition-all hover:bg-green-400 disabled:opacity-50"
+						>
 							{generateButtonText}
 						</button>
 					</Form>
@@ -433,7 +506,10 @@ function TimeRangeFilter({ includesTop }: { includesTop: boolean }) {
 	const submit = useSubmit();
 
 	const handleChange = (event: React.FormEvent<HTMLFormElement>) => {
-		submit(event.currentTarget, { replace: true, preventScrollReset: true });
+		submit(event.currentTarget, {
+			replace: true,
+			preventScrollReset: true,
+		});
 	};
 
 	const itemClassName =
@@ -443,8 +519,13 @@ function TimeRangeFilter({ includesTop }: { includesTop: boolean }) {
 		<Form
 			method="get"
 			onChange={handleChange}
-			className="z-0 overflow-x-scroll rounded-br-full rounded-tr-full  border border-neutral-700 bg-neutral-800 pl-5 text-neutral-400 sm:text-sm md:overflow-x-auto">
-			<input type="hidden" name="includeTop" value={String(includesTop)} />
+			className="z-0 overflow-x-scroll rounded-br-full rounded-tr-full  border border-neutral-700 bg-neutral-800 pl-5 text-neutral-400 sm:text-sm md:overflow-x-auto"
+		>
+			<input
+				type="hidden"
+				name="includeTop"
+				value={String(includesTop)}
+			/>
 			<RadioGroup.Root
 				defaultValue="medium"
 				id="range"
@@ -452,19 +533,37 @@ function TimeRangeFilter({ includesTop }: { includesTop: boolean }) {
 				aria-label="Time range"
 				orientation="horizontal"
 				loop={false}
-				className="flex justify-between gap-x-1">
-				<RadioGroup.Item value="short" id="r1" className={itemClassName}>
-					<label htmlFor="r1" className="cursor-pointer whitespace-nowrap">
+				className="flex justify-between gap-x-1"
+			>
+				<RadioGroup.Item
+					value="short"
+					id="r1"
+					className={itemClassName}
+				>
+					<label
+						htmlFor="r1"
+						className="cursor-pointer whitespace-nowrap"
+					>
 						4 weeks
 					</label>
 				</RadioGroup.Item>
-				<RadioGroup.Item value="medium" id="r2" className={itemClassName}>
-					<label htmlFor="r2" className="cursor-pointer whitespace-nowrap">
+				<RadioGroup.Item
+					value="medium"
+					id="r2"
+					className={itemClassName}
+				>
+					<label
+						htmlFor="r2"
+						className="cursor-pointer whitespace-nowrap"
+					>
 						6 months
 					</label>
 				</RadioGroup.Item>
 				<RadioGroup.Item value="long" id="r3" className={itemClassName}>
-					<label htmlFor="r3" className="cursor-pointer whitespace-nowrap">
+					<label
+						htmlFor="r3"
+						className="cursor-pointer whitespace-nowrap"
+					>
 						All time
 					</label>
 				</RadioGroup.Item>

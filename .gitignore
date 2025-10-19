@@ -1,14 +1,7 @@
-node_modules
-
-.cache
+.DS_Store
 .env
-.output
+/node_modules/
 
+# React Router
+/.react-router/
 /build/
-/public/build
-/api/index.js
-/api/index.js.map
-
-/app/tailwind.css
-
-.eslintcache
