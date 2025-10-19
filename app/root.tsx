@@ -19,14 +19,14 @@ export const meta: MetaFunction = () => ({
 		"insync automatically generates playlists with music from your favourite artists to help you rediscover the music you love!",
 	viewport: "width=device-width,initial-scale=1",
 	"og:type": "website",
-	"og:url": "https://insync.vercel.app",
+	"og:url": "https://insync.rocks",
 	"og:title": "insync - Stay in sync with the music you love",
 	"og:description":
 		"insync automatically generates playlists with music from your favourite artists to help you rediscover the music you love!",
 	"og:image": "https://i.imgur.com/69dTjNg.png",
 
 	"twitter:card": "summary_large_image",
-	"twitter:url": "https://insync.vercel.app",
+	"twitter:url": "https://insync.rocks",
 	"twitter:title": "insync - Stay in sync with the music you love",
 	"twitter:description":
 		"insync automatically generates playlists with music from your favourite artists to help you rediscover the music you love!",
