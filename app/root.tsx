@@ -159,7 +159,6 @@ export default function App() {
 // 					</div>
 // 				</footer>
 // 				<Scripts />
-// 				<LiveReload />
 // 			</body>
 // 		</html>
 // 	);
