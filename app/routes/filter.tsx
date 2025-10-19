@@ -1,4 +1,4 @@
-import type { LoaderArgs } from "@remix-run/node";
+import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json } from "@remix-run/node";
 import { Form, useLoaderData, useSubmit } from "@remix-run/react";
 import { z } from "zod";
@@ -7,7 +7,7 @@ const sourceSchema = z
 	.union([z.literal("followed"), z.literal("top")])
 	.catch("followed");
 
-export const loader = async ({ request }: LoaderArgs) => {
+export const loader = async ({ request }: LoaderFunctionArgs) => {
 	const url = new URL(request.url);
 
 	const source = sourceSchema.parse(url.searchParams.get("source"));

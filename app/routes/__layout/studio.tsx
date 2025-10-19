@@ -1,5 +1,5 @@
 import * as RadioGroup from "@radix-ui/react-radio-group";
-import type { ActionArgs } from "@remix-run/node";
+import type { ActionFunctionArgs } from "@remix-run/node";
 import { defer, json, redirect } from "@remix-run/node";
 import {
 	Await,
@@ -15,7 +15,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { Suspense, useState } from "react";
 import { z } from "zod";
 
-import { ArtistChip, ArtistChip2 } from "~/components/ArtistChip";
+import { ArtistChip2 } from "~/components/ArtistChip";
 import { Label } from "~/components/Label";
 import { NumberInput } from "~/components/NumberInput";
 import { RangeSlider } from "~/components/Range";
@@ -40,7 +40,7 @@ const generateOptionsSchema = z.object({
 
 const seedArtistSchema = z.array(z.string()).catch([]);
 
-export async function loader({ request }: ActionArgs) {
+export async function loader({ request }: ActionFunctionArgs) {
 	const session = await getSession(request.headers.get("Cookie"));
 	const redirectUri = new URL(request.url).origin;
 
@@ -113,7 +113,7 @@ export async function loader({ request }: ActionArgs) {
 	);
 }
 
-export async function action({ request }: ActionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
 	const formData = await request.formData();
 	const session = await getSession(request.headers.get("Cookie"));
 	const redirectUri = new URL(request.url).origin;

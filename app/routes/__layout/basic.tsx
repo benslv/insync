@@ -1,5 +1,5 @@
 import * as RadioGroup from "@radix-ui/react-radio-group";
-import type { ActionArgs } from "@remix-run/node";
+import type { ActionFunctionArgs } from "@remix-run/node";
 import { redirect } from "@remix-run/node";
 import { Form, useActionData, useNavigation } from "@remix-run/react";
 import { motion } from "framer-motion";
@@ -10,7 +10,7 @@ import { TextInput } from "~/components/TextInput";
 import { generatePlaylist } from "~/models/generate.server";
 import { commitSession, getSession } from "~/sessions";
 
-export async function action({ request }: ActionArgs) {
+export async function action({ request }: ActionFunctionArgs) {
 	const formData = await request.formData();
 
 	const selection = z
