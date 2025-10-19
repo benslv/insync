@@ -7,32 +7,46 @@ import {
 	Scripts,
 	ScrollRestoration,
 } from "@remix-run/react";
-import { metaV1 } from "@remix-run/v1-meta";
 
 import styles from "./tailwind.css";
 
-export function meta() {
-	return metaV1(null, {
-		charset: "utf-8",
-		title: "insync - Stay in sync with the music you love",
-		description:
-			"insync automatically generates playlists with music from your favourite artists to help you rediscover the music you love!",
-		viewport: "width=device-width,initial-scale=1",
-		"og:type": "website",
-		"og:url": "https://insync.rocks",
-		"og:title": "insync - Stay in sync with the music you love",
-		"og:description":
-			"insync automatically generates playlists with music from your favourite artists to help you rediscover the music you love!",
-		"og:image": "https://i.imgur.com/69dTjNg.png",
+export const meta = () => {
+	return [
+		{ charset: "utf-8" },
+		{ title: "insync - Stay in sync with the music you love" },
+		{
+			name: "description",
+			content:
+				"insync automatically generates playlists with music from your favourite artists to help you rediscover the music you love!",
+		},
+		{ name: "viewport", content: "width=device-width,initial-scale=1" },
+		{ property: "og:type", content: "website" },
+		{ property: "og:url", content: "https://insync.vercel.app" },
+		{
+			property: "og:title",
+			content: "insync - Stay in sync with the music you love",
+		},
+		{
+			property: "og:description",
+			content:
+				"insync automatically generates playlists with music from your favourite artists to help you rediscover the music you love!",
+		},
+		{ property: "og:image", content: "https://i.imgur.com/69dTjNg.png" },
 
-		"twitter:card": "summary_large_image",
-		"twitter:url": "https://insync.rocks",
-		"twitter:title": "insync - Stay in sync with the music you love",
-		"twitter:description":
-			"insync automatically generates playlists with music from your favourite artists to help you rediscover the music you love!",
-		"twitter:image": "https://i.imgur.com/69dTjNg.png",
-	});
-}
+		{ name: "twitter:card", content: "summary_large_image" },
+		{ name: "twitter:url", content: "https://insync.vercel.app" },
+		{
+			name: "twitter:title",
+			content: "insync - Stay in sync with the music you love",
+		},
+		{
+			name: "twitter:description",
+			content:
+				"insync automatically generates playlists with music from your favourite artists to help you rediscover the music you love!",
+		},
+		{ name: "twitter:image", content: "https://i.imgur.com/69dTjNg.png" },
+	];
+};
 
 export const links: LinksFunction = () => {
 	return [{ rel: "stylesheet", href: styles }];

@@ -3,7 +3,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import { ArrowLeft, ArrowRight, HelpCircle, Plus } from "iconoir-react";
 import { useState } from "react";
 
-export function OnboardingModal() {
+export default function OnboardingModal() {
 	const [currentPage, setCurrentPage] = useState(0);
 	const [isOpen, setIsOpen] = useState(false);
 

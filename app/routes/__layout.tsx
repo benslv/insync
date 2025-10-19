@@ -1,7 +1,7 @@
 import { Link, Outlet, useMatches } from "@remix-run/react";
 import { LongArrowUpLeft } from "iconoir-react";
 
-import { OnboardingModal } from "~/components/OnboardingModal";
+import OnboardingModal from "~/components/OnboardingModal";
 
 export default function GenerateIndex() {
 	const matches = useMatches();

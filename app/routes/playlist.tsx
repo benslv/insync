@@ -9,7 +9,6 @@ import type {
 import { addSeconds } from "date-fns";
 import { motion } from "framer-motion";
 import React from "react";
-import Balancer from "react-wrap-balancer";
 
 import { BackgroundCircles } from "~/components/BackgroundCircles";
 import { getSession } from "~/sessions";
@@ -95,7 +94,7 @@ export default function GeneratePage() {
 						initial={{ opacity: 0, y: -20 }}
 						animate={{ opacity: 1, y: 0 }}
 						className="mb-2 text-center text-3xl sm:text-5xl">
-						<Balancer>Your playlist with {artists} + others</Balancer>
+						Your playlist with {artists} + others
 					</motion.h1>
 					<motion.div
 						initial={{ opacity: 0, y: 20 }}

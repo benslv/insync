@@ -2,14 +2,11 @@ import type { LoaderFunctionArgs } from "@remix-run/node";
 import { json, redirect } from "@remix-run/node";
 import { Form, Link, useLoaderData } from "@remix-run/react";
 import { SpotifyWebApi } from "@thomasngrlt/spotify-web-api-ts";
-import type { PrivateUser } from "@thomasngrlt/spotify-web-api-ts/types/types/SpotifyObjects";
 import { addSeconds } from "date-fns";
 import { motion } from "framer-motion";
-import { ProfileCircle } from "iconoir-react";
-import Balancer from "react-wrap-balancer";
 
 import { BackgroundCircles } from "~/components/BackgroundCircles";
-import { OnboardingModal } from "~/components/OnboardingModal";
+import OnboardingModal from "~/components/OnboardingModal";
 import { commitSession, getSession } from "~/sessions";
 import { tokenHasExpired } from "~/utils/tokenHasExpired";
 
@@ -92,13 +89,11 @@ export default function Index() {
 				<div className="flex h-full w-full flex-col items-center justify-center gap-y-4 border-r border-white/20 px-8 text-center drop-shadow-xl sm:max-w-xl sm:items-start sm:text-left md:px-16">
 					<div className="flex w-full flex-col items-center gap-y-4 sm:items-start">
 						<h1 className="w-full text-5xl tracking-tighter">
-							<Balancer>Stay in sync with the music you love</Balancer>
+							Stay in sync with the music you love
 						</h1>
 						<p className="w-full">
-							<Balancer>
-								insync creates playlists from your followed artists on Spotify.
-								Connect your account for personalised music discovery.
-							</Balancer>
+							insync creates playlists from your followed artists on Spotify.
+							Connect your account for personalised music discovery.
 						</p>
 						{oAuthUrl ? (
 							<a
@@ -125,8 +120,7 @@ export default function Index() {
 								</Link>
 							</div>
 						)}
-
-						<OnboardingModal />
+						<OnboardingModal />{" "}
 					</div>
 
 					{userProfile ? (
@@ -134,7 +128,7 @@ export default function Index() {
 							<hr className="border-neutral-600" />
 							<div className="flex flex-col items-center gap-x-2 sm:flex-row sm:justify-between">
 								<div className="flex items-center gap-x-2">
-									<ProfileImage userProfile={userProfile} />
+									{/* <ProfileImage userProfile={userProfile} /> */}
 									<p className="text-sm">
 										Logged in as {userProfile.display_name}
 									</p>
@@ -199,18 +193,18 @@ export function ErrorBoundary() {
 	);
 }
 
-function ProfileImage({ userProfile }: { userProfile: PrivateUser }) {
-	if (userProfile.images && userProfile.images.length === 0) {
-		return <ProfileCircle className="h-4 w-4" />;
-	}
+// function ProfileImage({ userProfile }: { userProfile: PrivateUser }) {
+// 	if (userProfile.images && userProfile.images.length === 0) {
+// 		return <ProfileCircle className="h-4 w-4" />;
+// 	}
 
-	return (
-		<img
-			src={userProfile.images![0].url}
-			alt=""
-			className="h-4 w-4 rounded-full border border-white"
-			height={16}
-			width={16}
-		/>
-	);
-}
+// 	return (
+// 		<img
+// 			src={userProfile.images![0].url}
+// 			alt=""
+// 			className="h-4 w-4 rounded-full border border-white"
+// 			height={16}
+// 			width={16}
+// 		/>
+// 	);
+// }
