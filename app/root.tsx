@@ -1,5 +1,7 @@
 import { Links, Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 
+import "./app.css";
+
 export const meta = () => [
 	{ charset: "utf-8" },
 	{ title: "insync - Stay in sync with the music you love" },
@@ -34,13 +36,6 @@ export const meta = () => [
 			"insync automatically generates playlists with music from your favourite artists to help you rediscover the music you love!",
 	},
 	{ name: "twitter:image", content: "https://i.imgur.com/69dTjNg.png" },
-];
-
-export const links = () => [
-	{
-		rel: "stylesheet",
-		href: "/app/app.css",
-	},
 ];
 
 export default function App() {
