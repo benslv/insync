@@ -10,7 +10,9 @@ export default function GenerateIndex() {
 		<div className="relative flex flex-col items-center justify-between w-full h-full min-h-screen py-8 gap-y-8">
 			<div className="flex flex-col items-center gap-4">
 				<div className="flex flex-col items-center gap-2">
-					<p className="text-sm text-neutral-400">Choose generation method:</p>
+					<p className="text-sm text-neutral-400">
+						Choose generation method:
+					</p>
 					<div className="flex p-1 border rounded-lg w-max gap-x-1 border-neutral-600 bg-neutral-900">
 						<Link
 							to="./basic"
@@ -19,7 +21,8 @@ export default function GenerateIndex() {
 								selectedRoute === "/basic"
 									? "border-neutral-500 bg-neutral-700"
 									: "border-neutral-900"
-							}`}>
+							}`}
+						>
 							Basic
 						</Link>
 						<Link
@@ -29,7 +32,8 @@ export default function GenerateIndex() {
 								selectedRoute === "/studio"
 									? "border-neutral-500 bg-neutral-700"
 									: "border-neutral-900"
-							}`}>
+							}`}
+						>
 							Studio
 						</Link>
 					</div>
@@ -41,7 +45,8 @@ export default function GenerateIndex() {
 
 			<Link
 				to="/"
-				className="flex transition-all duration-150 h-max w-max text-neutral-500 hover:text-neutral-200">
+				className="flex transition-all duration-150 h-max w-max text-neutral-500 hover:text-neutral-200"
+			>
 				<LongArrowUpLeft />
 				Go back
 			</Link>

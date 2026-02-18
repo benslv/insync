@@ -1,6 +1,6 @@
 import { Meta, Outlet, Scripts, ScrollRestoration } from "react-router";
 
-import "./app.css";
+// import "./app.css";
 
 export const meta = () => {
 	return [
@@ -45,6 +45,7 @@ export default function App() {
 		<html lang="en" className="h-full font-sans">
 			<head>
 				<Meta />
+				<link href="/app/app.css" rel="stylesheet"></link>
 			</head>
 			<body className="flex h-max flex-col bg-neutral-900 text-white">
 				<Outlet />

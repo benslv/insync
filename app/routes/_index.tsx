@@ -11,7 +11,6 @@ import type { Route } from "./+types/_index";
 
 export async function loader({ request }: LoaderFunctionArgs) {
 	const session = await getSession(request.headers.get("Cookie"));
-	const redirectUri = new URL(request.url).origin;
 
 	const spotify = new SpotifyWebApi({
 		redirectUri: process.env.REDIRECT_URI,
