@@ -14,7 +14,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 	const redirectUri = new URL(request.url).origin;
 
 	const spotify = new SpotifyWebApi({
-		redirectUri,
+		redirectUri: process.env.REDIRECT_URI,
 		clientId: process.env.CLIENT_ID,
 		clientSecret: process.env.CLIENT_SECRET,
 	});
@@ -45,7 +45,7 @@ export async function loader({ request }: LoaderFunctionArgs) {
 				headers: {
 					"Set-Cookie": await commitSession(session),
 				},
-			}
+			},
 		);
 	}
 
